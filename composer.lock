@@ -1,0 +1,487 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "8f589018c5fddd38223cdb7e066fc240",
+    "packages": [
+        {
+            "name": "1happyplace/ansi-terminal",
+            "version": "v1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/1HappyPlace/ansi-terminal.git",
+                "reference": "d5e2942e493ce815e63fab83b0bcc48816f7513a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/1HappyPlace/ansi-terminal/zipball/d5e2942e493ce815e63fab83b0bcc48816f7513a",
+                "reference": "d5e2942e493ce815e63fab83b0bcc48816f7513a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "1happyplace/phpunit-colors": "1.*",
+                "phpunit/phpunit": "^8.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ANSI\\": "src/ANSI/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Katie Ayres",
+                    "email": "katie@1happyplace.com",
+                    "homepage": "http://1happyplace.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP Terminal emulator controller utilizing ANSI escape sequence coding.",
+            "homepage": "http://clio.1happyplace.com/clio/ansi-terminal.html",
+            "keywords": [
+                "ansi",
+                "emulator",
+                "terminal"
+            ],
+            "support": {
+                "issues": "https://github.com/1HappyPlace/ansi-terminal/issues",
+                "source": "https://github.com/1HappyPlace/ansi-terminal/tree/master"
+            },
+            "time": "2020-01-06T18:52:42+00:00"
+        },
+        {
+            "name": "1happyplace/clio",
+            "version": "v2.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/1HappyPlace/clio.git",
+                "reference": "27172a9af87c13be2e41cef5611df3e5ac3ddcf1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/1HappyPlace/clio/zipball/27172a9af87c13be2e41cef5611df3e5ac3ddcf1",
+                "reference": "27172a9af87c13be2e41cef5611df3e5ac3ddcf1",
+                "shasum": ""
+            },
+            "require": {
+                "1happyplace/ansi-terminal": "1.*"
+            },
+            "require-dev": {
+                "1happyplace/phpunit-colors": "1.*",
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Clio\\": "src/Clio/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Katie Ayres",
+                    "email": "katie@1happyplace.com",
+                    "homepage": "http://1happyplace.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Seriously level-up the user interface of your PHP CLI programs.",
+            "homepage": "http://clio.1happyplace.com/clio/clio.html",
+            "keywords": [
+                "ansi",
+                "bash",
+                "emulator",
+                "terminal"
+            ],
+            "support": {
+                "issues": "https://github.com/1HappyPlace/clio/issues",
+                "source": "https://github.com/1HappyPlace/clio/tree/v2.3.1"
+            },
+            "time": "2022-05-11T13:46:27+00:00"
+        },
+        {
+            "name": "inpsyde/wp-context",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/inpsyde/wp-context.git",
+                "reference": "1f61ccb539e287e2688dfdf86dea0448c18fc8c6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/1f61ccb539e287e2688dfdf86dea0448c18fc8c6",
+                "reference": "1f61ccb539e287e2688dfdf86dea0448c18fc8c6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "brain/monkey": "^2.6.1",
+                "inpsyde/php-coding-standards": "^1",
+                "inpsyde/wp-stubs": "dev-main",
+                "mockery/mockery": "~1.3.6",
+                "phpunit/phpunit": "~7.5.20 || ^8",
+                "vimeo/psalm": "^4.27.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Inpsyde\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "gpl-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Inpsyde GmbH",
+                    "email": "hello@inpsyde.com",
+                    "homepage": "https://inpsyde.com/",
+                    "role": "Company"
+                },
+                {
+                    "name": "Giuseppe Mazzapica",
+                    "email": "g.mazzapica@inpsyde.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A single-class utility to check the running context in WordPress sites.",
+            "support": {
+                "issues": "https://github.com/inpsyde/wp-context/issues",
+                "source": "https://github.com/inpsyde/wp-context/tree/1.5.0"
+            },
+            "time": "2023-01-09T06:27:09+00:00"
+        },
+        {
+            "name": "kevinlebrun/colors.php",
+            "version": "0.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kevinlebrun/colors.php.git",
+                "reference": "d132f36d06e48ea080855af19b4bcb1fb615224a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kevinlebrun/colors.php/zipball/d132f36d06e48ea080855af19b4bcb1fb615224a",
+                "reference": "d132f36d06e48ea080855af19b4bcb1fb615224a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "satooshi/php-coveralls": "dev-master",
+                "squizlabs/php_codesniffer": "1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Colors": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Le Brun",
+                    "email": "lebrun.k@gmail.com",
+                    "homepage": "http://kevinlebrun.fr",
+                    "role": "developer"
+                }
+            ],
+            "description": "Colors for PHP CLI scripts",
+            "homepage": "https://github.com/kevinlebrun/colors.php",
+            "keywords": [
+                "cli",
+                "color",
+                "colors",
+                "console",
+                "shell"
+            ],
+            "support": {
+                "issues": "https://github.com/kevinlebrun/colors.php/issues",
+                "source": "https://github.com/kevinlebrun/colors.php/tree/0.4.1"
+            },
+            "time": "2014-12-23T01:23:37+00:00"
+        },
+        {
+            "name": "micropackage/internationalization",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/micropackage/internationalization.git",
+                "reference": "cb140d4c4cbf9828bfcb20242b202517379381df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/micropackage/internationalization/zipball/cb140d4c4cbf9828bfcb20242b202517379381df",
+                "reference": "cb140d4c4cbf9828bfcb20242b202517379381df",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+                "phpcompatibility/php-compatibility": "^9.1",
+                "wp-coding-standards/wpcs": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Micropackage\\Internationalization\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Jakub Mikita",
+                    "email": "jakub@bracketspace.com"
+                }
+            ],
+            "description": "Internationalization (i18n) wrapper for WordPress plugins, themes or libraries",
+            "support": {
+                "issues": "https://github.com/micropackage/internationalization/issues",
+                "source": "https://github.com/micropackage/internationalization/tree/1.0.2"
+            },
+            "time": "2023-06-23T08:54:05+00:00"
+        },
+        {
+            "name": "micropackage/requirements",
+            "version": "dev-develop",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/micropackage/requirements.git",
+                "reference": "5efa4d00b96f49d94fec3e1284334c3d3d2f69cf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/micropackage/requirements/zipball/5efa4d00b96f49d94fec3e1284334c3d3d2f69cf",
+                "reference": "5efa4d00b96f49d94fec3e1284334c3d3d2f69cf",
+                "shasum": ""
+            },
+            "require": {
+                "micropackage/internationalization": "^1.0",
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+                "php-mock/php-mock-phpunit": "^2.5",
+                "phpcompatibility/php-compatibility": "^9.1",
+                "phpunit/phpunit": "^6.5.5",
+                "wp-coding-standards/wpcs": "^2.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Micropackage\\Requirements\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Jakub Mikita",
+                    "email": "jakub@bracketspace.com"
+                }
+            ],
+            "description": "Requirements checker for WordPress plugins",
+            "support": {
+                "issues": "https://github.com/micropackage/requirements/issues",
+                "source": "https://github.com/micropackage/requirements/tree/develop"
+            },
+            "time": "2023-06-23T09:01:10+00:00"
+        },
+        {
+            "name": "nategood/commando",
+            "version": "0.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nategood/commando.git",
+                "reference": "8fedd49fcb694faf60d87d5c2c4defdffa298fa0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nategood/commando/zipball/8fedd49fcb694faf60d87d5c2c4defdffa298fa0",
+                "reference": "8fedd49fcb694faf60d87d5c2c4defdffa298fa0",
+                "shasum": ""
+            },
+            "require": {
+                "kevinlebrun/colors.php": "~0.2",
+                "php": ">=5.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Commando": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nate Good",
+                    "email": "me@nategood.com"
+                }
+            ],
+            "description": "PHP CLI Commando Style",
+            "homepage": "http://github.com/nategood/commando",
+            "keywords": [
+                "automation",
+                "cli",
+                "command",
+                "command line",
+                "command line interface",
+                "scripting"
+            ],
+            "support": {
+                "issues": "https://github.com/nategood/commando/issues",
+                "source": "https://github.com/nategood/commando/tree/v0.4.0"
+            },
+            "time": "2019-07-10T02:37:11+00:00"
+        },
+        {
+            "name": "perchten/rmrdir",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:perchten/php-rmrdir.git",
+                "reference": "1d0b86871cad90dc9ab67ba30b3b53533714c5f0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/perchten/php-rmrdir/zipball/1d0b86871cad90dc9ab67ba30b3b53533714c5f0",
+                "reference": "1d0b86871cad90dc9ab67ba30b3b53533714c5f0",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/rmrdir.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alastair Brayne",
+                    "email": "al@perchten.co.uk",
+                    "homepage": "http://perchten.co.uk"
+                }
+            ],
+            "description": "Recusrive rmdir for PHP",
+            "homepage": "https://github.com/perchten/php-rmrdir",
+            "keywords": [
+                "dir",
+                "recursive",
+                "rm",
+                "rm -r",
+                "rmdir"
+            ],
+            "time": "2019-10-24T11:00:22+00:00"
+        },
+        {
+            "name": "zordius/lightncandy",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zordius/lightncandy.git",
+                "reference": "2beab0f1add20a9ddaa58e5d229e52c1d1b9c3b0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zordius/lightncandy/zipball/2beab0f1add20a9ddaa58e5d229e52c1d1b9c3b0",
+                "reference": "2beab0f1add20a9ddaa58e5d229e52c1d1b9c3b0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.1",
+                "phpunit/phpunit": ">=7"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "LightnCandy\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Zordius Chen",
+                    "email": "zordius@gmail.com"
+                }
+            ],
+            "description": "An extremely fast PHP implementation of handlebars ( http://handlebarsjs.com/ ) and mustache ( http://mustache.github.io/ ).",
+            "homepage": "https://github.com/zordius/lightncandy",
+            "keywords": [
+                "handlebars",
+                "logicless",
+                "mustache",
+                "php",
+                "template"
+            ],
+            "support": {
+                "issues": "https://github.com/zordius/lightncandy/issues",
+                "source": "https://github.com/zordius/lightncandy/tree/master"
+            },
+            "time": "2022-03-22T00:22:29+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=7.2",
+        "ext-json": "*"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
+}

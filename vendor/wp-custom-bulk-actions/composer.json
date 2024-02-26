@@ -1,0 +1,22 @@
+{
+  "name": "seravo/wp-custom-bulk-actions",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0",
+  "description": "Custom bulk actions for any type of posts in WordPress.",
+  "homepage": "https://github.com/Seravo/wp-custom-bulk-actions",
+  "authors": [
+    {
+      "name": "Otto Kekäläinen",
+      "email": "otto@seravo.com",
+      "homepage": "https://github.com/ottok"
+    },
+    {
+      "name": "Onni Hakala",
+      "email": "onni@seravo.fi",
+      "homepage": "https://github.com/onnimonni"
+    }
+  ],
+  "keywords": [
+    "wordpress","custom", "bulk action", "posts"
+  ]
+}

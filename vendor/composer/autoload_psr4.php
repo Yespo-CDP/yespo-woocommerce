@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Yespo\\Integrations\\Esputnik\\' => array($baseDir . '/integrations/esputnik'),
     'Yespo\\Engine\\' => array($baseDir . '/engine'),
     'Yespo\\Backend\\' => array($baseDir . '/backend'),
     'Micropackage\\Requirements\\' => array($vendorDir . '/micropackage/requirements/src'),

@@ -3,15 +3,9 @@
 namespace Yespo\Integrations\Esputnik;
 
 use Exception;
-use Yespo\Engine\Base;
 
-class Get_Account_Info_Yespo_Class extends Base
+class Get_Account_Info_Yespo_Class
 {
-    public function initialize() {
-        if ( !parent::initialize() ) {
-            return;
-        }
-    }
     public function send_keys($username, $api_key) {
         try {
             $curl = curl_init();

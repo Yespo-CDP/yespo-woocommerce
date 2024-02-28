@@ -163,7 +163,7 @@ class ComposerStaticInit445a55b8946a5e67bf332758c2221df6
         'Yespo\\Engine\\Base' => __DIR__ . '/../..' . '/engine/Base.php',
         'Yespo\\Engine\\Context' => __DIR__ . '/../..' . '/engine/Context.php',
         'Yespo\\Engine\\Initialize' => __DIR__ . '/../..' . '/engine/Initialize.php',
-        'Yespo\\Integrations\\Esputnik\\Get_Account_Info_Yespo_Class' => __DIR__ . '/../..' . '/integrations/esputnik/Get_Account_Info_Yespo_Class.php',
+        'Yespo\\Integrations\\Esputnik\\Get_Account_Info_Yespo_Class' => __DIR__ . '/../..' . '/integrations/esputnik/Account.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

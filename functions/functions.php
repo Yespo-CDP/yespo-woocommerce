@@ -32,7 +32,7 @@ function yespo_save_settings() {
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'check_api_key_esputnik' ) {
         $options['yespo_username'] = sanitize_text_field($_POST['yespo_username']);
         $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
-        $result = (new \Yespo\Integrations\Esputnik\Get_Account_Info_Yespo_Class())->send_keys($options['yespo_username'], $options['yespo_api_key']);
+        $result = (new \Yespo\Integrations\Esputnik\Account())->send_keys($options['yespo_username'], $options['yespo_api_key']);
         if ($result === 200) {
             $response_data = array(
                 'status' => 'success',

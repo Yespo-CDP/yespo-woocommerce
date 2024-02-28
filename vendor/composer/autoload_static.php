@@ -13,6 +13,7 @@ class ComposerStaticInit445a55b8946a5e67bf332758c2221df6
     public static $prefixLengthsPsr4 = array (
         'Y' => 
         array (
+            'Yespo\\Integrations\\Esputnik\\' => 28,
             'Yespo\\Engine\\' => 13,
             'Yespo\\Backend\\' => 14,
         ),
@@ -40,6 +41,10 @@ class ComposerStaticInit445a55b8946a5e67bf332758c2221df6
     );
 
     public static $prefixDirsPsr4 = array (
+        'Yespo\\Integrations\\Esputnik\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/integrations/esputnik',
+        ),
         'Yespo\\Engine\\' => 
         array (
             0 => __DIR__ . '/../..' . '/engine',
@@ -158,6 +163,7 @@ class ComposerStaticInit445a55b8946a5e67bf332758c2221df6
         'Yespo\\Engine\\Base' => __DIR__ . '/../..' . '/engine/Base.php',
         'Yespo\\Engine\\Context' => __DIR__ . '/../..' . '/engine/Context.php',
         'Yespo\\Engine\\Initialize' => __DIR__ . '/../..' . '/engine/Initialize.php',
+        'Yespo\\Integrations\\Esputnik\\Get_Account_Info_Yespo_Class' => __DIR__ . '/../..' . '/integrations/esputnik/Account.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

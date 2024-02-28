@@ -75,5 +75,5 @@ return array(
     'Yespo\\Engine\\Base' => $baseDir . '/engine/Base.php',
     'Yespo\\Engine\\Context' => $baseDir . '/engine/Context.php',
     'Yespo\\Engine\\Initialize' => $baseDir . '/engine/Initialize.php',
-    'Yespo\\Integrations\\Esputnik\\Get_Account_Info_Yespo_Class' => $baseDir . '/integrations/esputnik/Get_Account_Info_Yespo_Class.php',
+    'Yespo\\Integrations\\Esputnik\\Get_Account_Info_Yespo_Class' => $baseDir . '/integrations/esputnik/Account.php',
 );

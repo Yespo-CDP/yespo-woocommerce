@@ -4,13 +4,15 @@ namespace Yespo\Integrations\Esputnik;
 
 use Exception;
 
-class Get_Account_Info_Yespo_Class
+class Account
 {
+    const REMOTE_ESPUTNIK_URL = "https://esputnik.com/api/v1/account/info";
+
     public function send_keys($username, $api_key) {
         try {
             $curl = curl_init();
             curl_setopt_array($curl, [
-                CURLOPT_URL => "https://esputnik.com/api/v1/account/info",
+                CURLOPT_URL => self::REMOTE_ESPUTNIK_URL,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,

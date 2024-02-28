@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'yespo/yespo',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
+        'pretty_version' => 'dev-develop',
+        'version' => 'dev-develop',
+        'reference' => 'd4e12406901d6ee886712600c4894954d0b5d95e',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -87,9 +87,9 @@
             'dev_requirement' => false,
         ),
         'yespo/yespo' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => 'd4e12406901d6ee886712600c4894954d0b5d95e',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

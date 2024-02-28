@@ -20,6 +20,7 @@ function y_get_settings() {
 }
 
 function yespo_save_settings() {
+
     if ( ! isset( $_POST['yespo_plugin_settings_nonce'] ) || ! wp_verify_nonce( $_POST['yespo_plugin_settings_nonce'], 'yespo_plugin_settings_save' ) ) {
         return;
     }
@@ -28,19 +29,26 @@ function yespo_save_settings() {
         return;
     }
 
-    $options['yespo_username'] = sanitize_text_field( $_POST['yespo_username'] );
-    $options['yespo_api_key'] = sanitize_text_field( $_POST['yespo_api_key'] );
-    update_option( 'yespo_options', $options );
-}
-
-add_action( 'admin_init', 'yespo_save_settings' );
-
-
-function forms_updated_option_callback(){
-    if(isset($_REQUEST['settings-updated']) ) {
-        if ($_REQUEST['page'] === 'yespo' ) {
-            echo '<div class="notice notice-success is-dismissible"><p>' . __("Settings successfully saved!","yespo") . '</p></div>';
+    if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'check_api_key_esputnik' ) {
+        $options['yespo_username'] = sanitize_text_field($_POST['yespo_username']);
+        $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
+        $result = (new \Yespo\Integrations\Esputnik\Get_Account_Info_Yespo_Class())->send_keys($options['yespo_username'], $options['yespo_api_key']);
+        if ($result === 200) {
+            $response_data = array(
+                'status' => 'success',
+                'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Settings updated successfully!", Y_TEXTDOMAIN) . '</p></div>',
+            );
+        } else {
+            $response_data = array(
+                'status' => 'error',
+                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Authorization failed, please check your credentials", Y_TEXTDOMAIN) . '</p></div>',
+            );
         }
+        update_option('yespo_options', $options);
+        echo json_encode( $response_data );
+        exit;
     }
 }
-add_action('admin_notices', 'forms_updated_option_callback');
+
+add_action('wp_ajax_check_api_key_esputnik', 'yespo_save_settings');
+add_action('wp_ajax_nopriv_gcheck_api_key_esputnik', 'yespo_save_settings');

@@ -59,7 +59,16 @@ class Settings_Page extends Base {
          * Add a settings page for this plugin to the main menu
          *
          */
-        \add_menu_page( \__( 'Yespo Settings', Y_TEXTDOMAIN ), 'Settings', 'manage_options', Y_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
+        \add_menu_page( \__( 'Yespo Settings', Y_TEXTDOMAIN ), 'Yespo', 'manage_options', Y_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
+
+        add_submenu_page(
+            Y_TEXTDOMAIN,
+            __('Settings', Y_TEXTDOMAIN),
+            __('Settings', Y_TEXTDOMAIN),
+            'manage_options',
+            'yespo_settings',
+            array($this, 'display_plugin_settings_page')
+        );
     }
 
     /**
@@ -70,6 +79,10 @@ class Settings_Page extends Base {
      */
     public function display_plugin_admin_page() {
         include_once Y_PLUGIN_ROOT . 'backend/views/admin.php';
+    }
+
+    public function display_plugin_settings_page() {
+        include_once Y_PLUGIN_ROOT . 'backend/views/settings.php';
     }
 
     /**

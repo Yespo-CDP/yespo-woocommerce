@@ -48,7 +48,7 @@ function y_uninstall_multisite() {
 		}
 	}
 
-	y_uninstall();
+	//y_uninstall();
 }
 
 /**

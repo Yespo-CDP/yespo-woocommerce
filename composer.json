@@ -36,7 +36,8 @@
   "autoload": {
     "psr-4": {
       "Yespo\\Backend\\": "backend/",
-      "Yespo\\Engine\\": "engine/"
+      "Yespo\\Engine\\": "engine/",
+      "Yespo\\Integrations\\Esputnik\\": "integrations/esputnik/"
     }
   }
 }

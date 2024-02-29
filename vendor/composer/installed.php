@@ -3,7 +3,7 @@
         'name' => 'yespo/yespo',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => 'd4e12406901d6ee886712600c4894954d0b5d95e',
+        'reference' => '2bb69f89cf3733603d2636d28dc5fe1320c38f80',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -89,7 +89,7 @@
         'yespo/yespo' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => 'd4e12406901d6ee886712600c4894954d0b5d95e',
+            'reference' => '2bb69f89cf3733603d2636d28dc5fe1320c38f80',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

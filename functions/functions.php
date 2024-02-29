@@ -52,3 +52,10 @@ function yespo_save_settings() {
 
 add_action('wp_ajax_check_api_key_esputnik', 'yespo_save_settings');
 add_action('wp_ajax_nopriv_gcheck_api_key_esputnik', 'yespo_save_settings');
+
+
+function the_created_customer_function(){
+
+    return (new \Yespo\Integrations\Esputnik\AddUpdateContact())->send_data('test', 1665243787);
+}
+add_action('save_post', 'the_created_customer_function');

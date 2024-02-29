@@ -75,5 +75,7 @@ return array(
     'Yespo\\Engine\\Base' => $baseDir . '/engine/Base.php',
     'Yespo\\Engine\\Context' => $baseDir . '/engine/Context.php',
     'Yespo\\Engine\\Initialize' => $baseDir . '/engine/Initialize.php',
-    'Yespo\\Integrations\\Esputnik\\Get_Account_Info_Yespo_Class' => $baseDir . '/integrations/esputnik/Account.php',
+    'Yespo\\Integrations\\Esputnik\\Account' => $baseDir . '/integrations/esputnik/Account.php',
+    'Yespo\\Integrations\\Esputnik\\AddUpdateContact' => $baseDir . '/integrations/esputnik/AddUpdateContact.php',
+    'Yespo\\Integrations\\Esputnik\\CurlRequest' => $baseDir . '/integrations/esputnik/CurlRequest.php',
 );

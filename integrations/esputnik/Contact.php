@@ -3,7 +3,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class AddUpdateContact
+class Contact
 {
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const CUSTOM_REQUEST = "POST";

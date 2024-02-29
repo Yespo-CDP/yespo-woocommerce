@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Mapping
+class Contact_Mapping
 {
     public static function woo_to_yes(
         $email,

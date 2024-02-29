@@ -3,7 +3,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Contact
+class Esputnik_Contact
 {
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const CUSTOM_REQUEST = "POST";
@@ -12,7 +12,7 @@ class Contact
     public function send_data($email, $wc_id){
         if(get_option('yespo_options') !== null && !empty(get_option('yespo_options'))){
             $this->authData = get_option('yespo_options');
-            return CurlRequest::curl_request(
+            return Esputnik_Curl_Request::curl_request(
                 self::REMOTE_CONTACT_ESPUTNIK_URL,
                 self::CUSTOM_REQUEST,
                 $this->authData,

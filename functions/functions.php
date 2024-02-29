@@ -32,7 +32,7 @@ function yespo_save_settings() {
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'check_api_key_esputnik' ) {
         $options['yespo_username'] = sanitize_text_field($_POST['yespo_username']);
         $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
-        $result = (new \Yespo\Integrations\Esputnik\Account())->send_keys($options['yespo_username'], $options['yespo_api_key']);
+        $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($options['yespo_username'], $options['yespo_api_key']);
         if ($result === 200) {
             $response_data = array(
                 'status' => 'success',
@@ -56,7 +56,7 @@ add_action('wp_ajax_nopriv_gcheck_api_key_esputnik', 'yespo_save_settings');
 function register_woocommerce_user_esputnik($user_id){
     if(!empty($user_id)) {
         $user_data = get_userdata($user_id);
-        if(isset($user_data->user_email)) return (new \Yespo\Integrations\Esputnik\Contact())->send_data($user_data->user_email, $user_id);
+        if(isset($user_data->user_email)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->send_data($user_data->user_email, $user_id);
     }
 }
 add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);

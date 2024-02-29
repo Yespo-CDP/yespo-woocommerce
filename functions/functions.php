@@ -49,13 +49,14 @@ function yespo_save_settings() {
         exit;
     }
 }
-
 add_action('wp_ajax_check_api_key_esputnik', 'yespo_save_settings');
 add_action('wp_ajax_nopriv_gcheck_api_key_esputnik', 'yespo_save_settings');
 
-
-function the_created_customer_function(){
-
-    return (new \Yespo\Integrations\Esputnik\AddUpdateContact())->send_data('test', 1665243787);
+/** send user data to Esputnik **/
+function register_woocommerce_user_esputnik($user_id){
+    if(!empty($user_id)) {
+        $user_data = get_userdata($user_id);
+        if(isset($user_data->user_email)) return (new \Yespo\Integrations\Esputnik\AddUpdateContact())->send_data($user_data->user_email, $user_id);
+    }
 }
-add_action('save_post', 'the_created_customer_function');
+add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);

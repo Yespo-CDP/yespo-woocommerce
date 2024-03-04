@@ -21,8 +21,6 @@ class Esputnik_Contact_Mapping
         $address .= ' ' . ($address_2) ?? '';
         $region = ($state)??$country??'';
 
-        //$meta_data
-
         $data['channels'][] = [
             'value' => $email,
             'type' => 'email'
@@ -37,7 +35,20 @@ class Esputnik_Contact_Mapping
             'address' => $address,
             'postcode' => ($postcode) ?? ''
         ];
+        if (!empty($meta_data) && is_array($meta_data)){
+            $data['fields'] = self::fieldsTransformation($meta_data);
+        }
 
         return $data;
+    }
+
+    //necessary to improve code after getting incoming data
+    private static function fieldsTransformation($fields) {
+        return array_map(function($field) {
+            return [
+                'id' => $field['id'],
+                'value' => $field['value']
+            ];
+        }, $fields);
     }
 }

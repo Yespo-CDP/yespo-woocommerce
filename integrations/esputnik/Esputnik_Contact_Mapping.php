@@ -17,9 +17,9 @@ class Esputnik_Contact_Mapping
         $address_2 = null,
         $postcode = null
     ){
-        $address = ($address_1)??'';
+        $address = ($address_1) ?? '';
         $address .= ' ' . ($address_2) ?? '';
-        $region = ($state)??$country??'';
+        $region = ($state) ?? $country ?? '';
 
         $data['channels'][] = [
             'value' => $email,

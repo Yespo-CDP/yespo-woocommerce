@@ -7,12 +7,15 @@ class Esputnik_Contact
 {
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const CUSTOM_REQUEST = "POST";
-    private $authData = null;
+    private $authData;
     private $meta_key = 'yespo_contact_id';
 
+    public function __construct(){
+        $this->authData = get_option('yespo_options');
+    }
+
     public function create_on_yespo($email, $wc_id){
-        if(get_option('yespo_options') !== null && !empty(get_option('yespo_options'))){
-            $this->authData = get_option('yespo_options');
+        if(!empty($this->authData)){
             $response = Esputnik_Curl_Request::curl_request(
                 self::REMOTE_CONTACT_ESPUTNIK_URL,
                 self::CUSTOM_REQUEST,

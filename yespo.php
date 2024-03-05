@@ -54,7 +54,7 @@ if ( version_compare( PHP_VERSION, Y_MIN_PHP_VERSION, '<=' ) ) {
 			echo wp_kses_post(
 			sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				__( '"Yespo" requires PHP 5.6 or newer.', Y_TEXTDOMAIN )
+				__( '"Yespo" requires PHP 7.4 or newer.', Y_TEXTDOMAIN )
 			)
 			);
 		}

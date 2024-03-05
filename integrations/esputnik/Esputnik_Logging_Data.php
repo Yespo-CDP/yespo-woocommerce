@@ -41,6 +41,7 @@ class Esputnik_Logging_Data
     }
 
     /** if not exist table this code creates new table in database **/
+    /*
     private function create_table(){
         $charset_collate = $this->wpdb->get_charset_collate();
 
@@ -55,4 +56,5 @@ class Esputnik_Logging_Data
 
         $this->wpdb->query($this->wpdb->prepare($sql));
     }
+    */
 }

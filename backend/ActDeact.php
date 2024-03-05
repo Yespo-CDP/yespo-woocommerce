@@ -24,6 +24,14 @@ class ActDeact extends Base {
 	 *
 	 * @return void|bool
 	 */
+
+    private static $wpdb;
+
+    public function __construct() {
+        global $wpdb;
+        self::$wpdb = $wpdb;
+    }
+
 	public function initialize() {
 		if ( !parent::initialize() ) {
 			return;
@@ -50,6 +58,7 @@ class ActDeact extends Base {
 		\switch_to_blog( $blog_id );
 		self::single_activate();
 		\restore_current_blog();
+
 	}
 
 	/**
@@ -221,10 +230,13 @@ class ActDeact extends Base {
 	private static function single_activate() {
 		// @TODO: Define activation functionality here
 		// add_role( 'advanced', __( 'Advanced' ) ); //Add a custom roles
+        self::create_databases(self::$wpdb);
 		self::add_capabilities();
 		self::upgrade_procedure();
+
 		// Clear the permalinks
 		\flush_rewrite_rules();
+
 	}
 
 	/**
@@ -239,5 +251,23 @@ class ActDeact extends Base {
 		// Clear the permalinks
 		\flush_rewrite_rules();
 	}
+
+    /** this code creates new table in database **/
+    public static function create_databases($wpdb){
+        $table_name = $wpdb->prefix . 'yespo_contact_log';
+        $charset_collate = $wpdb->get_charset_collate();
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+            $sql = "CREATE TABLE $table_name (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                user_id varchar(255) NOT NULL,
+                contact_id varchar(255) NOT NULL,
+                action varchar(255) NOT NULL,
+                log_date datetime NOT NULL,
+                PRIMARY KEY  (id)
+            ) $charset_collate;";
+
+            $wpdb->query($wpdb->prepare($sql));
+        }
+    }
 
 }

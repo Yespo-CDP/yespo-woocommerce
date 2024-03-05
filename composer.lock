@@ -117,12 +117,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/inpsyde/wp-context.git",
-                "reference": "1f61ccb539e287e2688dfdf86dea0448c18fc8c6"
+                "reference": "baa95c7e7d54ccf6b46474ed6b21bc056d665369"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/1f61ccb539e287e2688dfdf86dea0448c18fc8c6",
-                "reference": "1f61ccb539e287e2688dfdf86dea0448c18fc8c6",
+                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/baa95c7e7d54ccf6b46474ed6b21bc056d665369",
+                "reference": "baa95c7e7d54ccf6b46474ed6b21bc056d665369",
                 "shasum": ""
             },
             "require": {
@@ -168,9 +168,9 @@
             "description": "A single-class utility to check the running context in WordPress sites.",
             "support": {
                 "issues": "https://github.com/inpsyde/wp-context/issues",
-                "source": "https://github.com/inpsyde/wp-context/tree/1.5.0"
+                "source": "https://github.com/inpsyde/wp-context/tree/main"
             },
-            "time": "2023-01-09T06:27:09+00:00"
+            "time": "2024-03-01T18:36:34+00:00"
         },
         {
             "name": "kevinlebrun/colors.php",

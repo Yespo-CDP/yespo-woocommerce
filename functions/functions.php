@@ -9,6 +9,8 @@
  * @link      https://yespo.io/
  */
 
+use Yespo\Integrations\Esputnik\Esputnik_Logging_Data;
+
 /**
  * Get the settings of the plugin in a filterable way
  *
@@ -56,7 +58,7 @@ add_action('wp_ajax_nopriv_gcheck_api_key_esputnik', 'yespo_save_settings');
 function register_woocommerce_user_esputnik($user_id){
     if(!empty($user_id)) {
         $user_data = get_userdata($user_id);
-        if(isset($user_data->user_email)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->send_data($user_data->user_email, $user_id);
+        if(isset($user_data->user_email)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_on_yespo($user_data->user_email, $user_id);
     }
 }
 add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);

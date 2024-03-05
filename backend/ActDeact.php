@@ -57,7 +57,6 @@ class ActDeact extends Base {
 
 		\switch_to_blog( $blog_id );
 		self::single_activate();
-        //self::create_table_contact_log(self::$wpdb);
 		\restore_current_blog();
 
 	}
@@ -86,7 +85,6 @@ class ActDeact extends Base {
 			}
 		}
 
-        //self::create_table_contact_log(self::$wpdb);
 		self::single_activate();
 	}
 
@@ -232,7 +230,7 @@ class ActDeact extends Base {
 	private static function single_activate() {
 		// @TODO: Define activation functionality here
 		// add_role( 'advanced', __( 'Advanced' ) ); //Add a custom roles
-        self::create_table_contact_log(self::$wpdb);
+        self::create_databases(self::$wpdb);
 		self::add_capabilities();
 		self::upgrade_procedure();
 
@@ -255,7 +253,7 @@ class ActDeact extends Base {
 	}
 
     /** this code creates new table in database **/
-    private static function create_table_contact_log($wpdb){
+    public static function create_databases($wpdb){
         $table_name = $wpdb->prefix . 'yespo_contact_log';
         $charset_collate = $wpdb->get_charset_collate();
         if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {

@@ -62,3 +62,12 @@ function register_woocommerce_user_esputnik($user_id){
     }
 }
 add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);
+
+/** update user profile on esputnik service **/
+function update_user_profile_esputnik($user_id, $old_user_data) {
+    if(!empty($user_id)) {
+        $user = get_user_by('id', $user_id);
+        if(isset($user->data->user_email)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_on_yespo($user);
+    }
+}
+add_action('profile_update', 'update_user_profile_esputnik', 10, 2);

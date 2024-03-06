@@ -33,6 +33,24 @@ class Esputnik_Contact
         return __( 'Empty user authorization data', Y_TEXTDOMAIN );
     }
 
+    public function update_on_yespo($user){
+        if(!empty($user)){
+            $response = Esputnik_Curl_Request::curl_request(
+                self::REMOTE_CONTACT_ESPUTNIK_URL,
+                self::CUSTOM_REQUEST,
+                $this->authData,
+                Esputnik_Contact_Mapping::woo_to_yes($user)
+            );
+            $responseArray = json_decode($response, true);
+
+            if(isset($responseArray['id'])) {
+                (new Esputnik_Logging_Data())->create((string)$user->ID, (string)$responseArray['id'], 'update'); //update entry to logfile
+            }
+            return true;
+        }
+        return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+    }
+
     private function get_user_data($email, $wc_id){
         return [
             'channels' => [

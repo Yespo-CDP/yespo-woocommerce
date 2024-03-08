@@ -28,6 +28,7 @@ if ( !defined( 'ABSPATH' ) ) {
 
 define( 'Y_VERSION', '1.0.0' );
 define( 'Y_TEXTDOMAIN', 'yespo' );
+define( 'Y_MAIN_PLUGIN_FOLDER', 'yespo-woocommerce-plugin' );
 define( 'Y_NAME', 'Yespo' );
 define( 'Y_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
 define( 'Y_PLUGIN_ABSOLUTE', __FILE__ );
@@ -54,7 +55,7 @@ if ( version_compare( PHP_VERSION, Y_MIN_PHP_VERSION, '<=' ) ) {
 			echo wp_kses_post(
 			sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				__( '"Yespo" requires PHP 5.6 or newer.', Y_TEXTDOMAIN )
+				__( '"Yespo" requires PHP 7.4 or newer.', Y_TEXTDOMAIN )
 			)
 			);
 		}
@@ -135,8 +136,8 @@ function y_fs() {
 //Puc_v4_Factory::buildUpdateChecker( 'https://github.com/user-name/repo-name/', __FILE__, 'unique-plugin-or-theme-slug' ); 24022024
 
 if ( ! wp_installing() ) {
-	register_activation_hook( Y_TEXTDOMAIN . '/' . Y_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'activate' ) );
-	register_deactivation_hook( Y_TEXTDOMAIN . '/' . Y_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'deactivate' ) );
+	register_activation_hook( Y_MAIN_PLUGIN_FOLDER . '/' . Y_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'activate' ) );
+	register_deactivation_hook( Y_MAIN_PLUGIN_FOLDER . '/' . Y_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'deactivate' ) );
 	add_action(
 		'plugins_loaded',
 		static function () use ( $yespo_libraries ) {

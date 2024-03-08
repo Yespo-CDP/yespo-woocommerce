@@ -1,1 +1,6 @@
-/node_modules/
+node_modules/
+vendor/
+vendor/composer/installed.json
+vendor/inpsyde/wp-context/LICENSE
+vendor/inpsyde/wp-context/composer.json
+vendor/inpsyde/wp-context/src/WpContext.php

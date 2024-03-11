@@ -11,7 +11,7 @@ class Esputnik_Curl_Request
         $url,
         $custom_request,
         $auth_data,
-        $user_data
+        $user_data = ''
     ){
         try {
             $curl = curl_init();

@@ -11,10 +11,6 @@
     ?>
     <form id="check-authorization" method="post" action="">
         <div class="field-group">
-            <label for="username"><?php echo __('Username',Y_TEXTDOMAIN) ?></label>
-            <input type="text" id="username" name="yespo_username" placeholder="username" value="<?php echo isset($yespo_username) ? $yespo_username : ''; ?>" />
-        </div>
-        <div class="field-group">
             <label for="api_key"><?php echo __('Api Key (Password)',Y_TEXTDOMAIN) ?></label>
             <input type="text" id="api_key" name="yespo_api_key" placeholder="api-key" value="<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>" />
         </div>
@@ -71,8 +67,6 @@
                             try {
                                 var response = JSON.parse(xhr.responseText);
                                 document.getElementById('yespo-notices').innerHTML = response.message;
-                                //console.log('Статус ответа:', response.status);
-                                //console.log('Сообщение:', response.message);
                             } catch (error) {
                                 console.error('Ошибка при парсинге JSON:', error);
                             }

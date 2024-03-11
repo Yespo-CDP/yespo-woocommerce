@@ -7,6 +7,7 @@ class Esputnik_Contact
 {
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const CUSTOM_REQUEST = "POST";
+    const CUSTOM_REQUEST_DELETE = "DELETE";
     const USER_META_KEY = 'yespo_contact_id';
     private $authData;
 
@@ -53,10 +54,27 @@ class Esputnik_Contact
         return __( 'Empty user authorization data', Y_TEXTDOMAIN );
     }
 
+    public function delete_from_yespo($user_id){
+        $yespo_id = $this->get_user_metafield_id($user_id);
+        if(!empty($this->authData) && !empty($yespo_id)){
+            $response = Esputnik_Curl_Request::curl_request(
+                self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=true',
+                self::CUSTOM_REQUEST_DELETE,
+                $this->authData
+            );
+            if($response === 'OK') return 'user ' . $user_id . ' successfully deleted';
+            else return 'user ' . $user_id . ' was not deleted';
+        }
+    }
+
     public function get_meta_key(){
         return self::USER_META_KEY;
     }
 
+    private function get_user_metafield_id($user_id){
+        return get_user_meta($user_id, self::USER_META_KEY, true);
+    }
+/*
     private function get_user_data($email, $wc_id){
         return [
             'channels' => [
@@ -68,7 +86,7 @@ class Esputnik_Contact
             'externalCustomerId' => $wc_id,
         ];
     }
-
+*/
     private function add_esputnik_id_to_userprofile($user_id, $external_id){
         if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);

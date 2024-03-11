@@ -57,13 +57,11 @@ class Esputnik_Contact
     public function delete_from_yespo($user_id){
         $yespo_id = $this->get_user_metafield_id($user_id);
         if(!empty($this->authData) && !empty($yespo_id)){
-            $response = Esputnik_Curl_Request::curl_request(
-                self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=true',
+            return Esputnik_Curl_Request::curl_request(
+                self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false',
                 self::CUSTOM_REQUEST_DELETE,
                 $this->authData
             );
-            if($response === 'OK') return 'user ' . $user_id . ' successfully deleted';
-            else return 'user ' . $user_id . ' was not deleted';
         }
     }
 
@@ -74,19 +72,7 @@ class Esputnik_Contact
     private function get_user_metafield_id($user_id){
         return get_user_meta($user_id, self::USER_META_KEY, true);
     }
-/*
-    private function get_user_data($email, $wc_id){
-        return [
-            'channels' => [
-                [
-                    'value' => $email,
-                    'type' => 'email'
-                ],
-            ],
-            'externalCustomerId' => $wc_id,
-        ];
-    }
-*/
+
     private function add_esputnik_id_to_userprofile($user_id, $external_id){
         if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);

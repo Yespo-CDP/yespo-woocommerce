@@ -93,8 +93,7 @@ add_action('wp_ajax_nopriv_export_user_data_to_esputnik', 'export_user_data_to_e
 
 /** remove woocommerce user **/
 function delete_woocommerce_user( $user_id ) {
-    $user_id = '2435322456';
     (new Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user_id);
 }
-//add_action( 'delete_user', 'delete_woocommerce_user');
-add_action('save_post', 'delete_woocommerce_user', 10, 1);
+add_action( 'delete_user', 'delete_woocommerce_user');
+//add_action('save_post', 'delete_woocommerce_user', 10, 1);

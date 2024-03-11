@@ -27,7 +27,7 @@ class Esputnik_Curl_Request
                 CURLOPT_POSTFIELDS => !empty($user_data) ? json_encode($user_data) : '',
                 CURLOPT_HTTPHEADER => [
                     "accept: application/json; charset=UTF-8",
-                    "authorization: Basic " . base64_encode($auth_data['yespo_username'] . ':' . $auth_data['yespo_api_key']),
+                    "authorization: Basic " . base64_encode(':' . $auth_data['yespo_api_key']),
                     "content-type: application/json"
                 ],
             ]);

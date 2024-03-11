@@ -117,12 +117,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/inpsyde/wp-context.git",
-                "reference": "baa95c7e7d54ccf6b46474ed6b21bc056d665369"
+                "reference": "1022fbf34725a2d1dd24330617138334dafa460a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/baa95c7e7d54ccf6b46474ed6b21bc056d665369",
-                "reference": "baa95c7e7d54ccf6b46474ed6b21bc056d665369",
+                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/1022fbf34725a2d1dd24330617138334dafa460a",
+                "reference": "1022fbf34725a2d1dd24330617138334dafa460a",
                 "shasum": ""
             },
             "require": {
@@ -170,7 +170,7 @@
                 "issues": "https://github.com/inpsyde/wp-context/issues",
                 "source": "https://github.com/inpsyde/wp-context/tree/main"
             },
-            "time": "2024-03-01T18:36:34+00:00"
+            "time": "2024-03-05T13:05:41+00:00"
         },
         {
             "name": "kevinlebrun/colors.php",

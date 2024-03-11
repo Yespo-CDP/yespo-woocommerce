@@ -9,8 +9,6 @@
  * @link      https://yespo.io/
  */
 
-use Yespo\Integrations\Esputnik\Esputnik_Logging_Data;
-
 /**
  * Get the settings of the plugin in a filterable way
  *
@@ -32,9 +30,8 @@ function yespo_save_settings() {
     }
 
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'check_api_key_esputnik' ) {
-        $options['yespo_username'] = sanitize_text_field($_POST['yespo_username']);
         $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
-        $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($options['yespo_username'], $options['yespo_api_key']);
+        $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($options['yespo_api_key']);
         if ($result === 200) {
             $response_data = array(
                 'status' => 'success',
@@ -52,7 +49,7 @@ function yespo_save_settings() {
     }
 }
 add_action('wp_ajax_check_api_key_esputnik', 'yespo_save_settings');
-add_action('wp_ajax_nopriv_gcheck_api_key_esputnik', 'yespo_save_settings');
+add_action('wp_ajax_nopriv_check_api_key_esputnik', 'yespo_save_settings');
 
 /** send user data to Esputnik **/
 function register_woocommerce_user_esputnik($user_id){
@@ -71,3 +68,25 @@ function update_user_profile_esputnik($user_id, $old_user_data) {
     }
 }
 add_action('profile_update', 'update_user_profile_esputnik', 10, 2);
+
+/*** Get total number for export ***/
+function get_all_users_total() {
+    $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->get_users_count();
+    echo json_encode($users);
+    wp_die();
+}
+add_action('wp_ajax_get_users_total', 'get_all_users_total');
+add_action('wp_ajax_nopriv_get_all_users_total', 'get_all_users_total');
+
+/*** Export users to esputnik ***/
+function export_user_data_to_esputnik(){
+    if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'export_user_data_to_esputnik' ) {
+        if(isset($_POST['startIndex'])){
+            $response = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->export_users_to_esputnik();
+            echo json_encode(intval($response));
+        }
+    }
+    wp_die();
+}
+add_action('wp_ajax_export_user_data_to_esputnik', 'export_user_data_to_esputnik');
+add_action('wp_ajax_nopriv_export_user_data_to_esputnik', 'export_user_data_to_esputnik');

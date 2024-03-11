@@ -7,8 +7,8 @@ class Esputnik_Contact
 {
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const CUSTOM_REQUEST = "POST";
+    const USER_META_KEY = 'yespo_contact_id';
     private $authData;
-    private $meta_key = 'yespo_contact_id';
 
     public function __construct(){
         $this->authData = get_option('yespo_options');
@@ -16,11 +16,12 @@ class Esputnik_Contact
 
     public function create_on_yespo($email, $wc_id){
         if(!empty($this->authData)){
+            $user = get_user_by('id', $wc_id);
             $response = Esputnik_Curl_Request::curl_request(
                 self::REMOTE_CONTACT_ESPUTNIK_URL,
                 self::CUSTOM_REQUEST,
                 $this->authData,
-                $this->get_user_data($email, $wc_id)
+                Esputnik_Contact_Mapping::woo_to_yes($user)//$this->get_user_data($email, $wc_id)
             );
             $responseArray = json_decode($response, true);
 
@@ -44,11 +45,16 @@ class Esputnik_Contact
             $responseArray = json_decode($response, true);
 
             if(isset($responseArray['id'])) {
+                $this->add_esputnik_id_to_userprofile($user->ID, $responseArray['id']);
                 (new Esputnik_Logging_Data())->create((string)$user->ID, (string)$responseArray['id'], 'update'); //update entry to logfile
             }
-            return true;
+            return $responseArray;
         }
         return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+    }
+
+    public function get_meta_key(){
+        return self::USER_META_KEY;
     }
 
     private function get_user_data($email, $wc_id){
@@ -64,6 +70,7 @@ class Esputnik_Contact
     }
 
     private function add_esputnik_id_to_userprofile($user_id, $external_id){
-        add_user_meta($user_id, $this->meta_key, $external_id, true);
+        if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);
+        else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);
     }
 }

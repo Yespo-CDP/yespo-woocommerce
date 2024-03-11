@@ -8,7 +8,7 @@ class Esputnik_Account
 {
     const REMOTE_ESPUTNIK_URL = "https://esputnik.com/api/v1/account/info";
 
-    public function send_keys($username, $api_key) {
+    public function send_keys($api_key) {
         try {
             $curl = curl_init();
             curl_setopt_array($curl, [
@@ -21,7 +21,7 @@ class Esputnik_Account
                 CURLOPT_CUSTOMREQUEST => "GET",
                 CURLOPT_HTTPHEADER => [
                     "accept: application/json; charset=UTF-8",
-                    "authorization: Basic " . base64_encode($username . ':' . $api_key)
+                    "authorization: Basic " . base64_encode(':' . $api_key)
                 ],
             ]);
 

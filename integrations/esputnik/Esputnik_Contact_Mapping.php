@@ -5,7 +5,14 @@ namespace Yespo\Integrations\Esputnik;
 class Esputnik_Contact_Mapping
 {
     public static function woo_to_yes($user_data){
-        $user = self::user_transformation_to_array($user_data);
+        return self::data_woo_to_yes(self::user_transformation_to_array($user_data));
+    }
+
+    public static function guest_user_woo_to_yes($order){
+        return self::data_woo_to_yes(self::order_transformation_to_array($order));
+    }
+
+    private static function data_woo_to_yes($user){
         $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : '');
         $region = ($user['state']) ?? $user['country'] ?? '';
 
@@ -48,11 +55,26 @@ class Esputnik_Contact_Mapping
             'last_name' => $user->last_name ?? '',
             'state' => self::get_state_name($user->billing_country, $user->billing_state) ?? '',
             //'country' => self::get_country_name($user->billing_country) ?? '',
-            //'timeZone' => $user->billing_country ?? '',
             'city' => $user->billing_city ?? '',
             'address_1' => $user->billing_address_1 ?? '',
             'address_2' => $user->billing_address_2 ?? '',
             'postcode' => $user->billing_postcode ?? ''
+        ];
+    }
+
+    private static function order_transformation_to_array($order){
+        return [
+            'email' => $order->get_billing_email(),
+            'ID' => $order->get_billing_email(),
+            'first_name' => $order->get_billing_first_name() ?? '',
+            'last_name' => $order->get_billing_last_name() ?? '',
+            'state' => self::get_state_name($order->get_billing_country(), $order->get_billing_state()) ?? '',
+            //'country' => self::get_country_name($user->billing_country) ?? '',
+            //'timeZone' => $user->billing_country ?? '',
+            'city' => $order->get_billing_city() ?? '',
+            'address_1' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
+            'address_2' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
+            'postcode' => $order->get_billing_postcode() ?? ''
         ];
     }
 

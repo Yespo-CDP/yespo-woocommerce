@@ -16,53 +16,51 @@ class Esputnik_Contact
     }
 
     public function create_on_yespo($email, $wc_id){
-        if(!empty($this->authData)){
-            $user = get_user_by('id', $wc_id);
-            $response = Esputnik_Curl_Request::curl_request(
-                self::REMOTE_CONTACT_ESPUTNIK_URL,
-                self::CUSTOM_REQUEST,
-                $this->authData,
-                Esputnik_Contact_Mapping::woo_to_yes($user)//$this->get_user_data($email, $wc_id)
-            );
-            $responseArray = json_decode($response, true);
+        $user = get_user_by('id', $wc_id);
+        return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'create', $wc_id);
+    }
 
-            if(isset($responseArray['id'])) {
-                $this->add_esputnik_id_to_userprofile($wc_id, $responseArray['id']);
-                (new Esputnik_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], 'create'); //add entry to logfile
-            }
-            return true;
-        }
-        return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+    public function create_guest_user_on_yespo($order){
+        return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $order->get_billing_email());
     }
 
     public function update_on_yespo($user){
-        if(!empty($user)){
-            $response = Esputnik_Curl_Request::curl_request(
-                self::REMOTE_CONTACT_ESPUTNIK_URL,
-                self::CUSTOM_REQUEST,
-                $this->authData,
-                Esputnik_Contact_Mapping::woo_to_yes($user)
-            );
-            $responseArray = json_decode($response, true);
-
-            if(isset($responseArray['id'])) {
-                $this->add_esputnik_id_to_userprofile($user->ID, $responseArray['id']);
-                (new Esputnik_Logging_Data())->create((string)$user->ID, (string)$responseArray['id'], 'update'); //update entry to logfile
-            }
-            return $responseArray;
-        }
-        return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+        return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
     }
 
     public function delete_from_yespo($user_id){
         $yespo_id = $this->get_user_metafield_id($user_id);
         if(!empty($this->authData) && !empty($yespo_id)){
-            return Esputnik_Curl_Request::curl_request(
-                self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false',
-                self::CUSTOM_REQUEST_DELETE,
-                $this->authData
-            );
+            return $this->process_on_yespo(null, 'delete', null, $yespo_id);
         }
+    }
+
+    private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null) {
+        if (empty($this->authData)) {
+            return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+        }
+
+        $url = self::REMOTE_CONTACT_ESPUTNIK_URL;
+        $request = self::CUSTOM_REQUEST;
+        if($operation === 'delete'){
+            $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
+            $request = self::CUSTOM_REQUEST_DELETE;
+        }
+
+        $response = Esputnik_Curl_Request::curl_request($url, $request, $this->authData, $data);
+        $responseArray = json_decode($response, true);
+
+        if(isset($responseArray['id'])) {
+            if ($operation !== 'delete') {
+                if ($wc_id !== null) {
+                    $this->add_esputnik_id_to_userprofile($wc_id, $responseArray['id']);
+                    $log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : 'update');
+                    (new Esputnik_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], $log_operation); //add entry to logfile
+                }
+            }
+            return true;
+        }
+        return __( 'Empty user authorization data', Y_TEXTDOMAIN );
     }
 
     public function get_meta_key(){

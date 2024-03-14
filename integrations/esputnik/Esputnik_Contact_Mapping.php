@@ -5,7 +5,6 @@ namespace Yespo\Integrations\Esputnik;
 class Esputnik_Contact_Mapping
 {
     public static function woo_to_yes($user_data){
-        //$user = self::user_transformation_to_array($user_data);
         return self::data_woo_to_yes(self::user_transformation_to_array($user_data));
     }
 
@@ -14,7 +13,6 @@ class Esputnik_Contact_Mapping
     }
 
     private static function data_woo_to_yes($user){
-        //$user = self::user_transformation_to_array($user_data);
         $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : '');
         $region = ($user['state']) ?? $user['country'] ?? '';
 

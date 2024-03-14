@@ -51,7 +51,7 @@ function yespo_save_settings() {
 add_action('wp_ajax_check_api_key_esputnik', 'yespo_save_settings');
 add_action('wp_ajax_nopriv_check_api_key_esputnik', 'yespo_save_settings');
 
-/** send user data to Esputnik **/
+/** send user data to Yespo **/
 function register_woocommerce_user_esputnik($user_id){
     if(!empty($user_id)) {
         $user_data = get_userdata($user_id);
@@ -60,7 +60,13 @@ function register_woocommerce_user_esputnik($user_id){
 }
 add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);
 
-/** update user profile on esputnik service **/
+/** Send guest user to Yespo **/
+function register_woocommerce_guest_user_esputnik($order_id) {
+    if(!empty($order_id)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_guest_user_on_yespo(wc_get_order($order_id));
+}
+add_action('woocommerce_thankyou', 'register_woocommerce_guest_user_esputnik', 10, 1);
+
+/** update user profile on Yespo service **/
 function update_user_profile_esputnik($user_id, $old_user_data) {
     if(!empty($user_id)) {
         $user = get_user_by('id', $user_id);
@@ -78,7 +84,7 @@ function get_all_users_total() {
 add_action('wp_ajax_get_users_total', 'get_all_users_total');
 add_action('wp_ajax_nopriv_get_all_users_total', 'get_all_users_total');
 
-/*** Export users to esputnik ***/
+/*** Export users to Yespo ***/
 function export_user_data_to_esputnik(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'export_user_data_to_esputnik' ) {
         if(isset($_POST['startIndex'])){
@@ -96,4 +102,3 @@ function delete_woocommerce_user( $user_id ) {
     (new Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user_id);
 }
 add_action( 'delete_user', 'delete_woocommerce_user');
-//add_action('save_post', 'delete_woocommerce_user', 10, 1);

@@ -24,6 +24,10 @@ class Esputnik_Contact
         return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $order->get_billing_email());
     }
 
+    public function create_guest_user_admin_on_yespo($post){
+        return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_admin_woo_to_yes($post), 'guest', $post['_billing_email']??$post['_shipping_email']);
+    }
+
     public function update_on_yespo($user){
         return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
     }

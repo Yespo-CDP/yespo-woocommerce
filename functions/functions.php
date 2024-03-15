@@ -66,6 +66,15 @@ function register_woocommerce_guest_user_esputnik($order_id) {
 }
 add_action('woocommerce_thankyou', 'register_woocommerce_guest_user_esputnik', 10, 1);
 
+/** create guest user when make order via admin **/
+function register_woocommerce_admin_guest_user_esputnik($order_id, $post) {
+    if(isset($_POST['_wp_http_referer'])) parse_str(parse_url($_POST['_wp_http_referer'], PHP_URL_QUERY), $get_params);
+    if (isset($get_params['page']) && $get_params['page'] === 'wc-orders' && isset($get_params['action']) && $get_params['action'] === 'new' && isset($_POST['action']) && $_POST['action'] === 'edit_order') {
+        if(!empty($order_id)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_guest_user_admin_on_yespo($_POST);
+    }
+}
+add_action('woocommerce_process_shop_order_meta', 'register_woocommerce_admin_guest_user_esputnik', 10, 2);
+
 /** update user profile on Yespo service **/
 function update_user_profile_esputnik($user_id, $old_user_data) {
     if(!empty($user_id)) {

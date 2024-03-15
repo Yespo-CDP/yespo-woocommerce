@@ -12,6 +12,10 @@ class Esputnik_Contact_Mapping
         return self::data_woo_to_yes(self::order_transformation_to_array($order));
     }
 
+    public static function guest_user_admin_woo_to_yes($post){
+        return self::data_woo_to_yes(self::admin_order_transformation_to_array($post));
+    }
+
     private static function data_woo_to_yes($user){
         $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : '');
         $region = ($user['state']) ?? $user['country'] ?? '';
@@ -75,6 +79,22 @@ class Esputnik_Contact_Mapping
             'address_1' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
             'address_2' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
             'postcode' => $order->get_billing_postcode() ?? ''
+        ];
+    }
+
+    private static function admin_order_transformation_to_array($post){
+        return [
+            'email' => $post['_billing_email'],
+            'ID' => $post['_billing_email'],
+            'first_name' => $post['_billing_first_name'] ?? $post['_shipping_first_name'] ?? '',
+            'last_name' => $post['_billing_last_name'] ??  $post['_shipping_last_name'] ?? '',
+            'state' => self::get_state_name($post['_billing_country'], $post['_billing_state']) ?? self::get_state_name($post['_shipping_country'], $post['_shipping_state']) ?? '',
+            //'country' => self::get_country_name($user->billing_country) ?? '',
+            //'timeZone' => $user->billing_country ?? '',
+            'city' => $post['_billing_city'] ?? $post['_shipping_city'] ?? '',
+            'address_1' => $post['_billing_address_1'] ?? $post['_shipping_address_1'] ?? '',
+            'address_2' => $post['_billing_address_2'] ?? $post['_shipping_address_2'] ?? '',
+            'postcode' => $post['_billing_postcode'] ?? $post['_shipping_postcode'] ?? ''
         ];
     }
 

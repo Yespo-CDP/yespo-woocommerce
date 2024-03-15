@@ -40,21 +40,4 @@ class Esputnik_Logging_Data
         }
     }
 
-    /** if not exist table this code creates new table in database **/
-    /*
-    private function create_table(){
-        $charset_collate = $this->wpdb->get_charset_collate();
-
-        $sql = "CREATE TABLE $this->table_name (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            user_id varchar(255) NOT NULL,
-            contact_id varchar(255) NOT NULL,
-            action varchar(255) NOT NULL,
-            log_date datetime NOT NULL,
-            PRIMARY KEY  (id)
-        ) $charset_collate;";
-
-        $this->wpdb->query($this->wpdb->prepare($sql));
-    }
-    */
 }

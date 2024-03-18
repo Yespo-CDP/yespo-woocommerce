@@ -65,32 +65,32 @@ class Esputnik_Contact_Mapping
         return [
             'email' => $user->data->user_email,
             'ID' => $user->ID,
-            'first_name' => $user->first_name ?? '',
-            'last_name' => $user->last_name ?? '',
-            'state' => self::get_state_name($user->billing_country, $user->billing_state) ?? '',
+            'first_name' => !empty($user->first_name) ? $user->first_name : (!empty($user->billing_first_name) ? $user->billing_first_name : (!empty($user->shipping_first_name) ? $user->shipping_first_name : '')),
+            'last_name' => !empty($user->last_name) ? $user->last_name : (!empty($user->billing_last_name) ? $user->billing_last_name : (!empty($user->shipping_last_name) ? $user->shipping_last_name : '')),
+            'state' => !empty(self::get_state_name($user->billing_country, $user->billing_state)) ? self::get_state_name($user->billing_country, $user->billing_state) : (!empty(self::get_state_name($user->shipping_country, $user->shipping_state)) ? self::get_state_name($user->shipping_country, $user->shipping_state) : ''),
             //'country' => self::get_country_name($user->billing_country) ?? '',
-            'city' => $user->billing_city ?? '',
-            'address_1' => $user->billing_address_1 ?? '',
-            'address_2' => $user->billing_address_2 ?? '',
-            'phone' => $user->billing_phone ?? '',
-            'postcode' => $user->billing_postcode ?? ''
+            'city' => !empty($user->billing_city) ? $user->billing_city : (!empty($user->shipping_city) ? $user->shipping_city : ''),
+            'address_1' => !empty($user->billing_address_1) ? $user->billing_address_1 : (!empty($user->shipping_address_1) ? $user->shipping_address_1 : ''),
+            'address_2' => !empty($user->billing_address_2) ? $user->billing_address_2 : (!empty($user->shipping_address_2) ? $user->shipping_address_2 : ''),
+            'phone' => !empty($user->billing_phone) ? $user->billing_phone : (!empty($user->shipping_phone) ? $user->shipping_phone : ''),
+            'postcode' => !empty($user->billing_postcode) ? $user->billing_postcode : (!empty($user->shipping_postcode) ? $user->shipping_postcode : '')
         ];
     }
 
     private static function order_transformation_to_array($order){
         return [
-            'email' => $order->get_billing_email(),
-            'ID' => $order->get_billing_email(),
-            'first_name' => $order->get_billing_first_name() ?? '',
-            'last_name' => $order->get_billing_last_name() ?? '',
-            'state' => self::get_state_name($order->get_billing_country(), $order->get_billing_state()) ?? '',
+            'email' => !empty($order->get_billing_email()) ? $order->get_billing_email() : (!empty($order->get_shipping_email()) ? $order->get_shipping_email() : ''),
+            'ID' => !empty($order->get_billing_email()) ? $order->get_billing_email() : (!empty($order->get_shipping_email()) ? $order->get_shipping_email() : ''),
+            'first_name' => !empty($order->get_billing_first_name()) ? $order->get_billing_first_name() : (!empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),
+            'last_name' => !empty($order->get_billing_last_name()) ? $order->get_billing_last_name() : (!empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),
+            'state' => !empty(self::get_state_name($order->get_billing_country(), $order->get_billing_state())) ? self::get_state_name($order->get_billing_country(), $order->get_billing_state()) : (!empty(self::get_state_name($order->get_shipping_country(), $order->get_shipping_state())) ? self::get_state_name($order->get_shipping_country(), $order->get_shipping_state()) : ''),
             //'country' => self::get_country_name($user->billing_country) ?? '',
             //'timeZone' => $user->billing_country ?? '',
-            'city' => $order->get_billing_city() ?? '',
-            'address_1' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
-            'address_2' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
-            'phone' => $order->get_billing_phone() ?? '',
-            'postcode' => $order->get_billing_postcode() ?? ''
+            'city' => !empty($order->get_billing_city()) ? $order->get_billing_city() : (!empty($order->get_shipping_city()) ? $order->get_shipping_city() : ''),
+            'address_1' => (!empty($order->get_billing_address_1()) ? $order->get_billing_address_1() : '') . (!empty($order->get_billing_address_2()) ? ', ' . $order->get_billing_address_2() : '') ?? (!empty($order->get_shipping_address_1()) ? $order->get_shipping_address_1() : '') . (!empty($order->get_shipping_address_2()) ? ', ' . $order->get_shipping_address_2() : ''),
+            'address_2' => (!empty($order->get_billing_address_1()) ? $order->get_billing_address_1() : '') . (!empty($order->get_billing_address_2()) ? ', ' . $order->get_billing_address_2() : '') ?? (!empty($order->get_shipping_address_1()) ? $order->get_shipping_address_1() : '') . (!empty($order->get_shipping_address_2()) ? ', ' . $order->get_shipping_address_2() : ''),
+            'phone' => !empty($order->get_billing_phone()) ? $order->get_billing_phone() : (!empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
+            'postcode' => !empty($order->get_billing_postcode()) ? $order->get_billing_postcode() : (!empty($order->get_shipping_postcode()) ? $order->get_shipping_postcode() : '')
         ];
     }
 
@@ -98,16 +98,16 @@ class Esputnik_Contact_Mapping
         return [
             'email' => $post['_billing_email'],
             'ID' => $post['_billing_email'],
-            'first_name' => $post['_billing_first_name'] ?? $post['_shipping_first_name'] ?? '',
-            'last_name' => $post['_billing_last_name'] ??  $post['_shipping_last_name'] ?? '',
-            'state' => self::get_state_name($post['_billing_country'], $post['_billing_state']) ?? self::get_state_name($post['_shipping_country'], $post['_shipping_state']) ?? '',
+            'first_name' => !empty($post['_billing_first_name']) ? $post['_billing_first_name'] : (!empty($post['_shipping_first_name']) ? $post['_shipping_first_name'] : ''),
+            'last_name' => !empty($post['_billing_last_name']) ? $post['_billing_last_name'] : (!empty($post['_shipping_last_name']) ? $post['_shipping_last_name'] : ''),
+            'state' => !empty(self::get_state_name($post['_billing_country'], $post['_billing_state'])) ? self::get_state_name($post['_billing_country'], $post['_billing_state']) : (!empty(self::get_state_name($post['_shipping_country'], $post['_shipping_state'])) ? self::get_state_name($post['_shipping_country'], $post['_shipping_state']) : ''),
             //'country' => self::get_country_name($user->billing_country) ?? '',
             //'timeZone' => $user->billing_country ?? '',
-            'city' => $post['_billing_city'] ?? $post['_shipping_city'] ?? '',
-            'address_1' => $post['_billing_address_1'] ?? $post['_shipping_address_1'] ?? '',
-            'address_2' => $post['_billing_address_2'] ?? $post['_shipping_address_2'] ?? '',
-            'phone' => $post['_billing_phone'] ?? '',
-            'postcode' => $post['_billing_postcode'] ?? $post['_shipping_postcode'] ?? ''
+            'city' => !empty($post['_billing_city']) ? $post['_billing_city'] : (!empty($post['_shipping_city']) ? $post['_shipping_city'] : ''),
+            'address_1' => !empty($post['_billing_address_1']) ? $post['_billing_address_1'] : (!empty($post['_shipping_address_1']) ? $post['_shipping_address_1'] : ''),
+            'address_2' => !empty($post['_billing_address_2']) ? $post['_billing_address_2'] : (!empty($post['_shipping_address_2']) ? $post['_shipping_address_2'] : ''),
+            'phone' => !empty($post['_billing_phone']) ? $post['_billing_phone'] : '',
+            'postcode' => !empty($post['_billing_postcode']) ? $post['_billing_postcode'] : (!empty($post['_shipping_postcode']) ? $post['_shipping_postcode'] : '')
         ];
     }
 

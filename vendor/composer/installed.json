@@ -118,12 +118,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/inpsyde/wp-context.git",
-                "reference": "1f61ccb539e287e2688dfdf86dea0448c18fc8c6"
+                "reference": "1022fbf34725a2d1dd24330617138334dafa460a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/1f61ccb539e287e2688dfdf86dea0448c18fc8c6",
-                "reference": "1f61ccb539e287e2688dfdf86dea0448c18fc8c6",
+                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/1022fbf34725a2d1dd24330617138334dafa460a",
+                "reference": "1022fbf34725a2d1dd24330617138334dafa460a",
                 "shasum": ""
             },
             "require": {
@@ -137,7 +137,7 @@
                 "phpunit/phpunit": "~7.5.20 || ^8",
                 "vimeo/psalm": "^4.27.0"
             },
-            "time": "2023-01-09T06:27:09+00:00",
+            "time": "2024-03-05T13:05:41+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -171,7 +171,7 @@
             "description": "A single-class utility to check the running context in WordPress sites.",
             "support": {
                 "issues": "https://github.com/inpsyde/wp-context/issues",
-                "source": "https://github.com/inpsyde/wp-context/tree/1.5.0"
+                "source": "https://github.com/inpsyde/wp-context/tree/main"
             },
             "install-path": "../inpsyde/wp-context"
         },

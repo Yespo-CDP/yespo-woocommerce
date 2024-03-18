@@ -28,6 +28,10 @@ class Esputnik_Contact
         return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_admin_woo_to_yes($post), 'guest', $post['_billing_email']??$post['_shipping_email']);
     }
 
+    public function create_subscribed_user_on_yespo($email){
+        return $this->process_on_yespo(Esputnik_Contact_Mapping::subscribed_user_woo_to_yes($email), 'subscription', $email);
+    }
+
     public function update_on_yespo($user){
         return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
     }
@@ -58,7 +62,8 @@ class Esputnik_Contact
             if ($operation !== 'delete') {
                 if ($wc_id !== null) {
                     $this->add_esputnik_id_to_userprofile($wc_id, $responseArray['id']);
-                    $log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : 'update');
+                    //$log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : 'update');
+                    $log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : (($operation === 'subscription') ? 'subscription' : 'update'));
                     (new Esputnik_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], $log_operation); //add entry to logfile
                 }
             }

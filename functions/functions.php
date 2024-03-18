@@ -111,3 +111,12 @@ function delete_woocommerce_user( $user_id ) {
     (new Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user_id);
 }
 add_action( 'delete_user', 'delete_woocommerce_user');
+
+/** Send data to yespo from subscription form **/
+function custom_wpcf7_before_send_mail( $contact_form ) {
+    if( $submission = WPCF7_Submission::get_instance()) {
+        $postedData = $submission->get_posted_data();
+        if(isset($postedData['your-email']) && !empty($postedData['your-email'])) (new Yespo\Integrations\Esputnik\Esputnik_Contact())->create_subscribed_user_on_yespo($postedData['your-email']);
+    }
+}
+add_action( 'wpcf7_before_send_mail', 'custom_wpcf7_before_send_mail' );

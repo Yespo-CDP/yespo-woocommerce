@@ -16,6 +16,10 @@ class Esputnik_Contact_Mapping
         return self::data_woo_to_yes(self::admin_order_transformation_to_array($post));
     }
 
+    public static function subscribed_user_woo_to_yes($email){
+        return self::data_woo_to_yes(self::subscription_transformation_to_array($email));
+    }
+
     private static function data_woo_to_yes($user){
         $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : '');
         $region = ($user['state']) ?? $user['country'] ?? '';
@@ -24,6 +28,12 @@ class Esputnik_Contact_Mapping
             'value' => $user['email'],
             'type' => 'email'
         ];
+        if(isset($user['phone']) && !empty($user['phone'])){
+            $data['channels'][] = [
+                'value' => preg_replace("/[^0-9]/", "", $user['phone']),
+                'type' => 'sms'
+            ];
+        }
         $data['externalCustomerId'] = $user['ID'];
         if($user['first_name'] !== null) $data['firstName'] = $user['first_name'];
         if($user['last_name'] !== null) $data['lastName'] = $user['last_name'];
@@ -62,6 +72,7 @@ class Esputnik_Contact_Mapping
             'city' => $user->billing_city ?? '',
             'address_1' => $user->billing_address_1 ?? '',
             'address_2' => $user->billing_address_2 ?? '',
+            'phone' => $user->billing_phone ?? '',
             'postcode' => $user->billing_postcode ?? ''
         ];
     }
@@ -78,6 +89,7 @@ class Esputnik_Contact_Mapping
             'city' => $order->get_billing_city() ?? '',
             'address_1' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
             'address_2' => $order->get_billing_address_1() . ', ' . $order->get_billing_address_2() ?? '',
+            'phone' => $order->get_billing_phone() ?? '',
             'postcode' => $order->get_billing_postcode() ?? ''
         ];
     }
@@ -94,7 +106,15 @@ class Esputnik_Contact_Mapping
             'city' => $post['_billing_city'] ?? $post['_shipping_city'] ?? '',
             'address_1' => $post['_billing_address_1'] ?? $post['_shipping_address_1'] ?? '',
             'address_2' => $post['_billing_address_2'] ?? $post['_shipping_address_2'] ?? '',
+            'phone' => $post['_billing_phone'] ?? '',
             'postcode' => $post['_billing_postcode'] ?? $post['_shipping_postcode'] ?? ''
+        ];
+    }
+
+    private static function subscription_transformation_to_array($email){
+        return [
+            'email' => $email,
+            'ID' => $email
         ];
     }
 

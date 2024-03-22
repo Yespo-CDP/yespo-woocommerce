@@ -60,9 +60,13 @@ function register_woocommerce_user_esputnik($user_id){
 }
 add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);
 
-/** Send guest user to Yespo **/
+/** Send guest user and order to Yespo **/
 function register_woocommerce_guest_user_esputnik($order_id) {
-    if(!empty($order_id)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_guest_user_on_yespo(wc_get_order($order_id));
+    if(!empty($order_id)){
+        $responseContact = (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo(wc_get_order($order_id));
+        $responseOrder = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_guest_user_on_yespo(wc_get_order($order_id));
+    }
+    if(isset($responseContact) && isset($responseOrder) && $responseOrder === true) return true;
 }
 add_action('woocommerce_thankyou', 'register_woocommerce_guest_user_esputnik', 10, 1);
 
@@ -120,3 +124,26 @@ function custom_wpcf7_before_send_mail( $contact_form ) {
     }
 }
 add_action( 'wpcf7_before_send_mail', 'custom_wpcf7_before_send_mail' );
+
+
+/** testing functionality **/
+function get_order_details_test($post_id){
+    $order_id = 155;
+    $response = \Yespo\Integrations\Esputnik\Esputnik_Product_Mapping::order_woo_to_yes(wc_get_order($order_id));
+    //$response = \Yespo\Integrations\Esputnik\Esputnik_Product_Mapping::order_transformation_to_array(wc_get_order($order_id));
+    echo "<pre>";
+    print_r($response);
+    echo "</pre>";
+    die();
+    /*
+    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
+    $data_to_append = $order->get_customer_id() . ' ' . $order->get_billing_email() . ' ' . $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() . ' ' . $order->get_billing_address_2() . ' ' . $order->get_billing_address_1() . ' ' . $order->get_billing_city() . ' ' . $order->get_billing_state() . ' ' . $order->get_billing_country() . ' ' . $order->get_billing_postcode() . ' ' . $order->get_billing_phone();
+
+    $file_handle = fopen($file_path, 'a');
+    if ($file_handle) {
+        fwrite($file_handle, $data_to_append);
+        fclose($file_handle);
+    }
+    */
+}
+//add_action('save_post', 'get_order_details_test', 10, 1);

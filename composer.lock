@@ -376,12 +376,12 @@
             "version": "1.0.3",
             "source": {
                 "type": "git",
-                "url": "git@github.com:perchten/php-rmrdir.git",
+                "url": "https://github.com/builtbybrayne/php-rmrdir.git",
                 "reference": "1d0b86871cad90dc9ab67ba30b3b53533714c5f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/perchten/php-rmrdir/zipball/1d0b86871cad90dc9ab67ba30b3b53533714c5f0",
+                "url": "https://api.github.com/repos/builtbybrayne/php-rmrdir/zipball/1d0b86871cad90dc9ab67ba30b3b53533714c5f0",
                 "reference": "1d0b86871cad90dc9ab67ba30b3b53533714c5f0",
                 "shasum": ""
             },
@@ -411,6 +411,10 @@
                 "rm -r",
                 "rmdir"
             ],
+            "support": {
+                "issues": "https://github.com/builtbybrayne/php-rmrdir/issues",
+                "source": "https://github.com/builtbybrayne/php-rmrdir/tree/1.0.3"
+            },
             "time": "2019-10-24T11:00:22+00:00"
         },
         {

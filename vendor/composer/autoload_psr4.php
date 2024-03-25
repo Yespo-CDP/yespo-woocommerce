@@ -11,8 +11,5 @@ return array(
     'Yespo\\Backend\\' => array($baseDir . '/backend'),
     'Micropackage\\Requirements\\' => array($vendorDir . '/micropackage/requirements/src'),
     'Micropackage\\Internationalization\\' => array($vendorDir . '/micropackage/internationalization/src'),
-    'LightnCandy\\' => array($vendorDir . '/zordius/lightncandy/src'),
     'Inpsyde\\' => array($vendorDir . '/inpsyde/wp-context/src'),
-    'Clio\\' => array($vendorDir . '/1happyplace/clio/src/Clio'),
-    'ANSI\\' => array($vendorDir . '/1happyplace/ansi-terminal/src/ANSI'),
 );

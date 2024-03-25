@@ -36,11 +36,13 @@ function yespo_save_settings() {
             $response_data = array(
                 'status' => 'success',
                 'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Settings updated successfully!", Y_TEXTDOMAIN) . '</p></div>',
+                'total' => __("Completed successfully!", Y_TEXTDOMAIN),
             );
         } else {
             $response_data = array(
                 'status' => 'error',
                 'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Authorization failed, please check your credentials", Y_TEXTDOMAIN) . '</p></div>',
+                'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }
         update_option('yespo_options', $options);
@@ -60,9 +62,13 @@ function register_woocommerce_user_esputnik($user_id){
 }
 add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);
 
-/** Send guest user to Yespo **/
+/** Send guest user and order to Yespo **/
 function register_woocommerce_guest_user_esputnik($order_id) {
-    if(!empty($order_id)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_guest_user_on_yespo(wc_get_order($order_id));
+    if(!empty($order_id)){
+        $responseContact = (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo(wc_get_order($order_id));
+        $responseOrder = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_guest_user_on_yespo(wc_get_order($order_id));
+    }
+    if(isset($responseContact) && isset($responseOrder) && $responseOrder === true) return true;
 }
 add_action('woocommerce_thankyou', 'register_woocommerce_guest_user_esputnik', 10, 1);
 
@@ -87,7 +93,9 @@ add_action('profile_update', 'update_user_profile_esputnik', 10, 2);
 /*** Get total number for export ***/
 function get_all_users_total() {
     $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->get_users_count();
-    echo json_encode($users);
+    //$users = 10;
+    if($users > 0) echo json_encode($users);
+    else echo json_encode(0);
     wp_die();
 }
 add_action('wp_ajax_get_users_total', 'get_all_users_total');
@@ -98,7 +106,8 @@ function export_user_data_to_esputnik(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'export_user_data_to_esputnik' ) {
         if(isset($_POST['startIndex'])){
             $response = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->export_users_to_esputnik();
-            echo json_encode(intval($response));
+            if(intval($response) > 0) echo json_encode(intval($response));
+            else echo json_encode(0);
         }
     }
     wp_die();

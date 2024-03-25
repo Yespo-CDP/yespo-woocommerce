@@ -36,11 +36,13 @@ function yespo_save_settings() {
             $response_data = array(
                 'status' => 'success',
                 'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Settings updated successfully!", Y_TEXTDOMAIN) . '</p></div>',
+                'total' => __("Completed successfully!", Y_TEXTDOMAIN),
             );
         } else {
             $response_data = array(
                 'status' => 'error',
                 'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Authorization failed, please check your credentials", Y_TEXTDOMAIN) . '</p></div>',
+                'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }
         update_option('yespo_options', $options);
@@ -91,7 +93,9 @@ add_action('profile_update', 'update_user_profile_esputnik', 10, 2);
 /*** Get total number for export ***/
 function get_all_users_total() {
     $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->get_users_count();
-    echo json_encode($users);
+    //$users = 10;
+    if($users > 0) echo json_encode($users);
+    else echo json_encode(0);
     wp_die();
 }
 add_action('wp_ajax_get_users_total', 'get_all_users_total');
@@ -102,7 +106,8 @@ function export_user_data_to_esputnik(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'export_user_data_to_esputnik' ) {
         if(isset($_POST['startIndex'])){
             $response = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->export_users_to_esputnik();
-            echo json_encode(intval($response));
+            if(intval($response) > 0) echo json_encode(intval($response));
+            else echo json_encode(0);
         }
     }
     wp_die();
@@ -124,26 +129,3 @@ function custom_wpcf7_before_send_mail( $contact_form ) {
     }
 }
 add_action( 'wpcf7_before_send_mail', 'custom_wpcf7_before_send_mail' );
-
-
-/** testing functionality **/
-function get_order_details_test($post_id){
-    $order_id = 155;
-    $response = \Yespo\Integrations\Esputnik\Esputnik_Product_Mapping::order_woo_to_yes(wc_get_order($order_id));
-    //$response = \Yespo\Integrations\Esputnik\Esputnik_Product_Mapping::order_transformation_to_array(wc_get_order($order_id));
-    echo "<pre>";
-    print_r($response);
-    echo "</pre>";
-    die();
-    /*
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = $order->get_customer_id() . ' ' . $order->get_billing_email() . ' ' . $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() . ' ' . $order->get_billing_address_2() . ' ' . $order->get_billing_address_1() . ' ' . $order->get_billing_city() . ' ' . $order->get_billing_state() . ' ' . $order->get_billing_country() . ' ' . $order->get_billing_postcode() . ' ' . $order->get_billing_phone();
-
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
-    */
-}
-//add_action('save_post', 'get_order_details_test', 10, 1);

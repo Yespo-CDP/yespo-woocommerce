@@ -6,6 +6,4 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Commando' => array($vendorDir . '/nategood/commando/src'),
-    'Colors' => array($vendorDir . '/kevinlebrun/colors.php/src'),
 );

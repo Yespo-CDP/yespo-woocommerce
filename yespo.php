@@ -34,6 +34,7 @@ define( 'Y_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
 define( 'Y_PLUGIN_ABSOLUTE', __FILE__ );
 define( 'Y_MIN_PHP_VERSION', '7.4' );
 define( 'Y_WP_VERSION', '5.3' );
+define( 'Y_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 add_action(
 	'init',

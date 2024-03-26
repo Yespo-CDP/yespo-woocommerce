@@ -4,6 +4,7 @@ namespace Yespo\Integrations\Esputnik;
 
 class Esputnik_Export_Users
 {
+    const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
     private $meta_key;
 
@@ -29,7 +30,7 @@ class Esputnik_Export_Users
     }
     private function get_users_export_args(){
         return [
-            'role'    => self::SUBSCRIBER,
+            'role__in'    => [self::CUSTOMER, self::SUBSCRIBER],
             'orderby' => 'registered',
             'order'   => 'DESC',
             'fields'  => 'ID',

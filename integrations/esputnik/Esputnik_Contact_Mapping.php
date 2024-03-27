@@ -35,8 +35,8 @@ class Esputnik_Contact_Mapping
             ];
         }
         $data['externalCustomerId'] = $user['ID'];
-        if($user['first_name'] !== null) $data['firstName'] = $user['first_name'];
-        if($user['last_name'] !== null) $data['lastName'] = $user['last_name'];
+        if($user['first_name'] !== null && Esputnik_Contact_Validation::name_validation($user['first_name'])) $data['firstName'] = $user['first_name'];
+        if($user['last_name'] !== null && Esputnik_Contact_Validation::lastname_validation($user['last_name'])) $data['lastName'] = $user['last_name'];
 
         $data['address'] = [
             'region' => $region,

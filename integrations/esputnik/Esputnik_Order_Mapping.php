@@ -21,8 +21,8 @@ class Esputnik_Order_Mapping
         $data['orders'][0]['email'] = $orderArray['email'];
         $data['orders'][0]['date'] = $orderArray['date'];
         $data['orders'][0]['currency'] = $orderArray['currency'];
-        $data['orders'][0]['firstName'] = $orderArray['firstName'];
-        $data['orders'][0]['lastName'] = $orderArray['lastName'];
+        if(Esputnik_Contact_Validation::name_validation($orderArray['firstName'])) $data['orders'][0]['firstName'] = $orderArray['firstName'];
+        if(Esputnik_Contact_Validation::lastname_validation($orderArray['lastName'])) $data['orders'][0]['lastName'] = $orderArray['lastName'];
         $data['orders'][0]['deliveryAddress'] = $orderArray['deliveryAddress'];
         $data['orders'][0]['phone'] = preg_replace("/[^0-9]/", "", $orderArray['phone']);
         $data['orders'][0]['shipping'] = $orderArray['shipping'];

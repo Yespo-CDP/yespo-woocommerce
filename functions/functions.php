@@ -9,6 +9,7 @@
  * @link      https://yespo.io/
  */
 
+
 /**
  * Get the settings of the plugin in a filterable way
  *

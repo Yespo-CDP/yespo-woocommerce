@@ -35,8 +35,8 @@ class Esputnik_Contact_Mapping
             ];
         }
         $data['externalCustomerId'] = $user['ID'];
-        if($user['first_name'] !== null) $data['firstName'] = $user['first_name'];
-        if($user['last_name'] !== null) $data['lastName'] = $user['last_name'];
+        if($user['first_name'] !== null && Esputnik_Contact_Validation::name_validation($user['first_name'])) $data['firstName'] = $user['first_name'];
+        if($user['last_name'] !== null && Esputnik_Contact_Validation::lastname_validation($user['last_name'])) $data['lastName'] = $user['last_name'];
 
         $data['address'] = [
             'region' => $region,
@@ -44,6 +44,7 @@ class Esputnik_Contact_Mapping
             'address' => $address,
             'postcode' => ($user['postcode']) ?? ''
         ];
+        if($user['languageCode']) $data['languageCode'] = $user['languageCode'];
         if (!empty($meta_data) && is_array($meta_data)){
             $data['fields'] = self::fields_transformation($meta_data);
         }
@@ -73,7 +74,8 @@ class Esputnik_Contact_Mapping
             'address_1' => !empty($user->billing_address_1) ? $user->billing_address_1 : (!empty($user->shipping_address_1) ? $user->shipping_address_1 : ''),
             'address_2' => !empty($user->billing_address_2) ? $user->billing_address_2 : (!empty($user->shipping_address_2) ? $user->shipping_address_2 : ''),
             'phone' => !empty($user->billing_phone) ? $user->billing_phone : (!empty($user->shipping_phone) ? $user->shipping_phone : ''),
-            'postcode' => !empty($user->billing_postcode) ? $user->billing_postcode : (!empty($user->shipping_postcode) ? $user->shipping_postcode : '')
+            'postcode' => !empty($user->billing_postcode) ? $user->billing_postcode : (!empty($user->shipping_postcode) ? $user->shipping_postcode : ''),
+            'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ' '
         ];
     }
 

@@ -86,6 +86,7 @@ add_action('woocommerce_process_shop_order_meta', 'register_woocommerce_admin_gu
 function update_user_profile_esputnik($user_id, $old_user_data) {
     if(!empty($user_id)) {
         $user = get_user_by('id', $user_id);
+        if(empty($user->billing_phone) && empty($user->shipping_phone)) (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_phone_on_yespo($user->data->user_email);
         if(isset($user->data->user_email)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_on_yespo($user);
     }
 }
@@ -130,3 +131,15 @@ function custom_wpcf7_before_send_mail( $contact_form ) {
     }
 }
 add_action( 'wpcf7_before_send_mail', 'custom_wpcf7_before_send_mail' );
+
+/*** Remove personal data from Yespo after erase personal data ***/
+add_action( 'wp_privacy_personal_data_erased', 'mymy_custom_function_after_data_erased', 10, 1 );
+function mymy_custom_function_after_data_erased( $erased ){
+    if ( is_numeric( $erased ) && $erased > 0 ){
+        $order = get_post( $erased );
+        if ( $order && $order instanceof WP_Post ){
+            (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_phone_on_yespo($order->post_title);
+            (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_data_from_yespo($order->post_title);
+        }
+    }
+}

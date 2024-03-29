@@ -20,34 +20,83 @@ class Esputnik_Contact_Mapping
         return self::data_woo_to_yes(self::subscription_transformation_to_array($email));
     }
 
+    public static function clean_user_phone_data($email){
+        return self::remove_phone_number_array($email);
+    }
+
+    public static function clean_user_personal_data($email){
+        return self::remove_all_personal_data($email);
+    }
+
     private static function data_woo_to_yes($user){
-        $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : '');
-        $region = ($user['state']) ?? $user['country'] ?? '';
+        $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : ' ');
+        $region = ($user['state']) ?? $user['country'] ?? ' ';
 
         $data['channels'][] = [
             'value' => $user['email'],
             'type' => 'email'
         ];
-        if(isset($user['phone']) && !empty($user['phone'])){
-            $data['channels'][] = [
-                'value' => preg_replace("/[^0-9]/", "", $user['phone']),
-                'type' => 'sms'
-            ];
-        }
+        if(isset($user['phone']) && !empty($user['phone'])) $phoneNumber = preg_replace("/[^0-9]/", "", $user['phone']);
+        else $phoneNumber = ' ';
+        $data['channels'][] = [
+            'value' => $phoneNumber,
+            'type' => 'sms'
+        ];
+
         $data['externalCustomerId'] = $user['ID'];
         if($user['first_name'] !== null && Esputnik_Contact_Validation::name_validation($user['first_name'])) $data['firstName'] = $user['first_name'];
+        else $data['firstName'] = ' ';
+
         if($user['last_name'] !== null && Esputnik_Contact_Validation::lastname_validation($user['last_name'])) $data['lastName'] = $user['last_name'];
+        else $data['lastName'] = ' ';
 
         $data['address'] = [
             'region' => $region,
-            'town' => $user['city'] ?? '',
+            'town' => $user['city'] ?? ' ',
             'address' => $address,
-            'postcode' => ($user['postcode']) ?? ''
+            'postcode' => $user['postcode'] ?? ' '
         ];
         if($user['languageCode']) $data['languageCode'] = $user['languageCode'];
         if (!empty($meta_data) && is_array($meta_data)){
             $data['fields'] = self::fields_transformation($meta_data);
         }
+
+        return $data;
+    }
+
+    //remove user phone
+    private static function remove_phone_number_array($email){
+        return [
+            'dedupeOn' => 'email',
+            'contactFields' => ['sms'],
+            'contacts' => [
+                [
+                    'channels' => [
+                        [
+                            'type' => 'email',
+                            'value' => $email
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    //removes personal user data
+    private static function remove_all_personal_data($email){
+        $data['channels'][] = [
+            'value' => $email,
+            'type' => 'email'
+        ];
+        $data['firstName'] = ' ';
+        $data['lastName'] = ' ';
+        $data['address'] = [
+            'region' => ' ',
+            'town' => ' ',
+            'address' => ' ',
+            'postcode' => ' '
+        ];
+        $data['languageCode'] = ' ';
 
         return $data;
     }

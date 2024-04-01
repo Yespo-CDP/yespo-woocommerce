@@ -133,8 +133,8 @@ function custom_wpcf7_before_send_mail( $contact_form ) {
 add_action( 'wpcf7_before_send_mail', 'custom_wpcf7_before_send_mail' );
 
 /*** Remove personal data from Yespo after erase personal data ***/
-add_action( 'wp_privacy_personal_data_erased', 'mymy_custom_function_after_data_erased', 10, 1 );
-function mymy_custom_function_after_data_erased( $erased ){
+add_action( 'wp_privacy_personal_data_erased', 'clean_user_data_after_data_erased', 10, 1 );
+function clean_user_data_after_data_erased( $erased ){
     if ( is_numeric( $erased ) && $erased > 0 ){
         $order = get_post( $erased );
         if ( $order && $order instanceof WP_Post ){

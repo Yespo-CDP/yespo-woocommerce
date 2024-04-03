@@ -13,7 +13,7 @@ class Esputnik_Export_Users
     }
 
     public function export_users_to_esputnik(){
-        $users = $this->get_users_export_esputnik();
+        $users = $this->get_users_object();
         if(count($users) > 0 && isset($users[0])){
             return (new Esputnik_Contact())-> create_on_yespo(
                 (get_user_by('id', $users[0]))->user_email,
@@ -22,11 +22,21 @@ class Esputnik_Export_Users
         }
     }
 
-    public function get_users_count(){
-        return count($this->get_users_export_esputnik());
+    public function get_users_total_count(){
+        return count($this->get_users_object($this->get_users_total_args()));
     }
-    public function get_users_export_esputnik(){
-        return get_users($this->get_users_export_args());
+    public function get_users_export_count(){
+        return count($this->get_users_object($this->get_users_export_args()));
+    }
+    public function get_users_object($args){
+        return get_users($args);
+    }
+    private function get_users_total_args(){
+        return [
+            'role__in'    => [self::CUSTOMER, self::SUBSCRIBER],
+            'orderby' => 'registered',
+            'order'   => 'DESC',
+        ];
     }
     private function get_users_export_args(){
         return [

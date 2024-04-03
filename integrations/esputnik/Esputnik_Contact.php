@@ -6,6 +6,7 @@ namespace Yespo\Integrations\Esputnik;
 class Esputnik_Contact
 {
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
+    const REMOTE_CONTACTS_ESPUTNIK_URL = "https://esputnik.com/api/v1/contacts";
     const CUSTOM_REQUEST = "POST";
     const CUSTOM_REQUEST_DELETE = "DELETE";
     const USER_META_KEY = 'yespo_contact_id';
@@ -36,6 +37,14 @@ class Esputnik_Contact
         return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
     }
 
+    public function remove_user_phone_on_yespo($email){
+        return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_phone_data($email), 'clean');
+    }
+
+    public function remove_user_data_from_yespo($email){
+        return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_personal_data($email), 'update');
+    }
+
     public function delete_from_yespo($user_id){
         $yespo_id = $this->get_user_metafield_id($user_id);
         if(!empty($this->authData) && !empty($yespo_id)){
@@ -54,6 +63,7 @@ class Esputnik_Contact
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
             $request = self::CUSTOM_REQUEST_DELETE;
         }
+        if($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;
 
         $response = Esputnik_Curl_Request::curl_request($url, $request, $this->authData, $data);
         $responseArray = json_decode($response, true);
@@ -69,7 +79,7 @@ class Esputnik_Contact
             }
             return true;
         }
-        return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+        return __( 'Other user authorization operation', Y_TEXTDOMAIN );
     }
 
     public function get_meta_key(){

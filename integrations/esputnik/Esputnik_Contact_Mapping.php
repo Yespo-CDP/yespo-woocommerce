@@ -20,34 +20,86 @@ class Esputnik_Contact_Mapping
         return self::data_woo_to_yes(self::subscription_transformation_to_array($email));
     }
 
-    private static function data_woo_to_yes($user){
-        $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : '');
-        $region = ($user['state']) ?? $user['country'] ?? '';
+    public static function clean_user_phone_data($email){
+        return self::remove_phone_number_array($email);
+    }
+
+    public static function clean_user_personal_data($email){
+        return self::remove_all_personal_data($email);
+    }
+
+    private static function data_woo_to_yes($user)
+    {
+        $address = !empty($user['address_1']) ? $user['address_1'] : (!empty($user['address_2']) ? $user['address_2'] : ' ');
+        $region = ($user['state']) ?? $user['country'] ?? ' ';
 
         $data['channels'][] = [
             'value' => $user['email'],
             'type' => 'email'
         ];
-        if(isset($user['phone']) && !empty($user['phone'])){
-            $data['channels'][] = [
-                'value' => preg_replace("/[^0-9]/", "", $user['phone']),
-                'type' => 'sms'
-            ];
-        }
+        if (isset($user['phone']) && !empty($user['phone'])) {
+            if(!empty($user['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($user['phone'], $user['country_id']);
+            else $phoneNumber = preg_replace("/[^0-9]/", "", $user['phone']);
+        } else $phoneNumber = ' ';
+        $data['channels'][] = [
+            'value' => $phoneNumber,
+            'type' => 'sms'
+        ];
+
         $data['externalCustomerId'] = $user['ID'];
         if($user['first_name'] !== null && Esputnik_Contact_Validation::name_validation($user['first_name'])) $data['firstName'] = $user['first_name'];
+        else $data['firstName'] = ' ';
+
         if($user['last_name'] !== null && Esputnik_Contact_Validation::lastname_validation($user['last_name'])) $data['lastName'] = $user['last_name'];
+        else $data['lastName'] = ' ';
 
         $data['address'] = [
             'region' => $region,
-            'town' => $user['city'] ?? '',
+            'town' => $user['city'] ?? ' ',
             'address' => $address,
-            'postcode' => ($user['postcode']) ?? ''
+            'postcode' => $user['postcode'] ?? ' '
         ];
         if($user['languageCode']) $data['languageCode'] = $user['languageCode'];
         if (!empty($meta_data) && is_array($meta_data)){
             $data['fields'] = self::fields_transformation($meta_data);
         }
+
+        return $data;
+    }
+
+    //remove user phone
+    private static function remove_phone_number_array($email){
+        return [
+            'dedupeOn' => 'email',
+            'contactFields' => ['sms'],
+            'contacts' => [
+                [
+                    'channels' => [
+                        [
+                            'type' => 'email',
+                            'value' => $email
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    //removes personal user data
+    private static function remove_all_personal_data($email){
+        $data['channels'][] = [
+            'value' => $email,
+            'type' => 'email'
+        ];
+        $data['firstName'] = ' ';
+        $data['lastName'] = ' ';
+        $data['address'] = [
+            'region' => ' ',
+            'town' => ' ',
+            'address' => ' ',
+            'postcode' => ' '
+        ];
+        $data['languageCode'] = ' ';
 
         return $data;
     }
@@ -70,6 +122,7 @@ class Esputnik_Contact_Mapping
             'last_name' => !empty($user->last_name) ? $user->last_name : (!empty($user->billing_last_name) ? $user->billing_last_name : (!empty($user->shipping_last_name) ? $user->shipping_last_name : '')),
             'state' => !empty(self::get_state_name($user->billing_country, $user->billing_state)) ? self::get_state_name($user->billing_country, $user->billing_state) : (!empty(self::get_state_name($user->shipping_country, $user->shipping_state)) ? self::get_state_name($user->shipping_country, $user->shipping_state) : ''),
             //'country' => self::get_country_name($user->billing_country) ?? '',
+            'country_id' => !empty($user->billing_country) ? $user->billing_country : (!empty($user->shipping_country) ? $user->shipping_country : ''),
             'city' => !empty($user->billing_city) ? $user->billing_city : (!empty($user->shipping_city) ? $user->shipping_city : ''),
             'address_1' => !empty($user->billing_address_1) ? $user->billing_address_1 : (!empty($user->shipping_address_1) ? $user->shipping_address_1 : ''),
             'address_2' => !empty($user->billing_address_2) ? $user->billing_address_2 : (!empty($user->shipping_address_2) ? $user->shipping_address_2 : ''),
@@ -87,6 +140,7 @@ class Esputnik_Contact_Mapping
             'last_name' => !empty($order->get_billing_last_name()) ? $order->get_billing_last_name() : (!empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),
             'state' => !empty(self::get_state_name($order->get_billing_country(), $order->get_billing_state())) ? self::get_state_name($order->get_billing_country(), $order->get_billing_state()) : (!empty(self::get_state_name($order->get_shipping_country(), $order->get_shipping_state())) ? self::get_state_name($order->get_shipping_country(), $order->get_shipping_state()) : ''),
             //'country' => self::get_country_name($user->billing_country) ?? '',
+            'country_id' => !empty($order->get_billing_country()) ? $order->get_billing_country() : (!empty($order->get_shipping_country()) ? $order->get_shipping_country() : ''),
             //'timeZone' => $user->billing_country ?? '',
             'city' => !empty($order->get_billing_city()) ? $order->get_billing_city() : (!empty($order->get_shipping_city()) ? $order->get_shipping_city() : ''),
             'address_1' => (!empty($order->get_billing_address_1()) ? $order->get_billing_address_1() : '') . (!empty($order->get_billing_address_2()) ? ', ' . $order->get_billing_address_2() : '') ?? (!empty($order->get_shipping_address_1()) ? $order->get_shipping_address_1() : '') . (!empty($order->get_shipping_address_2()) ? ', ' . $order->get_shipping_address_2() : ''),
@@ -104,6 +158,7 @@ class Esputnik_Contact_Mapping
             'last_name' => !empty($post['_billing_last_name']) ? $post['_billing_last_name'] : (!empty($post['_shipping_last_name']) ? $post['_shipping_last_name'] : ''),
             'state' => !empty(self::get_state_name($post['_billing_country'], $post['_billing_state'])) ? self::get_state_name($post['_billing_country'], $post['_billing_state']) : (!empty(self::get_state_name($post['_shipping_country'], $post['_shipping_state'])) ? self::get_state_name($post['_shipping_country'], $post['_shipping_state']) : ''),
             //'country' => self::get_country_name($user->billing_country) ?? '',
+            'country_id' => !empty($post['_billing_country']) ? $post['_billing_country'] : (!empty($post['_shipping_country']) ? $post['_shipping_country'] : ''),
             //'timeZone' => $user->billing_country ?? '',
             'city' => !empty($post['_billing_city']) ? $post['_billing_city'] : (!empty($post['_shipping_city']) ? $post['_shipping_city'] : ''),
             'address_1' => !empty($post['_billing_address_1']) ? $post['_billing_address_1'] : (!empty($post['_shipping_address_1']) ? $post['_shipping_address_1'] : ''),

@@ -13,6 +13,10 @@ class Esputnik_Order_Mapping
 
     public static function order_woo_to_yes($order){
         $orderArray = self::order_transformation_to_array($order);
+        if (isset($orderArray['phone']) && !empty($orderArray['phone'])) {
+            if(!empty($orderArray['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($orderArray['phone'], $orderArray['country_id']);
+            else $phoneNumber = preg_replace("/[^0-9]/", "", $orderArray['phone']);
+        } else $phoneNumber = '';
 
         $data['orders'][0]['status'] = $orderArray['status'];
         $data['orders'][0]['externalOrderId'] = $orderArray['externalOrderId'];
@@ -24,7 +28,7 @@ class Esputnik_Order_Mapping
         if(Esputnik_Contact_Validation::name_validation($orderArray['firstName'])) $data['orders'][0]['firstName'] = $orderArray['firstName'];
         if(Esputnik_Contact_Validation::lastname_validation($orderArray['lastName'])) $data['orders'][0]['lastName'] = $orderArray['lastName'];
         $data['orders'][0]['deliveryAddress'] = $orderArray['deliveryAddress'];
-        $data['orders'][0]['phone'] = preg_replace("/[^0-9]/", "", $orderArray['phone']);
+        $data['orders'][0]['phone'] = preg_replace("/[^0-9]/", "", $phoneNumber);
         $data['orders'][0]['shipping'] = $orderArray['shipping'];
         $data['orders'][0]['discount'] = $orderArray['discount'];
         $data['orders'][0]['taxes'] = $orderArray['taxes'];
@@ -54,7 +58,8 @@ class Esputnik_Order_Mapping
             'taxes' => !empty($order->total_tax) ? $order->total_tax : ((!empty($order->discount_tax)) ? $order->discount_tax : ((!empty($order->cart_tax)) ? $order->cart_tax : ((!empty($order->shipping_tax)) ? $order->shipping_tax : ''))),
             'source' => $order->created_via ?? '',
             //'deliveryMethod' => $order['method_title'],
-            'paymentMethod' => $order->payment_method ?? ''
+            'paymentMethod' => $order->payment_method ?? '',
+            'country_id' => !empty($order->get_billing_country()) ? $order->get_billing_country() : (!empty($order->get_shipping_country()) ? $order->get_shipping_country() : ''),
         ];
     }
 

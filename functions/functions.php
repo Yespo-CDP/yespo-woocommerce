@@ -92,16 +92,25 @@ function update_user_profile_esputnik($user_id, $old_user_data) {
 }
 add_action('profile_update', 'update_user_profile_esputnik', 10, 2);
 
-/*** Get total number for export ***/
+/*** Get total users number ***/
 function get_all_users_total() {
-    $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->get_users_count();
-    //$users = 10;
+    $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->get_users_total_count();
     if($users > 0) echo json_encode($users);
     else echo json_encode(0);
     wp_die();
 }
 add_action('wp_ajax_get_users_total', 'get_all_users_total');
-add_action('wp_ajax_nopriv_get_all_users_total', 'get_all_users_total');
+add_action('wp_ajax_nopriv_get_users_total', 'get_all_users_total');
+
+/*** Get total users number for export ***/
+function get_all_users_total_export() {
+    $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users)->get_users_export_count();
+    if($users > 0) echo json_encode($users);
+    else echo json_encode(0);
+    wp_die();
+}
+add_action('wp_ajax_get_users_total_export', 'get_all_users_total_export');
+add_action('wp_ajax_nopriv_get_users_total_export', 'get_all_users_total_export');
 
 /*** Export users to Yespo ***/
 function export_user_data_to_esputnik(){
@@ -133,7 +142,6 @@ function custom_wpcf7_before_send_mail( $contact_form ) {
 add_action( 'wpcf7_before_send_mail', 'custom_wpcf7_before_send_mail' );
 
 /*** Remove personal data from Yespo after erase personal data ***/
-add_action( 'wp_privacy_personal_data_erased', 'clean_user_data_after_data_erased', 10, 1 );
 function clean_user_data_after_data_erased( $erased ){
     if ( is_numeric( $erased ) && $erased > 0 ){
         $order = get_post( $erased );
@@ -143,3 +151,41 @@ function clean_user_data_after_data_erased( $erased ){
         }
     }
 }
+add_action( 'wp_privacy_personal_data_erased', 'clean_user_data_after_data_erased', 10, 1 );
+
+/*** Get total orders number ***/
+function get_all_orders_total() {
+    $orders = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders)->get_total_orders();
+    if($orders > 0) echo json_encode($orders);
+    else echo json_encode(0);
+    wp_die();
+}
+add_action('wp_ajax_get_orders_total', 'get_all_orders_total');
+add_action('wp_ajax_nopriv_get_orders_total', 'get_all_orders_total');
+
+
+/*** Get total orders number for export ***/
+function get_all_orders_total_export() {
+    $orders = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders)->get_export_orders_count();
+    if($orders > 0) echo json_encode($orders);
+    else echo json_encode(0);
+    wp_die();
+}
+add_action('wp_ajax_get_orders_total_export', 'get_all_orders_total_export');
+add_action('wp_ajax_nopriv_get_orders_total_export', 'get_all_orders_total_export');
+
+/*** Export orders to Yespo ***/
+function export_orders_to_yespo(){
+
+    if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'export_orders_data_to_esputnik' ) {
+        if(isset($_POST['startIndex'])){
+            $response = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders)->export_orders_to_esputnik();
+            if(intval($response) > 0) echo json_encode(intval($response));
+            else echo json_encode(0);
+        }
+    }
+    wp_die();
+
+}
+add_action('wp_ajax_export_orders_data_to_esputnik', 'export_orders_to_yespo');
+add_action('wp_ajax_nopriv_export_orders_data_to_esputnik', 'export_order_to_yespo');

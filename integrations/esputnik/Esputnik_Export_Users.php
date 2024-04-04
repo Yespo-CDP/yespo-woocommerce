@@ -13,7 +13,7 @@ class Esputnik_Export_Users
     }
 
     public function export_users_to_esputnik(){
-        $users = $this->get_users_object();
+        $users = $this->get_users_object($this->get_users_export_args());
         if(count($users) > 0 && isset($users[0])){
             return (new Esputnik_Contact())-> create_on_yespo(
                 (get_user_by('id', $users[0]))->user_email,

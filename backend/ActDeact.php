@@ -116,6 +116,7 @@ class ActDeact extends Base {
 		}
 
 		self::single_deactivate();
+        //self::yespo_crone_deactivate();
 	}
 
 	/**
@@ -268,6 +269,30 @@ class ActDeact extends Base {
 
             $wpdb->query($wpdb->prepare($sql));
         }
+
+        $table_export_name = $wpdb->prefix . 'yespo_export_status_log';
+        $charset_collate_export = $wpdb->get_charset_collate();
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_export_name'") != $table_export_name) {
+            $sqlExport = "CREATE TABLE $table_export_name (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                export_type varchar(255) NOT NULL,
+                total varchar(255) NOT NULL,
+                exported varchar(255) NOT NULL,
+                status varchar(255) NOT NULL,
+                PRIMARY KEY  (id)
+            ) $charset_collate_export;";
+
+            $wpdb->query($wpdb->prepare($sqlExport));
+        }
+    }
+
+    public static function yespo_crone_deactivate(){
+
+        register_deactivation_hook (__FILE__, function(){
+
+            $timestamp = wp_next_scheduled ('yespo_export_data_cron');
+            wp_unschedule_event ($timestamp, 'yespo_export_data_cron');
+        });
     }
 
 }

@@ -6,12 +6,60 @@ use WP_Query;
 
 class Esputnik_Export_Orders
 {
-    const CUSTOMER = 'customer';
-    const SUBSCRIBER = 'subscriber';
+    private $number_for_export = 10;
+    private $table_name;
     private $meta_key;
+    private $wpdb;
 
     public function __construct(){
-        $this->meta_key = (new Esputnik_Order())->get_meta_key();
+        global $wpdb;
+        $this->meta_key = (new Esputnik_Contact())->get_meta_key();
+        $this->wpdb = $wpdb;
+        $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
+    }
+
+    public function add_orders_export_task(){
+        $status = $this->get_order_export_status();
+        if(empty($status)){
+            $data = [
+                'export_type' => 'orders',
+                'total' => $this->get_export_orders_count(),
+                'exported' => 0,
+                'status' => 'active'
+            ];
+            $result = $this->wpdb->insert($this->table_name, $data);
+
+            if ($result !== false) return true;
+            else return false;
+        }
+        else return false;
+    }
+
+    public function start_export_orders() {
+        $status = $this->get_order_export_status();
+        if(!empty($status) && $status->status == 'active'){
+            $total = intval($status->total);
+            $exported = intval($status->exported);
+            $current_status = $status->status;
+            $live_exported = 0;
+
+            if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
+
+            for($i = 0; $i < $this->number_for_export; $i++){
+
+                $result = $this->export_orders_to_esputnik();
+                if($result){
+                    $live_exported += 1;
+                }
+            }
+
+            if($total <= $exported + $live_exported){
+                $current_status = 'completed';
+                $exported = $total;
+            } else $exported += $live_exported;
+
+            $this->update_table_data($status->id, $exported, $current_status);
+        }
     }
 
     public function export_orders_to_esputnik(){
@@ -22,6 +70,30 @@ class Esputnik_Export_Orders
                 wc_get_order($orders[0])
             );
         }
+    }
+
+    public function get_process_orders_exported(){
+        return $this->get_order_export_status();
+    }
+
+    public function get_order_export_status(){
+        return $this->wpdb->get_row(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s",
+                'orders',
+                'active'
+            )
+        );
+    }
+
+    private function update_table_data($id, $exported, $status){
+        return $this->wpdb->update(
+            $this->table_name,
+            array('exported' => $exported, 'status' => $status),
+            array('id' => $id),
+            array('%d', '%s'),
+            array('%d')
+        );
     }
 
     public function get_total_orders(){

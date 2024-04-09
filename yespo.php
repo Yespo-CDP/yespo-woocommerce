@@ -146,3 +146,10 @@ if ( ! wp_installing() ) {
 		}
 	);
 }
+
+function export_data_activation(){
+    if (!wp_next_scheduled('yespo_export_data_cron')) {
+        wp_schedule_event(time(), 'every_minute', 'yespo_export_data_cron');
+    }
+}
+export_data_activation();

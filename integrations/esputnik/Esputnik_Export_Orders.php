@@ -13,7 +13,7 @@ class Esputnik_Export_Orders
 
     public function __construct(){
         global $wpdb;
-        $this->meta_key = (new Esputnik_Contact())->get_meta_key();
+        $this->meta_key = (new Esputnik_Order())->get_meta_key();
         $this->wpdb = $wpdb;
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
     }

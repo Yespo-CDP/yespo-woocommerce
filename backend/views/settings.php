@@ -311,6 +311,7 @@
             this.exportUsersButton = document.querySelector('#export_users');
             this.exportOrdersButton = document.querySelector('#export_orders');
             this.users = null;
+            this.usersExportStatus = false;
             this.total_users = null;
             this.orders = null;
             this.total_orders = null;
@@ -320,6 +321,7 @@
             this.appendTotalNumber();
         }
 
+        /** get data when loading the page **/
         appendTotalNumber() {
             this.getRequest('get_users_total', this.exportUsersButton, '#total-users', (response) => {
                 this.users = response;
@@ -375,50 +377,52 @@
             });
         }
 
-        startExport(dataType, exportButton, totalElementSelector, action, progressBarSelector, exportedCountElementSelector) {
-            this.getRequest(`get_${dataType}_total_export`, exportButton, totalElementSelector, (response) => {
-                this[dataType] = response;
-            }).then(() => {
-                if (this[dataType] > 0) {
-                    const batchSize = 1;
-                    let currentIndex = 0;
-                    exportButton.disabled = true;
-
-                    const sendNextBatch = () => {
-                        const itemsToSend = this[dataType] - currentIndex >= batchSize ?
-                            batchSize :
-                            this[dataType] - currentIndex;
-
-                        if (itemsToSend > 0) {
-                            this.exportChunk(currentIndex, itemsToSend, action).then(() => {
-                                currentIndex++;
-                                this.updateProgress((currentIndex / this[dataType]) * 100, dataType);
-
-                                if (currentIndex < this[dataType]) {
-                                    sendNextBatch();
-                                }
-                                if (document.querySelector(exportedCountElementSelector)) {
-                                    document.querySelector(exportedCountElementSelector).innerHTML = currentIndex;
-                                }
-                            }).catch(error => {
-                                console.error('Error exporting chunk:', error);
-                                document.querySelector(progressBarSelector).style.background = `url("<?php echo Y_PLUGIN_URL;?>assets/images/progress-container-warning.svg")`;
-                                this.progressBar.style.width = '100%';
-                                document.querySelector(progressBarSelector).innerHTML = '<span class="notAvailable">Service not available now. Try again later</span>';
-                                exportButton.disabled = false;
-                            });
-                        }
-                    };
-
-                    sendNextBatch();
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
+        /** start export **/
         startExportUsers() {
             this.startExport(
+                'export_user_data_to_esputnik',
+                'users'
+            );
+        }
+
+        startExportOrders() {
+            this.startExport(
+                'export_order_data_to_esputnik',
+                'orders'
+            );
+        }
+
+        startExport(action, service){
+            this.startExportChunk(action, service);
+        }
+
+        startExportChunk(action, service) {
+            const formData = new FormData();
+            formData.append('service', service);
+            formData.append('action', action);
+
+            fetch(this.ajaxUrl, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (response) {
+                        if(service === 'users'){
+                            this.exportUsersButton.disabled = true;
+                        }
+                        if(service === 'orders') this.exportOrdersButton.disabled = true;
+                    } else console.error('Send error:', response.statusText);
+                })
+                .catch(error => {
+                    console.error('Send error:', error);
+                });
+        }
+
+        /** check and update process **/
+
+        processExportUsers() {
+            this.checkExportStatus(
+                'get_process_export_users_data_to_esputnik',
                 'users',
                 this.exportUsersButton,
                 '#total-users-export',
@@ -428,8 +432,9 @@
             );
         }
 
-        startExportOrders() {
-            this.startExport(
+        processExportOrders() {
+            this.checkExportStatus(
+                'get_process_export_orders_data_to_esputnik',
                 'orders',
                 this.exportOrdersButton,
                 '#total-orders-export',
@@ -439,30 +444,46 @@
             );
         }
 
-        exportChunk(startIndex, count, action) {
-            return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', this.ajaxUrl, true);
-                const formData = new FormData();
-                formData.append('startIndex', startIndex);
-                formData.append('count', count);
-                formData.append('action', action);
+        checkExportStatus(action, way, button, totalUnits, totalExport, progressUnits, exportedUnits) {
+            this.getProcessData(action, (response) => {
+                response = JSON.parse(response);
+                //console.log(response.total);
+                //console.log(response);
+                //console.log(this.usersExportStatus);
+                if (response && response.status === 'active') {
+                    if (response.exported !== null && document.querySelector(exportedUnits) && response.exported >= 0) {
+                        this.updateProgress((response.exported / response.total) * 100, way);
+                        document.querySelector(exportedUnits).innerHTML = response.exported;
+                    }
+                    if (response.exported !== response.total) {
+                        button.disabled = true;
+                        setTimeout(() => {
+                            if(way === 'users') this.processExportUsers();
+                            if (way === 'orders') this.processExportOrders();
+                        }, 5000);
+                    } else this.usersExportStatus = false;
+                } else if(response && response.exported && response.exported > 0){
+                    this.updateProgress((response.exported / response.total) * 100, way);
+                    document.querySelector(exportedUnits).innerHTML = response.exported;
+                }
+                //console.log(this.usersExportStatus);
+            });
+        }
 
-                xhr.onreadystatechange = () => {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            const response = JSON.parse(xhr.responseText);
-                            if (typeof response === 'number' && response > 0) {
-                                resolve(response);
-                            } else {
-                                reject(response);
-                            }
-                        } else {
-                            reject(xhr.statusText);
+        getProcessData(action, callback){
+            return new Promise((resolve, reject) => {
+                let xhr = new XMLHttpRequest();
+                xhr.open('GET', this.ajaxUrl + '?action=' + action, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        let response = xhr.responseText;
+                        if (response) {
+                            callback(response);
                         }
+                        resolve();
                     }
                 };
-                xhr.send(formData);
+                xhr.send();
             });
         }
 
@@ -491,4 +512,9 @@
         usersOrdersExportEsputnik.startExportOrders();
         this.disabled = true;
     });
+
+    usersOrdersExportEsputnik.processExportUsers();
+    usersOrdersExportEsputnik.processExportOrders();
+
+
 </script>

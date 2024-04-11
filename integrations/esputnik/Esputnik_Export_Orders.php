@@ -86,6 +86,18 @@ class Esputnik_Export_Orders
         );
     }
 
+    public function clean_user_from_yespo_orders(string $email){
+        $customer_orders = wc_get_orders( array(
+            'limit'    => -1,
+            'orderby'  => 'date',
+            'order'    => 'DESC',
+            'customer' => $email,
+        ) );
+        foreach( $customer_orders as $order ) {
+            $order_id = $order->get_id();
+        }
+    }
+
     private function update_table_data($id, $exported, $status){
         return $this->wpdb->update(
             $this->table_name,

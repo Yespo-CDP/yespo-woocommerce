@@ -12,18 +12,40 @@ class Esputnik_Order
     public function __construct(){
         $this->authData = get_option('yespo_options');
     }
-    public function create_order_on_yespo($order){
+    public function create_order_on_yespo($order, $operation = null){
 
         if (empty($this->authData)) {
             return __( 'Empty user authorization data', Y_TEXTDOMAIN );
         }
-
-        $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order));
+        if($operation === 'delete') $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::map_clean_user_data_order($order));
+        else $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order));
         if(strlen($response) < 1){
             if ($order && is_a($order, 'WC_Order') && $order->get_id()) update_post_meta( $order->get_id(), self::ORDER_META_KEY, 'true' );
             return true;
         }
         return $response;
+    }
+
+    public function clean_users_data_from_orders_yespo($email){
+        $orders = $this->find_orders_by_user_email($email);
+        if(count($orders) > 0){
+            foreach($orders as $order_id){
+                $this->create_order_on_yespo(wc_get_order($order_id), 'delete');
+            }
+        }
+    }
+    private function find_orders_by_user_email($email){
+        $customer_orders = wc_get_orders( array(
+            'limit'    => -1,
+            'orderby'  => 'date',
+            'order'    => 'DESC',
+            'customer' => $email,
+        ) );
+        $orders = [];
+        foreach( $customer_orders as $order ) {
+            $orders[] = $order->get_id();
+        }
+        return $orders;
     }
 
     public function get_meta_key(){

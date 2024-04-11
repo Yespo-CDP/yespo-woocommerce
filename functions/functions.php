@@ -9,7 +9,6 @@
  * @link      https://yespo.io/
  */
 
-use Spatie\Async\Pool;
 /**
  * Get the settings of the plugin in a filterable way
  *
@@ -162,8 +161,16 @@ function clean_user_data_after_data_erased( $erased ){
     if ( is_numeric( $erased ) && $erased > 0 ){
         $order = get_post( $erased );
         if ( $order && $order instanceof WP_Post ){
-            (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_phone_on_yespo($order->post_title);
-            (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_data_from_yespo($order->post_title);
+            if (filter_var($order->post_title, FILTER_VALIDATE_EMAIL)) $email = $order->post_title;
+            else {
+                $user = get_user_by( 'login', $order->post_title );
+                if($user) $email = $user->user_email;
+            }
+            if(isset($email)) {
+                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_phone_on_yespo($email);
+                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_data_from_yespo($email);
+                (new \Yespo\Integrations\Esputnik\Esputnik_Order())->clean_users_data_from_orders_yespo($email);
+            }
         }
     }
 }
@@ -219,6 +226,12 @@ function get_process_export_orders_data_to_esputnik(){
 add_action('wp_ajax_get_process_export_orders_data_to_esputnik', 'get_process_export_orders_data_to_esputnik');
 add_action('wp_ajax_nopriv_get_process_export_orders_data_to_esputnik', 'get_process_export_orders_data_to_esputnik');
 
+/*** update order on yespo ***/
+function update_order_after_changes_save( $order ) {
+    if($order !== null) (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order);
+}
+add_action( 'woocommerce_before_order_object_save', 'update_order_after_changes_save', 10, 1 );
+
 /***
  * CRON
  */
@@ -230,6 +243,7 @@ function establish_custom_cron_interval( $schedules ) {
     return $schedules;
 }
 add_filter( 'cron_schedules', 'establish_custom_cron_interval' );
+
 /*** START CRON JOB ***/
 function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();

@@ -19,7 +19,7 @@ class Esputnik_Export_Orders
     }
 
     public function add_orders_export_task(){
-        $status = $this->get_order_export_status();
+        $status = $this->get_order_export_status_active();
         if(empty($status)){
             $data = [
                 'export_type' => 'orders',
@@ -36,7 +36,7 @@ class Esputnik_Export_Orders
     }
 
     public function start_export_orders() {
-        $status = $this->get_order_export_status();
+        $status = $this->get_order_export_status_active();
         if(!empty($status) && $status->status == 'active'){
             $total = intval($status->total);
             $exported = intval($status->exported);
@@ -59,7 +59,17 @@ class Esputnik_Export_Orders
             } else $exported += $live_exported;
 
             $this->update_table_data($status->id, $exported, $current_status);
+        } else {
+            $status = $this->get_order_export_status();
+            if(!empty($status) && $status->status === 'completed' && $status->display === null){
+                $this->update_table_data($status->id, intval($status->total), $status->status);
+            }
         }
+    }
+
+    public function get_final_orders_exported(){
+        $status = $this->get_order_export_status();
+        return $this->update_table_data($status->id, intval($status->total), $status->status, true);
     }
 
     public function export_orders_to_esputnik(){
@@ -79,19 +89,28 @@ class Esputnik_Export_Orders
     public function get_order_export_status(){
         return $this->wpdb->get_row(
             $this->wpdb->prepare(
-                "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s",
+                "SELECT * FROM $this->table_name WHERE export_type = %s ORDER BY id DESC LIMIT 1",
+                'orders'
+            )
+        );
+    }
+
+    public function get_order_export_status_active(){
+        return $this->wpdb->get_row(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
                 'orders',
                 'active'
             )
         );
     }
 
-    private function update_table_data($id, $exported, $status){
+    private function update_table_data($id, $exported, $status, $display = null){
         return $this->wpdb->update(
             $this->table_name,
-            array('exported' => $exported, 'status' => $status),
+            array('exported' => $exported, 'status' => $status, 'display' => $display),
             array('id' => $id),
-            array('%d', '%s'),
+            array('%d', '%s', '%s'),
             array('%d')
         );
     }

@@ -72,7 +72,7 @@ class Esputnik_Order_Mapping
             'totalCost' => $order->total,
             'status' => self::get_order_status($order->status)?? self::INITIALIZED,
             'email' => $order->get_billing_email(),
-            'date' => ($order->get_date_created())->format('Y-m-d\TH:i:s.uP'),
+            'date' => ($date_created = $order->get_date_created()) ? $date_created->format('Y-m-d\TH:i:s.uP') : null,
             'currency' => $order->currency,
             'firstName' => !empty($order->get_billing_first_name()) ? $order->get_billing_first_name() : (!empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),
             'lastName' => !empty($order->get_billing_last_name()) ? $order->get_billing_last_name() : (!empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),

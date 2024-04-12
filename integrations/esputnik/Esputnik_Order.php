@@ -20,7 +20,10 @@ class Esputnik_Order
         if($operation === 'delete') $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::map_clean_user_data_order($order));
         else $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order));
         if(strlen($response) < 1){
-            if ($order && is_a($order, 'WC_Order') && $order->get_id()) update_post_meta( $order->get_id(), self::ORDER_META_KEY, 'true' );
+            if ($order && is_a($order, 'WC_Order') && $order->get_id()){
+                update_post_meta( $order->get_id(), self::ORDER_META_KEY, 'true' );
+                (new Esputnik_Logging_Data())->create_entry_order($order->get_id(), $operation); //add entry to logfile
+            }
             return true;
         }
         return $response;
@@ -31,6 +34,7 @@ class Esputnik_Order
         if(count($orders) > 0){
             foreach($orders as $order_id){
                 $this->create_order_on_yespo(wc_get_order($order_id), 'delete');
+                (new Esputnik_Logging_Data())->create_entry_order($order_id, 'delete'); //add entry to logfile
             }
         }
     }
@@ -45,7 +49,7 @@ class Esputnik_Order
         foreach( $customer_orders as $order ) {
             $orders[] = $order->get_id();
         }
-        return $orders;
+        return array_unique($orders);
     }
 
     public function get_meta_key(){

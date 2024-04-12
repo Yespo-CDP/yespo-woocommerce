@@ -336,7 +336,7 @@
                         if (this.users !== null && document.querySelector('#total-users-export') && this.users > 0) document.querySelector('#total-users-export').innerHTML = this.users;
                         document.querySelector('#exportContactTotal').innerHTML = this.users;
                     } else {
-                        document.querySelector('#progressContainerUsers').innerHTML = '<span class="notFound">No contacts found</span>';
+                        document.querySelector('#progressContainerUsers').innerHTML = '<span class="notFound">No new contacts found</span>';
                     }
                 });
             }).then(() => {
@@ -354,7 +354,7 @@
                         if (this.orders !== null && document.querySelector('#total-orders-export') && this.orders > 0) document.querySelector('#total-orders-export').innerHTML = this.orders;
                         document.querySelector('#exportOrdersTotal').innerHTML = this.orders;
                     } else {
-                        document.querySelector('#progressContainerOrders').innerHTML = '<span class="notFound">No contacts found</span>';
+                        document.querySelector('#progressContainerOrders').innerHTML = '<span class="notFound">No new orders found</span>';
                     }
                 });
             });
@@ -409,8 +409,12 @@
                     if (response) {
                         if(service === 'users'){
                             this.exportUsersButton.disabled = true;
+                            this.processExportUsers();
                         }
-                        if(service === 'orders') this.exportOrdersButton.disabled = true;
+                        if(service === 'orders'){
+                            this.exportOrdersButton.disabled = true;
+                            this.processExportOrders();
+                        }
                     } else console.error('Send error:', response.statusText);
                 })
                 .catch(error => {
@@ -447,26 +451,25 @@
         checkExportStatus(action, way, button, totalUnits, totalExport, progressUnits, exportedUnits) {
             this.getProcessData(action, (response) => {
                 response = JSON.parse(response);
-                //console.log(response.total);
-                //console.log(response);
-                //console.log(this.usersExportStatus);
-                if (response && response.status === 'active') {
+                if (response && parseInt(response.display) !== 1){
                     if (response.exported !== null && document.querySelector(exportedUnits) && response.exported >= 0) {
                         this.updateProgress((response.exported / response.total) * 100, way);
                         document.querySelector(exportedUnits).innerHTML = response.exported;
                     }
-                    if (response.exported !== response.total) {
+                    if (response.exported !== response.total && response.status === 'active') {
                         button.disabled = true;
                         setTimeout(() => {
                             if(way === 'users') this.processExportUsers();
                             if (way === 'orders') this.processExportOrders();
                         }, 5000);
-                    } else this.usersExportStatus = false;
-                } else if(response && response.exported && response.exported > 0){
-                    this.updateProgress((response.exported / response.total) * 100, way);
-                    document.querySelector(exportedUnits).innerHTML = response.exported;
+                    } else if(response.display === null){
+                        console.log('inside response null');
+                        if(way === 'users') this.userFinalExportChunk();
+                        if(way === 'orders') this.orderFinalExportChunk();
+                    } else {
+                        this.usersExportStatus = false;
+                    }
                 }
-                //console.log(this.usersExportStatus);
             });
         }
 
@@ -499,6 +502,25 @@
                 if(way === 'users') this.exportUsersButton.disabled=true;
                 else if(way === 'orders') this.exportOrdersButton.disabled=true;
             }
+        }
+
+        userFinalExportChunk(){
+            this.finalExportChunk('final_export_users_data_to_esputnik', 'users');
+        }
+
+        orderFinalExportChunk(){
+            this.finalExportChunk('final_export_orders_data_to_esputnik', 'orders');
+        }
+
+        finalExportChunk(action, service) {
+            const formData = new FormData();
+            formData.append('service', service);
+            formData.append('action', action);
+
+            fetch(this.ajaxUrl, {
+                method: 'POST',
+                body: formData
+            });
         }
     }
 

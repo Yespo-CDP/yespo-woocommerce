@@ -270,6 +270,22 @@ class ActDeact extends Base {
             $wpdb->query($wpdb->prepare($sql));
         }
 
+        $table_name_order_log = $wpdb->prefix . 'yespo_order_log';
+        $charset_collate_order = $wpdb->get_charset_collate();
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name_order_log'") != $table_name_order_log) {
+            $sql_order_log = "CREATE TABLE $table_name_order_log (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                order_id varchar(255) NOT NULL,
+                action varchar(255) NOT NULL,
+                status varchar(255) NOT NULL,
+                created_at datetime NOT NULL,
+                updated_at datetime default NULL,
+                PRIMARY KEY  (id)
+            ) $charset_collate_order;";
+
+            $wpdb->query($wpdb->prepare($sql_order_log));
+        }
+
         $table_export_name = $wpdb->prefix . 'yespo_export_status_log';
         $charset_collate_export = $wpdb->get_charset_collate();
         if ($wpdb->get_var("SHOW TABLES LIKE '$table_export_name'") != $table_export_name) {
@@ -279,6 +295,7 @@ class ActDeact extends Base {
                 total varchar(255) NOT NULL,
                 exported varchar(255) NOT NULL,
                 status varchar(255) NOT NULL,
+                display varchar(255) default NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate_export;";
 

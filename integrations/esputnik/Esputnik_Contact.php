@@ -18,7 +18,9 @@ class Esputnik_Contact
 
     public function create_on_yespo($email, $wc_id){
         $user = get_user_by('id', $wc_id);
-        return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'create', $wc_id);
+        if ($this->check_user_role($user)) {
+            return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'create', $wc_id);
+        }
     }
 
     public function create_guest_user_on_yespo($order){
@@ -34,7 +36,9 @@ class Esputnik_Contact
     }
 
     public function update_on_yespo($user){
-        return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
+        if ($this->check_user_role($user)) {
+            return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
+        }
     }
 
     public function remove_user_phone_on_yespo($email){
@@ -46,9 +50,11 @@ class Esputnik_Contact
     }
 
     public function delete_from_yespo($user_id){
-        $yespo_id = $this->get_user_metafield_id($user_id);
-        if(!empty($this->authData) && !empty($yespo_id)){
-            return $this->process_on_yespo(null, 'delete', null, $yespo_id);
+        if($this->check_user_role(get_user_by('id', $user_id))) {
+            $yespo_id = $this->get_user_metafield_id($user_id);
+            if (!empty($this->authData) && !empty($yespo_id)) {
+                return $this->process_on_yespo(null, 'delete', null, $yespo_id);
+            }
         }
     }
 
@@ -85,6 +91,20 @@ class Esputnik_Contact
 
     public function get_meta_key(){
         return self::USER_META_KEY;
+    }
+
+    private function check_user_role($user){
+        if (isset($user->roles) &&
+            is_array($user->roles) &&
+            !empty($user->roles) &&
+            in_array($user->roles[0], $this->get_user_type_allowed())
+        ) return true;
+    }
+    private function get_user_type_allowed(){
+        return [
+            'subscriber',
+            'customer'
+        ];
     }
 
     private function get_user_metafield_id($user_id){

@@ -8,19 +8,27 @@ class Esputnik_Logging_Data
 {
     private $wpdb;
     private $table_name;
+    private $table_name_order;
 
     public function __construct(){
         global $wpdb;
         $this->wpdb = $wpdb;
         $this->table_name = $this->wpdb->prefix . 'yespo_contact_log';
+        $this->table_name_order = $this->wpdb->prefix . 'yespo_order_log';
+
     }
     public function create(string $user_id, string $contact_id, string $action){
-        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") != $this->table_name) $this->create_table();
-        return $this->create_log_entry($user_id, $contact_id, $action); //if success returns 1
+        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") === $this->table_name)
+            return $this->create_log_entry_user($user_id, $contact_id, $action); //if success returns 1
     }
 
-    /** create new entry in database **/
-    private function create_log_entry(string $user_id, string $contact_id, string $action){
+    public function create_entry_order(string $order_id, string $action){
+        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name_order'") === $this->table_name_order)
+            return $this->create_log_entry_order($order_id, $action); //if success returns 1
+    }
+
+    /** create new log user entry in database **/
+    private function create_log_entry_user(string $user_id, string $contact_id, string $action){
         $data = array(
             'user_id' => sanitize_text_field($user_id),
             'contact_id' => sanitize_text_field($contact_id),
@@ -38,6 +46,39 @@ class Esputnik_Logging_Data
         } catch (Exception $e) {
             return "Error: " . $e->getMessage();
         }
+    }
+
+    /** create new log order entry in database **/
+    private function create_log_entry_order(string $order_id, string $action){
+        if(!$this->check_presence_in_database($order_id, $action, 'completed')) {
+            $data = [
+                'order_id' => $order_id,
+                'action' => $action,
+                'status' => 'completed',
+                'created_at' => current_time('mysql', 1)
+            ];
+
+            try {
+                $response = $this->wpdb->insert(
+                    $this->table_name_order,
+                    $data,
+                    array('%s', '%s', '%s', '%s')
+                );
+                return $response;
+            } catch (Exception $e) {
+                return "Error: " . $e->getMessage();
+            }
+        }
+    }
+
+    private function check_presence_in_database(string $order_id, string $action, string $status){
+        $query = $this->wpdb->prepare(
+            "SELECT COUNT(*) FROM $this->table_name_order WHERE order_id = %s AND action = %s AND status = %s",
+            $order_id,
+            $action,
+            $status
+        );
+       return $this->wpdb->get_var($query);
     }
 
 }

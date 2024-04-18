@@ -68,7 +68,7 @@ class Esputnik_Order_Mapping
     private static function order_transformation_to_array($order){
         return [
             'externalOrderId' => $order->id,
-            'externalCustomerId' => $order->customer_id ?? '0',
+            'externalCustomerId' => !empty($order->customer_id) ? $order->customer_id : (!empty($order->get_billing_email()) ? $order->get_billing_email() : '0'),
             'totalCost' => $order->total,
             'status' => self::get_order_status($order->status)?? self::INITIALIZED,
             'email' => $order->get_billing_email(),

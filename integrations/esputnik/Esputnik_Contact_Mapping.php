@@ -46,7 +46,7 @@ class Esputnik_Contact_Mapping
             'type' => 'sms'
         ];
 
-        $data['externalCustomerId'] = $user['ID'];
+        if(isset($user['ID'])) $data['externalCustomerId'] = $user['ID'];
         if($user['first_name'] !== null && Esputnik_Contact_Validation::name_validation($user['first_name'])) $data['firstName'] = $user['first_name'];
         else $data['firstName'] = ' ';
 
@@ -128,14 +128,15 @@ class Esputnik_Contact_Mapping
             'address_2' => !empty($user->billing_address_2) ? $user->billing_address_2 : (!empty($user->shipping_address_2) ? $user->shipping_address_2 : ''),
             'phone' => !empty($user->billing_phone) ? $user->billing_phone : (!empty($user->shipping_phone) ? $user->shipping_phone : ''),
             'postcode' => !empty($user->billing_postcode) ? $user->billing_postcode : (!empty($user->shipping_postcode) ? $user->shipping_postcode : ''),
-            'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ' '
+            'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ''
         ];
     }
 
     private static function order_transformation_to_array($order){
         return [
             'email' => !empty($order->get_billing_email()) ? $order->get_billing_email() : (!empty($order->get_shipping_email()) ? $order->get_shipping_email() : ''),
-            'ID' => !empty($order->get_billing_email()) ? $order->get_billing_email() : (!empty($order->get_shipping_email()) ? $order->get_shipping_email() : ''),
+            //'ID' => !empty($order->get_billing_email()) ? $order->get_billing_email() : (!empty($order->get_shipping_email()) ? $order->get_shipping_email() : ''),
+            'ID' => self::get_registered_user_id($order),
             'first_name' => !empty($order->get_billing_first_name()) ? $order->get_billing_first_name() : (!empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),
             'last_name' => !empty($order->get_billing_last_name()) ? $order->get_billing_last_name() : (!empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),
             'state' => !empty(self::get_state_name($order->get_billing_country(), $order->get_billing_state())) ? self::get_state_name($order->get_billing_country(), $order->get_billing_state()) : (!empty(self::get_state_name($order->get_shipping_country(), $order->get_shipping_state())) ? self::get_state_name($order->get_shipping_country(), $order->get_shipping_state()) : ''),
@@ -153,7 +154,7 @@ class Esputnik_Contact_Mapping
     private static function admin_order_transformation_to_array($post){
         return [
             'email' => $post['_billing_email'],
-            'ID' => $post['_billing_email'],
+            //'ID' => $post['_billing_email'],
             'first_name' => !empty($post['_billing_first_name']) ? $post['_billing_first_name'] : (!empty($post['_shipping_first_name']) ? $post['_shipping_first_name'] : ''),
             'last_name' => !empty($post['_billing_last_name']) ? $post['_billing_last_name'] : (!empty($post['_shipping_last_name']) ? $post['_shipping_last_name'] : ''),
             'state' => !empty(self::get_state_name($post['_billing_country'], $post['_billing_state'])) ? self::get_state_name($post['_billing_country'], $post['_billing_state']) : (!empty(self::get_state_name($post['_shipping_country'], $post['_shipping_state'])) ? self::get_state_name($post['_shipping_country'], $post['_shipping_state']) : ''),
@@ -173,6 +174,12 @@ class Esputnik_Contact_Mapping
             'email' => $email,
             'ID' => $email
         ];
+    }
+
+    private static function get_registered_user_id($order){
+        $user = get_user_by('email', $order->get_billing_email());
+        if($user) return $user->ID;
+        else return null;
     }
 
     /** get country name by ID **/

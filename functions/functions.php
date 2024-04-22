@@ -177,8 +177,14 @@ function clean_user_data_after_data_erased( $erased ){
                 if($user) $email = $user->user_email;
             }
             if(isset($email)) {
-                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_phone_on_yespo($email);
-                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_data_from_yespo($email);
+                $esputnik_contact = new \Yespo\Integrations\Esputnik\Esputnik_Contact();
+                $user = get_user_by('email', $email);
+                if($user) {
+                    $esputnik_contact->delete_from_yespo($user->ID);
+                    //wp_delete_user($user->ID);
+                }
+                //$esputnik_contact->remove_user_phone_on_yespo($email);
+                //$esputnik_contact->remove_user_data_from_yespo($email);
                 (new \Yespo\Integrations\Esputnik\Esputnik_Order())->clean_users_data_from_orders_yespo($email);
             }
         }

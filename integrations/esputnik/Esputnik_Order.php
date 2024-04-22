@@ -17,6 +17,7 @@ class Esputnik_Order
         if (empty($this->authData)) {
             return __( 'Empty user authorization data', Y_TEXTDOMAIN );
         }
+
         if($operation === 'delete') $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::map_clean_user_data_order($order));
         else $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order));
         if(strlen($response) < 1){

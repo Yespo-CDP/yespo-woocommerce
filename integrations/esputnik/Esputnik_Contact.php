@@ -24,7 +24,11 @@ class Esputnik_Contact
     }
 
     public function create_guest_user_on_yespo($order){
-        return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $order->get_billing_email());
+        $email = $order->get_billing_email();
+        $user = get_user_by('email', $email);
+        if($user) return $this->create_on_yespo($email, $user->ID);
+        else return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
+        //return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
     }
 
     public function create_guest_user_admin_on_yespo($post){
@@ -51,9 +55,14 @@ class Esputnik_Contact
 
     public function delete_from_yespo($user_id){
         if($this->check_user_role(get_user_by('id', $user_id))) {
-            $yespo_id = $this->get_user_metafield_id($user_id);
+            //$yespo_id = $this->get_user_metafield_id($user_id);
+            /*
             if (!empty($this->authData) && !empty($yespo_id)) {
                 return $this->process_on_yespo(null, 'delete', null, $yespo_id);
+            }
+            */
+            if (!empty($this->authData) && !empty($user_id)) {
+                return $this->process_on_yespo(null, 'delete', null, $user_id);
             }
         }
     }
@@ -66,7 +75,7 @@ class Esputnik_Contact
         $url = self::REMOTE_CONTACT_ESPUTNIK_URL;
         $request = self::CUSTOM_REQUEST;
         if($operation === 'delete'){
-            $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
+            $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
             $request = self::CUSTOM_REQUEST_DELETE;
         }
         if($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;

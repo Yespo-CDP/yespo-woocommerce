@@ -76,6 +76,7 @@ class Esputnik_Contact
         $request = self::CUSTOM_REQUEST;
         if($operation === 'delete'){
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
+            //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
             $request = self::CUSTOM_REQUEST_DELETE;
         }
         if($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;

@@ -171,7 +171,10 @@ function clean_user_data_after_data_erased( $erased ){
     if ( is_numeric( $erased ) && $erased > 0 ){
         $order = get_post( $erased );
         if ( $order && $order instanceof WP_Post ){
-            if (filter_var($order->post_title, FILTER_VALIDATE_EMAIL)) $email = $order->post_title;
+            if (filter_var($order->post_title, FILTER_VALIDATE_EMAIL)){
+                $email = $order->post_title;
+                if($email) $user = get_user_by('email', $email);
+            }
             else {
                 $user = get_user_by( 'login', $order->post_title );
                 if($user) $email = $user->user_email;
@@ -186,6 +189,7 @@ function clean_user_data_after_data_erased( $erased ){
                 //$esputnik_contact->remove_user_phone_on_yespo($email);
                 //$esputnik_contact->remove_user_data_from_yespo($email);
                 (new \Yespo\Integrations\Esputnik\Esputnik_Order())->clean_users_data_from_orders_yespo($email);
+                if($user && $user->ID) (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user->ID);
             }
         }
     }

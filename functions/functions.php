@@ -180,15 +180,19 @@ function clean_user_data_after_data_erased( $erased ){
                 if($user) $email = $user->user_email;
             }
             if(isset($email)) {
-                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_phone_on_yespo($email);
-                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_data_from_yespo($email);
                 (new \Yespo\Integrations\Esputnik\Esputnik_Order())->clean_users_data_from_orders_yespo($email);
-                if($user && $user->ID) (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user->ID);
+                if($user && $user->ID){
+                    (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user->ID);
+                    wp_delete_user($user->ID);
+                }
             }
         }
     }
+
 }
 add_action( 'wp_privacy_personal_data_erased', 'clean_user_data_after_data_erased', 10, 1 );
+
+
 /***
  * EXPORT ORDERS
  */
@@ -252,6 +256,11 @@ add_action('wp_ajax_nopriv_final_export_orders_data_to_esputnik', 'get_final_exp
 
 /*** update order on yespo ***/
 function update_order_after_changes_save( $order ) {
+
+    if (function_exists('is_wc_privacy_remove_order') && is_wc_privacy_remove_order()) {
+        return;
+    }
+
     if($order !== null) (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order, 'update');
 }
 add_action( 'woocommerce_before_order_object_save', 'update_order_after_changes_save', 10, 1 );

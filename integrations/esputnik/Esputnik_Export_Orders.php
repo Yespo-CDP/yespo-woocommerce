@@ -6,16 +6,21 @@ use WP_Query;
 
 class Esputnik_Export_Orders
 {
+    private $period_selection = 120;
     private $number_for_export = 10;
     private $table_name;
+    private $table_posts;
     private $meta_key;
     private $wpdb;
+    private $time_limit;
 
     public function __construct(){
         global $wpdb;
         $this->meta_key = (new Esputnik_Order())->get_meta_key();
         $this->wpdb = $wpdb;
+        $this->table_posts = $this->wpdb->prefix . 'posts';
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
+        $this->time_limit = strtotime('-' . $this->period_selection . 'seconds');
     }
 
     public function add_orders_export_task(){
@@ -65,6 +70,20 @@ class Esputnik_Export_Orders
                 $this->update_table_data($status->id, intval($status->total), $status->status);
             }
         }
+    }
+
+    public function schedule_export_orders(){
+
+        $orders = $this->get_latest_orders();
+
+        if(count($orders) > 0 ){
+            foreach ($orders as $order) {
+                (new Esputnik_Order())->create_order_on_yespo(
+                    wc_get_order($order)
+                );
+            }
+        }
+
     }
 
     public function get_final_orders_exported(){
@@ -157,4 +176,24 @@ class Esputnik_Export_Orders
             ),
         ];
     }
+
+    private function get_latest_orders(){
+        $results = $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_posts WHERE post_type = %s AND post_modified >= %s",
+                'shop_order',
+                date('Y-m-d H:i:s', $this->time_limit)
+            )
+        );
+        $orders = [];
+        if(count($results) > 0){
+            foreach ($results as $post){
+                //if(get_post_meta( $post->ID, $this->meta_key, true )) $orders[] = $post->ID;
+                //else
+                $orders[] = $post->ID;
+            }
+        }
+        return $orders;
+    }
+
 }

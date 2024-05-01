@@ -36,6 +36,10 @@ define( 'Y_MIN_PHP_VERSION', '7.4' );
 define( 'Y_WP_VERSION', '5.3' );
 define( 'Y_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
+define( 'YOUR_CLIENT_ID', 'd048ab4ffd96be4ee0c17510d8a42486' );
+define( 'YOUR_CALLBACK', '9bf62295abbb565a5f4e248f30e00b741d3dd713d7cea79c737f14a5ed775486' );
+
+
 add_action(
 	'init',
 	static function () {

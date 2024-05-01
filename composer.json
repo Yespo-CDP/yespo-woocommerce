@@ -34,7 +34,8 @@
     "psr-4": {
       "Yespo\\Backend\\": "backend/",
       "Yespo\\Engine\\": "engine/",
-      "Yespo\\Integrations\\Esputnik\\": "integrations/esputnik/"
+      "Yespo\\Integrations\\Esputnik\\": "integrations/esputnik/",
+      "Yespo\\Integrations\\Plugins\\": "integrations/plugins/"
     }
   }
 }

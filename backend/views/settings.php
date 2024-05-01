@@ -267,7 +267,6 @@
     }
 </style>
 <script>
-
     document.addEventListener('DOMContentLoaded', function() {
 
         if(document.querySelector('.wrap.yespo-settings-page #check-authorization')) {

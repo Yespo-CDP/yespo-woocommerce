@@ -60,7 +60,7 @@ function register_woocommerce_user_esputnik($user_id){
         if(isset($user_data->user_email)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_on_yespo($user_data->user_email, $user_id);
     }
 }
-add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);
+//add_action('user_register', 'register_woocommerce_user_esputnik', 10, 1);
 
 /** Send guest user and order to Yespo **/
 function register_woocommerce_guest_user_esputnik($order_id) {
@@ -70,7 +70,7 @@ function register_woocommerce_guest_user_esputnik($order_id) {
     }
     if(isset($responseContact) && isset($responseOrder) && $responseOrder === true) return true;
 }
-add_action('woocommerce_thankyou', 'register_woocommerce_guest_user_esputnik', 10, 1);
+//add_action('woocommerce_thankyou', 'register_woocommerce_guest_user_esputnik', 10, 1);
 
 /** create guest user when make order via admin **/
 function register_woocommerce_admin_guest_user_esputnik($order_id, $post) {
@@ -79,7 +79,7 @@ function register_woocommerce_admin_guest_user_esputnik($order_id, $post) {
         if(!empty($order_id)) return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->create_guest_user_admin_on_yespo($_POST);
     }
 }
-add_action('woocommerce_process_shop_order_meta', 'register_woocommerce_admin_guest_user_esputnik', 10, 2);
+//add_action('woocommerce_process_shop_order_meta', 'register_woocommerce_admin_guest_user_esputnik', 10, 2);
 
 /** update user profile on Yespo service **/
 function update_user_profile_esputnik($user_id, $old_user_data) {
@@ -263,7 +263,7 @@ function update_order_after_changes_save( $order ) {
 
     if($order !== null) (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order, 'update');
 }
-add_action( 'woocommerce_before_order_object_save', 'update_order_after_changes_save', 10, 1 );
+//add_action( 'woocommerce_before_order_object_save', 'update_order_after_changes_save', 10, 1 );
 
 /***
  * CRON
@@ -281,5 +281,43 @@ add_filter( 'cron_schedules', 'establish_custom_cron_interval' );
 function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
+    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
+
+
+
+
+
+/***
+/////////////////////////////////// TEST /////////////////////////////////
+ */
+function get_all_users($post)
+{
+    $user_id = 80;
+    (new Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user_id);
+
+    /*
+    global $wpdb;
+
+    $query = "
+        SELECT email
+        FROM {$wpdb->prefix}newsletter
+    ";
+
+    $emails = $wpdb->get_col( $query );
+    var_dump($emails);
+    */
+    /*
+    $emails = (new \Yespo\Integrations\Plugins\Newsletter())->sendUserToYespo();
+    var_dump($emails);
+    die();
+    */
+    //$email = 'vadym.gmurya+10@asper.pro';
+    //var_dump(!email_exists($email));
+
+    //$orders = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
+    //var_dump($orders);
+    //die();
+}
+//add_action('save_post', 'get_all_users' , 10 , 1);

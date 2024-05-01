@@ -18,7 +18,7 @@ class Esputnik_Contact
 
     public function create_on_yespo($email, $wc_id){
         $user = get_user_by('id', $wc_id);
-        if ($this->check_user_role($user)) {
+        if ($this->check_user_role($user) || !email_exists($email)) {
             return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'create', $wc_id);
         }
     }
@@ -26,17 +26,24 @@ class Esputnik_Contact
     public function create_guest_user_on_yespo($order){
         $email = $order->get_billing_email();
         $user = get_user_by('email', $email);
-        if($user) return $this->create_on_yespo($email, $user->ID);
-        else return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
+        if ($this->check_user_role($user) || !email_exists($email)) {
+            if ($user) return $this->create_on_yespo($email, $user->ID);
+            else return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
+        }
         //return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
     }
 
     public function create_guest_user_admin_on_yespo($post){
-        return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_admin_woo_to_yes($post), 'guest', $post['_billing_email']??$post['_shipping_email']);
+        $email = $post['_billing_email'] ?? $post['_shipping_email'];
+        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
+            return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_admin_woo_to_yes($post), 'guest', $email);
+        }
     }
 
     public function create_subscribed_user_on_yespo($email){
-        return $this->process_on_yespo(Esputnik_Contact_Mapping::subscribed_user_woo_to_yes($email), 'subscription', $email);
+        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
+            return $this->process_on_yespo(Esputnik_Contact_Mapping::subscribed_user_woo_to_yes($email), 'subscription', $email);
+        }
     }
 
     public function update_on_yespo($user){
@@ -46,24 +53,26 @@ class Esputnik_Contact
     }
 
     public function remove_user_phone_on_yespo($email){
-        return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_phone_data($email), 'clean');
+        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
+            return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_phone_data($email), 'clean');
+        }
     }
 
     public function remove_user_data_from_yespo($email){
-        return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_personal_data($email), 'update');
+        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
+            return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_personal_data($email), 'update');
+        }
     }
 
     public function delete_from_yespo($user_id){
-        if($this->check_user_role(get_user_by('id', $user_id))) {
-            //$yespo_id = $this->get_user_metafield_id($user_id);
-            /*
-            if (!empty($this->authData) && !empty($yespo_id)) {
-                return $this->process_on_yespo(null, 'delete', null, $yespo_id);
-            }
-            */
-            if (!empty($this->authData) && !empty($user_id)) {
-                return $this->process_on_yespo(null, 'delete', null, $user_id);
-            }
+        //$yespo_id = $this->get_user_metafield_id($user_id);
+        /*
+        if (!empty($this->authData) && !empty($yespo_id)) {
+            return $this->process_on_yespo(null, 'delete', null, $yespo_id);
+        }
+        */
+        if (!empty($this->authData) && !empty($user_id)) {
+            return $this->process_on_yespo(null, 'delete', null, $user_id);
         }
     }
 
@@ -78,6 +87,7 @@ class Esputnik_Contact
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
             //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
             $request = self::CUSTOM_REQUEST_DELETE;
+            //var_dump($url);
         }
         if($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;
 
@@ -103,7 +113,7 @@ class Esputnik_Contact
         return self::USER_META_KEY;
     }
 
-    private function check_user_role($user){
+    public function check_user_role($user){
         if (isset($user->roles) &&
             is_array($user->roles) &&
             !empty($user->roles) &&

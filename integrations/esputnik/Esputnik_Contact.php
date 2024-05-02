@@ -88,7 +88,7 @@ class Esputnik_Contact
         if(count($users) > 0){
             foreach ($users as $user_id){
                 $this->delete_from_yespo($user_id);
-                //wp_delete_user($user_id);
+                wp_delete_user($user_id);
             }
         }
     }
@@ -167,7 +167,7 @@ class Esputnik_Contact
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
                 "SELECT * FROM $this->table_log_users WHERE action = %s AND log_date BETWEEN %s AND %s",
-                'update',
+                'delete',
                 date('Y-m-d H:i:s', time() - $this->period_selection_since),
                 date('Y-m-d H:i:s', time() - $this->period_selection_up)
             )

@@ -194,7 +194,7 @@ function clean_user_data_after_data_erased( $erased ){
         }
     }
 }
-//add_action( 'wp_privacy_personal_data_erased', 'clean_user_data_after_data_erased', 10, 1 );
+add_action( 'wp_privacy_personal_data_erased', 'clean_user_data_after_data_erased', 10, 1 );
 
 
 /***

@@ -87,8 +87,10 @@ class Esputnik_Contact
         $users = $this->get_latest_users_activity();
         if(count($users) > 0){
             foreach ($users as $user_id){
-                $this->delete_from_yespo($user_id);
-                wp_delete_user($user_id);
+                if(get_user_by( 'ID', $user_id )) {
+                    $this->delete_from_yespo($user_id);
+                    wp_delete_user($user_id);
+                }
             }
         }
     }

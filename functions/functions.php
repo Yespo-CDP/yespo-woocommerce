@@ -182,13 +182,14 @@ function clean_user_data_after_data_erased( $erased ){
             $data_to_append = ' wp_privacy_personal_data_erased1 ';
             //if(isset($email)) {
                 //(new \Yespo\Integrations\Esputnik\Esputnik_Order())->clean_users_data_from_orders_yespo($email);
-            /*
-                if($user && $user->ID){
-                    (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user->ID);
-                    wp_delete_user($user->ID);
-                    $data_to_append .= ' wp_privacy_personal_data_erased2 ';
-                }
-            */
+
+            if($user && $user->ID){
+                (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->create($user->ID,'delete', 'delete');
+                //(new \Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user->ID);
+                //wp_delete_user($user->ID);
+                //$data_to_append .= ' wp_privacy_personal_data_erased2 ';
+            }
+
             //}
         }
     }

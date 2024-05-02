@@ -192,14 +192,6 @@ function clean_user_data_after_data_erased( $erased ){
             //}
         }
     }
-
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append .= ' wp_privacy_personal_data_erased ';
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
 }
 //add_action( 'wp_privacy_personal_data_erased', 'clean_user_data_after_data_erased', 10, 1 );
 

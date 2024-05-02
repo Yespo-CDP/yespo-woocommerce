@@ -146,7 +146,7 @@ class Esputnik_Contact
         ];
     }
 
-    private function get_user_metafield_id($user_id){
+    public function get_user_metafield_id($user_id){
         return get_user_meta($user_id, self::USER_META_KEY, true);
     }
 

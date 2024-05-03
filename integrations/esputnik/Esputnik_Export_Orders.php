@@ -13,14 +13,16 @@ class Esputnik_Export_Orders
     private $meta_key;
     private $wpdb;
     private $time_limit;
+    private $gmt;
 
     public function __construct(){
         global $wpdb;
         $this->meta_key = (new Esputnik_Order())->get_meta_key();
         $this->wpdb = $wpdb;
-        $this->table_posts = $this->wpdb->prefix . 'posts';
+        $this->table_posts = $this->wpdb->prefix . 'wc_orders';
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
-        $this->time_limit = strtotime('-' . $this->period_selection . 'seconds');
+        $this->time_limit = current_time('timestamp') - $this->period_selection;
+        $this->gmt = time() - $this->period_selection;
     }
 
     public function add_orders_export_task(){
@@ -78,9 +80,7 @@ class Esputnik_Export_Orders
 
         if(count($orders) > 0 ){
             foreach ($orders as $order) {
-                (new Esputnik_Order())->create_order_on_yespo(
-                    wc_get_order($order)
-                );
+                (new Esputnik_Order())->create_order_on_yespo(wc_get_order($order), 'update');
             }
         }
 
@@ -178,22 +178,29 @@ class Esputnik_Export_Orders
     }
 
     private function get_latest_orders(){
-        $results = $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM $this->table_posts WHERE post_type = %s AND post_modified >= %s",
-                'shop_order',
-                date('Y-m-d H:i:s', $this->time_limit)
-            )
-        );
+        $results = $this->get_orders_from_db($this->time_limit);
+        if(empty($results)) $results = $this->get_orders_from_db($this->gmt);
+
         $orders = [];
         if(count($results) > 0){
             foreach ($results as $post){
                 //if(get_post_meta( $post->ID, $this->meta_key, true )) $orders[] = $post->ID;
                 //else
-                $orders[] = $post->ID;
+                $orders[] = $post->id;
             }
         }
         return $orders;
+    }
+
+
+    private function get_orders_from_db($time){
+        return $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_posts WHERE type = %s AND date_updated_gmt >= %s",
+                'shop_order',
+                date('Y-m-d H:i:s', $time)
+            )
+        );
     }
 
 }

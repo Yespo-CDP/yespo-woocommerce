@@ -43,13 +43,13 @@ class Esputnik_Order_Mapping
     public static function map_clean_user_data_order($order){
         $orderArray = self::order_transformation_to_array($order);
 
-        $data['orders'][0]['status'] = $orderArray['status'];
+        $data['orders'][0]['status'] = 'IN_PROGRESS';
         $data['orders'][0]['externalOrderId'] = $orderArray['externalOrderId'];
         $data['orders'][0]['externalCustomerId'] = $orderArray['externalCustomerId'];
         $data['orders'][0]['totalCost'] = $orderArray['totalCost'];
         $data['orders'][0]['date'] = $orderArray['date'];
         $data['orders'][0]['currency'] = $orderArray['currency'];
-        $data['orders'][0]['email'] = ' ';
+        $data['orders'][0]['email'] = 'deleted@site.invalid';
         $data['orders'][0]['firstName'] = ' ';
         $data['orders'][0]['lastName'] = ' ';
         $data['orders'][0]['deliveryAddress'] = ' ';

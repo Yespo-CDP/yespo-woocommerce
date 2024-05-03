@@ -5,15 +5,22 @@ namespace Yespo\Integrations\Esputnik;
 
 class Esputnik_Contact
 {
+    private $period_selection_since = 600;
+    private $period_selection_up = 400;
+    private $table_log_users;
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const REMOTE_CONTACTS_ESPUTNIK_URL = "https://esputnik.com/api/v1/contacts";
     const CUSTOM_REQUEST = "POST";
     const CUSTOM_REQUEST_DELETE = "DELETE";
     const USER_META_KEY = 'yespo_contact_id';
     private $authData;
+    private $wpdb;
 
     public function __construct(){
+        global $wpdb;
+        $this->wpdb = $wpdb;
         $this->authData = get_option('yespo_options');
+        $this->table_log_users = $this->wpdb->prefix . 'yespo_contact_log';
     }
 
     public function create_on_yespo($email, $wc_id){
@@ -76,6 +83,18 @@ class Esputnik_Contact
         }
     }
 
+    public function remove_user_after_erase(){
+        $users = $this->get_latest_users_activity();
+        if(count($users) > 0){
+            foreach ($users as $user_id){
+                if(get_user_by( 'ID', $user_id )) {
+                    $this->delete_from_yespo($user_id);
+                    wp_delete_user($user_id);
+                }
+            }
+        }
+    }
+
     private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null) {
         if (empty($this->authData)) {
             return __( 'Empty user authorization data', Y_TEXTDOMAIN );
@@ -127,12 +146,33 @@ class Esputnik_Contact
         ];
     }
 
-    private function get_user_metafield_id($user_id){
+    public function get_user_metafield_id($user_id){
         return get_user_meta($user_id, self::USER_META_KEY, true);
     }
 
     private function add_esputnik_id_to_userprofile($user_id, $external_id){
         if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);
+    }
+
+    private function get_latest_users_activity(){
+        $results = $this->get_users_from_log();
+        $users = [];
+        if(count($results) > 0){
+            foreach($results as $item){
+                $users[] = $item->user_id;
+            }
+        }
+        return array_unique($users);
+    }
+    private function get_users_from_log(){
+        return $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_log_users WHERE action = %s AND log_date BETWEEN %s AND %s",
+                'delete',
+                date('Y-m-d H:i:s', time() - $this->period_selection_since),
+                date('Y-m-d H:i:s', time() - $this->period_selection_up)
+            )
+        );
     }
 }

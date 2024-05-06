@@ -68,23 +68,25 @@ class Esputnik_Order_Mapping
     private static function order_transformation_to_array($order){
         return [
             'externalOrderId' => $order->id,
-            'externalCustomerId' => $order->customer_id ?? $order->get_billing_email(),
+            //'externalCustomerId' => $order->customer_id ?? $order->get_billing_email(),
+            'externalCustomerId' => !empty($order->customer_id) ? $order->customer_id : (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email()) ? $order->get_billing_email() : 'deleted@site.invalid'),
             'totalCost' => $order->total,
-            'status' => self::get_order_status($order->status)?? self::INITIALIZED,
-            'email' => $order->get_billing_email(),
-            'date' => ($date_created = $order->get_date_created()) ? $date_created->format('Y-m-d\TH:i:s.uP') : null,
+            'status' => self::get_order_status($order->status) ? self::get_order_status($order->status) : self::INITIALIZED,
+            //'email' => $order->get_billing_email(),
+            'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'nomail@nomail.invalid',
+            'date' => ($order && !is_bool($order) && method_exists($order, 'get_date_created') && ($date_created = $order->get_date_created())) ? $date_created->format('Y-m-d\TH:i:s.uP') : null,
             'currency' => $order->currency,
-            'firstName' => !empty($order->get_billing_first_name()) ? $order->get_billing_first_name() : (!empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),
-            'lastName' => !empty($order->get_billing_last_name()) ? $order->get_billing_last_name() : (!empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),
+            'firstName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_first_name') && !empty($order->get_billing_first_name())) ? $order->get_billing_first_name() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_first_name') && !empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),
+            'lastName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_last_name') && !empty($order->get_billing_last_name())) ? $order->get_billing_last_name() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_last_name') && !empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),
             'deliveryAddress' => self::get_delivery_address($order, 'shipping') ? self::get_delivery_address($order, 'shipping') : ( self::get_delivery_address($order, 'billing') ? self::get_delivery_address($order, 'billing') : ''),
-            'phone' => !empty($order->get_billing_phone()) ? $order->get_billing_phone() : (!empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
-            'shipping' => $order->shipping_total ??'',
-            'discount' => $order->discount ?? '',
+            'phone' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
+            'shipping' => ($order->shipping_total) ? $order->shipping_total : '',
+            'discount' => ($order->discount) ? $order->discount : '',
             'taxes' => !empty($order->total_tax) ? $order->total_tax : ((!empty($order->discount_tax)) ? $order->discount_tax : ((!empty($order->cart_tax)) ? $order->cart_tax : ((!empty($order->shipping_tax)) ? $order->shipping_tax : ''))),
-            'source' => $order->created_via ?? '',
+            'source' => ($order->created_via) ? $order->created_via : '',
             //'deliveryMethod' => $order['method_title'],
-            'paymentMethod' => $order->payment_method ?? '',
-            'country_id' => !empty($order->get_billing_country()) ? $order->get_billing_country() : (!empty($order->get_shipping_country()) ? $order->get_shipping_country() : ''),
+            'paymentMethod' => ($order->payment_method) ? $order->payment_method : '',
+            'country_id' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_country') && !empty($order->get_billing_country())) ? $order->get_billing_country() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_country') && !empty($order->get_shipping_country()) ? $order->get_shipping_country() : ''),
         ];
     }
 
@@ -94,11 +96,11 @@ class Esputnik_Order_Mapping
 
         foreach ($fields as $field) {
             $method = 'get_' . $way . '_' . $field;
-            $value = $order->$method();
+            $value = (!empty($order) && !is_bool($order) && method_exists($order, $method)) ? $order->$method() : '';
             if($field === 'country') $value = self::get_country_name($value);
             if($field === 'state'){
                 $method = 'get_' . $way . '_country';
-                $country = $order->$method();
+                $country = (!empty($order) && !is_bool($order) && method_exists($order, $method)) ? $order->$method() : '';
                 $value = self::get_state_name($country, $value);
             }
 
@@ -133,16 +135,18 @@ class Esputnik_Order_Mapping
     private static function get_orders_items($order){
         $data = [];
         $i = 0;
-        foreach ( $order->get_items() as $item_id => $item ) {
-            $data[$i]['externalItemId'] = $item->get_product_id();
-            $data[$i]['name'] = $item->get_name();
-            $data[$i]['category'] = self::get_product_category($data[$i]['externalItemId']);
-            $data[$i]['quantity'] = $item->get_quantity();
-            $data[$i]['cost'] = $item->get_subtotal();
-            $data[$i]['url'] = get_permalink( $data[$i]['externalItemId'] );
-            $data[$i]['imageUrl'] = self::get_product_thumbnail_url($data[$i]['externalItemId']);
-            $data[$i]['description'] = (wc_get_product( $data[$i]['externalItemId']))->get_short_description();
-            $i++;
+        if (!empty($order) && !is_bool($order) && method_exists($order, 'get_items')) {
+            foreach ($order->get_items() as $item_id => $item) {
+                $data[$i]['externalItemId'] = $item->get_product_id();
+                $data[$i]['name'] = $item->get_name();
+                $data[$i]['category'] = self::get_product_category($data[$i]['externalItemId']);
+                $data[$i]['quantity'] = $item->get_quantity();
+                $data[$i]['cost'] = $item->get_subtotal();
+                $data[$i]['url'] = get_permalink( $data[$i]['externalItemId'] );
+                $data[$i]['imageUrl'] = self::get_product_thumbnail_url($data[$i]['externalItemId']);
+                $data[$i]['description'] = (wc_get_product( $data[$i]['externalItemId']))->get_short_description();
+                $i++;
+            }
         }
         return $data;
     }

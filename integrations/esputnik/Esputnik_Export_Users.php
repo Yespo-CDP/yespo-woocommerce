@@ -57,7 +57,7 @@ class Esputnik_Export_Users
                 $current_status = 'completed';
                 $exported = $total;
             } else $exported += $live_exported;
-            
+
             $this->update_table_data($status->id, $exported, $current_status);
         } else {
             $status = $this->get_user_export_status();

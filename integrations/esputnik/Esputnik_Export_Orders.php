@@ -196,8 +196,9 @@ class Esputnik_Export_Orders
     private function get_orders_from_db($time){
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
-                "SELECT * FROM $this->table_posts WHERE type = %s AND date_updated_gmt >= %s",
+                "SELECT * FROM $this->table_posts WHERE type = %s AND date_updated_gmt BETWEEN %s AND %s",
                 'shop_order',
+                date('Y-m-d H:i:s', $time - 120),
                 date('Y-m-d H:i:s', $time)
             )
         );

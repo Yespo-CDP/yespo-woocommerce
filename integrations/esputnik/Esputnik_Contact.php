@@ -5,8 +5,8 @@ namespace Yespo\Integrations\Esputnik;
 
 class Esputnik_Contact
 {
-    private $period_selection_since = 600;
-    private $period_selection_up = 400;
+    private $period_selection_since = 900;
+    private $period_selection_up = 600;
     private $table_log_users;
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const REMOTE_CONTACTS_ESPUTNIK_URL = "https://esputnik.com/api/v1/contacts";
@@ -89,7 +89,6 @@ class Esputnik_Contact
             foreach ($users as $user_id){
                 if(get_user_by( 'ID', $user_id )) {
                     $this->delete_from_yespo($user_id);
-                    wp_delete_user($user_id);
                 }
             }
         }

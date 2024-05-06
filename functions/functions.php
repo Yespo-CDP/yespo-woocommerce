@@ -181,7 +181,7 @@ function clean_user_data_after_data_erased( $erased ){
             }
             $data_to_append = ' wp_privacy_personal_data_erased1 ';
             //if(isset($email)) {
-                //(new \Yespo\Integrations\Esputnik\Esputnik_Order())->clean_users_data_from_orders_yespo($email);
+            //(new \Yespo\Integrations\Esputnik\Esputnik_Order())->clean_users_data_from_orders_yespo($email);
 
             if($user && $user->ID){
                 (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->create(
@@ -270,16 +270,8 @@ function update_order_after_changes_save( $order ) {
 
     if($order !== null) (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order, 'update');
 
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = ' woocommerce_before_order_object_save ';
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
-
 }
-add_action( 'woocommerce_before_order_object_save', 'update_order_after_changes_save', 20, 1 );
+//add_action( 'woocommerce_before_order_object_save', 'update_order_after_changes_save', 20, 1 );
 
 /***
  * CRON
@@ -297,8 +289,19 @@ add_filter( 'cron_schedules', 'establish_custom_cron_interval' );
 function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
-    //(new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
+    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
+
+    /*
+        $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
+        $data_to_append = ' cron-works-8 ';
+        $file_handle = fopen($file_path, 'a');
+        if ($file_handle) {
+            fwrite($file_handle, $data_to_append);
+            fclose($file_handle);
+        }
+        */
+
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
 

@@ -6,7 +6,7 @@ use WP_Query;
 
 class Esputnik_Export_Orders
 {
-    private $period_selection = 120;
+    private $period_selection = 180;
     private $number_for_export = 10;
     private $table_name;
     private $table_posts;
@@ -14,6 +14,8 @@ class Esputnik_Export_Orders
     private $wpdb;
     private $time_limit;
     private $gmt;
+    private $shop_order = 'shop_order';
+    private $shop_order_placehold = 'shop_order_placehold';
 
     public function __construct(){
         global $wpdb;
@@ -63,6 +65,7 @@ class Esputnik_Export_Orders
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
                 $exported = $total;
+                Esputnik_Metrika::count_finish_exported();
             } else $exported += $live_exported;
 
             $this->update_table_data($status->id, $exported, $current_status);
@@ -135,10 +138,14 @@ class Esputnik_Export_Orders
     }
 
     public function get_total_orders(){
-        return count($this->get_orders_export_esputnik($this->get_orders_args()));
+        $orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order_placehold)));
+        if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order)));
+        return $orders;
     }
     public function get_export_orders_count(){
-        return count($this->get_orders_export_esputnik($this->get_orders_export_args()));
+        $orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold)));
+        if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order)));
+        return $orders;
     }
     public function get_orders_export_esputnik($args){
         $orders = [];
@@ -153,16 +160,16 @@ class Esputnik_Export_Orders
         }
         return $orders;
     }
-    private function get_orders_args(){
+    private function get_orders_args($shop_order){
         return [
-            'post_type'      => 'shop_order_placehold',
+            'post_type'      => $shop_order,
             'posts_per_page' => -1,
             'post_status'    => 'any',
         ];
     }
-    private function get_orders_export_args(){
+    private function get_orders_export_args($shop_order){
         return [
-            'post_type'      => 'shop_order_placehold',
+            'post_type'      => $shop_order,
             'posts_per_page' => -1,
             'post_status'    => 'any',
             'order'          => 'ASC',
@@ -192,13 +199,12 @@ class Esputnik_Export_Orders
         return $orders;
     }
 
-
     private function get_orders_from_db($time){
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
-                "SELECT * FROM $this->table_posts WHERE type = %s AND date_updated_gmt BETWEEN %s AND %s",
+                "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s AND date_updated_gmt >= %s",
                 'shop_order',
-                date('Y-m-d H:i:s', $time - 120),
+                'wc-checkout-draft',
                 date('Y-m-d H:i:s', $time)
             )
         );

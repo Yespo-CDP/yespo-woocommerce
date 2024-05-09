@@ -117,6 +117,7 @@ function y_uninstall() { // phpcs:ignore
 			$role->remove_cap( $cap );
 		}
 	}
+
 }
 
 y_uninstall_multisite();

@@ -73,7 +73,7 @@ class Esputnik_Order_Mapping
             'totalCost' => $order->total,
             'status' => self::get_order_status($order->status) ? self::get_order_status($order->status) : self::INITIALIZED,
             //'email' => $order->get_billing_email(),
-            'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'nomail@nomail.invalid',
+            'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid',
             'date' => ($order && !is_bool($order) && method_exists($order, 'get_date_created') && ($date_created = $order->get_date_created())) ? $date_created->format('Y-m-d\TH:i:s.uP') : null,
             'currency' => $order->currency,
             'firstName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_first_name') && !empty($order->get_billing_first_name())) ? $order->get_billing_first_name() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_first_name') && !empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),

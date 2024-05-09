@@ -56,6 +56,7 @@ class Esputnik_Export_Users
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
                 $exported = $total;
+                Esputnik_Metrika::count_finish_exported();
             } else $exported += $live_exported;
 
             $this->update_table_data($status->id, $exported, $current_status);

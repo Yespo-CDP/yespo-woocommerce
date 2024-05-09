@@ -96,6 +96,23 @@
 
     <section class="settingsSection">
         <div class="sectionHeader">
+            <span class="number">4</span>
+            <h2><?php echo __('Product Feed Configuration',Y_TEXTDOMAIN) ?></h2>
+            <img class="imageArrow" src="<?php echo Y_PLUGIN_URL;?>assets/images/arrow.svg" width="16" height="32">
+        </div>
+        <div class="sectionBody">
+            <div class="formBlock">
+                <div class="field-group">
+                    <button id="importFeed" class="button button-primary"><?php echo __('Search Feed',Y_TEXTDOMAIN) ?></button>
+                </div>
+                <div class="field-group importFeedUrls" id="importFeedUrls">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="settingsSection">
+        <div class="sectionHeader">
             <span class="number number-total"><img src="<?php echo Y_PLUGIN_URL;?>assets/images/check.svg" width="7" height="7" alt="v" title="v"></span>
             <h2><?php echo __('Success page',Y_TEXTDOMAIN) ?></h2>
             <img class="imageArrow" src="<?php echo Y_PLUGIN_URL;?>assets/images/arrow.svg" width="16" height="32">
@@ -301,6 +318,80 @@
             });
         }
     });
+
+    //get feeds urls
+    class importFeedUrls {
+        constructor(){
+            this.importFeedButton = document.querySelector('#importFeed');
+            this.tableArea = document.querySelector('#importFeedUrls');
+            this.action = 'get_feed_urls';
+            this.ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+            this.listenImportClick();
+        }
+
+        listenImportClick(){
+            this.importFeedButton.addEventListener('click', ()=> {
+                this.getRequest();
+                this.importFeedButton.disabled=true;
+            });
+        }
+
+        createTable(urls){
+            this.tableArea.innerHTML = '';
+            const tableBody = document.createElement('table-body');
+
+            urls.forEach(url => {
+                const row = document.createElement('tr');
+                //row.style.paddingTop = '20px';
+                //row.style.paddingBottom = '20px';
+
+                const urlColumn = document.createElement('td');
+                urlColumn.textContent = url;
+
+                const buttonColumn = document.createElement('td');
+
+                const downloadButton = document.createElement('button');
+                downloadButton.textContent = 'Download';
+
+                downloadButton.classList.add('button', 'button-primary');
+
+                downloadButton.dataset.url = url;
+
+                downloadButton.addEventListener('click', function() {
+                    const url = this.dataset.url;
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', '');
+                    link.click();
+                });
+                buttonColumn.appendChild(downloadButton);
+
+                row.appendChild(urlColumn);
+                row.appendChild(buttonColumn);
+
+                tableBody.appendChild(row);
+            });
+            this.tableArea.appendChild(tableBody);
+            this.importFeedButton.remove();
+        }
+
+        getRequest() {
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', this.ajaxUrl + '?action=' + this.action, true);
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    let response = xhr.responseText;
+                    if (response) {
+                        let data = JSON.parse( response.replace(/^[^\[]+/, '').replace(/[^\]]+$/, '') );
+                        if(data.length > 0){
+                            this.createTable(data);
+                        }
+                    }
+                }
+            };
+            xhr.send();
+        }
+    }
 
     class UsersOrdersExportEsputnik {
 
@@ -536,6 +627,8 @@
 
     usersOrdersExportEsputnik.processExportUsers();
     usersOrdersExportEsputnik.processExportOrders();
+
+    new importFeedUrls();
 
 
 </script>

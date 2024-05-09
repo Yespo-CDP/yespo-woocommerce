@@ -13,6 +13,7 @@
 namespace Yespo\Backend;
 
 use Yespo\Engine\Base;
+use Yespo\Integrations\Esputnik\Esputnik_Metrika;
 
 /**
  * Activate and deactive method of the plugin and relates.
@@ -86,6 +87,7 @@ class ActDeact extends Base {
 		}
 
 		self::single_activate();
+        Esputnik_Metrika::count_activations();
 	}
 
 	/**
@@ -116,6 +118,7 @@ class ActDeact extends Base {
 		}
 
 		self::single_deactivate();
+        Esputnik_Metrika::count_deactivations();
         //self::yespo_crone_deactivate();
 	}
 

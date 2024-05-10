@@ -289,7 +289,7 @@ function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
 
-
+/*
         $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
         $data_to_append = ' cron-works-10 ';
         $file_handle = fopen($file_path, 'a');
@@ -297,7 +297,7 @@ function yespo_export_data_cron_function(){
             fwrite($file_handle, $data_to_append);
             fclose($file_handle);
         }
-
+*/
 
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');

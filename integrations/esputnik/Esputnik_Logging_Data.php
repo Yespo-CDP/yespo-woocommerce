@@ -22,6 +22,11 @@ class Esputnik_Logging_Data
             return $this->create_log_entry_user($user_id, $contact_id, $action); //if success returns 1
     }
 
+    public function update_contact_log($user_id, $action, $response){
+        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") === $this->table_name)
+            $this->update_log_entry_user($user_id, $action, $response);
+    }
+
     public function create_entry_order(string $order_id, string $action){
         if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name_order'") === $this->table_name_order)
             return $this->create_log_entry_order($order_id, $action); //if success returns 1
@@ -33,19 +38,31 @@ class Esputnik_Logging_Data
             'user_id' => sanitize_text_field($user_id),
             'contact_id' => sanitize_text_field($contact_id),
             'action' => sanitize_text_field($action),
-            'log_date' => current_time('mysql', 1)
+            'yespo' => 1,
+            'log_date' => date('Y-m-d H:i:s', time())
         );
 
         try {
             $response = $this->wpdb->insert(
                 $this->table_name,
                 $data,
-                array('%s', '%s', '%s', '%s')
+                array('%s', '%s', '%s', '%s', '%s')
             );
             return $response;
         } catch (Exception $e) {
             return "Error: " . $e->getMessage();
         }
+    }
+
+    private function update_log_entry_user($user_id, $action, $response){
+        $this->wpdb->query(
+            $this->wpdb->prepare(
+                "UPDATE $this->table_name SET yespo = %d WHERE action = %s AND user_id = %s",
+                $response,
+                $action,
+                $user_id
+            )
+        );
     }
 
     /** create new log order entry in database **/

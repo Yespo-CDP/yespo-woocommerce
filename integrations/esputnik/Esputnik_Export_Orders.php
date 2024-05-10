@@ -6,7 +6,7 @@ use WP_Query;
 
 class Esputnik_Export_Orders
 {
-    private $period_selection = 180;
+    private $period_selection = 300;
     private $number_for_export = 10;
     private $table_name;
     private $table_posts;

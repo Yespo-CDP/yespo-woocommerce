@@ -289,15 +289,15 @@ function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
 
-    /*
+/*
         $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-        $data_to_append = ' cron-works-8 ';
+        $data_to_append = ' cron-works-10 ';
         $file_handle = fopen($file_path, 'a');
         if ($file_handle) {
             fwrite($file_handle, $data_to_append);
             fclose($file_handle);
         }
-        */
+*/
 
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
@@ -339,6 +339,9 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
 function get_all_users($post)
 {
 
+    //$sch = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
+    //var_dump($sch);
+    //(new \Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo(110);
     //$active_plugins = \Yespo\Integrations\Feeds\Product_Feed_PRO_WC::get_feed_url();
     //var_dump($active_plugins);
 

@@ -5,7 +5,7 @@ namespace Yespo\Integrations\Esputnik;
 
 class Esputnik_Contact
 {
-    private $period_selection_since = 900;
+    private $period_selection_since = 7200;
     private $period_selection_up = 600;
     private $table_log_users;
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
@@ -104,25 +104,28 @@ class Esputnik_Contact
         if($operation === 'delete'){
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
             //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
-            $request = self::CUSTOM_REQUEST_DELETE;
-            //var_dump($url);
-        }
-        if($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;
+            //$request = self::CUSTOM_REQUEST_DELETE;
+            $response = Esputnik_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
+            (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
+        } else {
+            if ($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;
 
-        $response = Esputnik_Curl_Request::curl_request($url, $request, $this->authData, $data);
-        $responseArray = json_decode($response, true);
+            $response = Esputnik_Curl_Request::curl_request($url, $request, $this->authData, $data);
 
-        if(isset($responseArray['id'])) {
-            if ($operation !== 'delete') {
-                if ($wc_id !== null) {
-                    $this->add_esputnik_id_to_userprofile($wc_id, $responseArray['id']);
-                    //$log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : 'update');
-                    $log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : (($operation === 'subscription') ? 'subscription' : 'update'));
-                    (new Esputnik_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], $log_operation); //add entry to logfile
-                    return true;
+            $responseArray = json_decode($response, true);
+
+            if (isset($responseArray['id'])) {
+                if ($operation !== 'delete') {
+                    if ($wc_id !== null) {
+                        $this->add_esputnik_id_to_userprofile($wc_id, $responseArray['id']);
+                        //$log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : 'update');
+                        $log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : (($operation === 'subscription') ? 'subscription' : 'update'));
+                        (new Esputnik_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], $log_operation); //add entry to logfile
+                        return true;
+                    }
                 }
+                return true;
             }
-            return true;
         }
         return __( 'Other user authorization operation', Y_TEXTDOMAIN );
     }
@@ -167,10 +170,11 @@ class Esputnik_Contact
     private function get_users_from_log(){
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
-                "SELECT * FROM $this->table_log_users WHERE action = %s AND log_date BETWEEN %s AND %s",
+                "SELECT * FROM $this->table_log_users WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
                 'delete',
                 date('Y-m-d H:i:s', time() - $this->period_selection_since),
-                date('Y-m-d H:i:s', time() - $this->period_selection_up)
+                date('Y-m-d H:i:s', time() - $this->period_selection_up),
+                200
             )
         );
     }

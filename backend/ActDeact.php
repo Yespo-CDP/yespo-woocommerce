@@ -266,6 +266,7 @@ class ActDeact extends Base {
                 user_id varchar(255) NOT NULL,
                 contact_id varchar(255) NOT NULL,
                 action varchar(255) NOT NULL,
+                yespo INT NULL,
                 log_date datetime NOT NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate;";

@@ -34,6 +34,9 @@ class Esputnik_Curl_Request
 
             $response = curl_exec($curl);
             $err = curl_error($curl);
+
+            $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            if($custom_request === 'DELETE') $response = $http_code;
             curl_close($curl);
 
             if ($err) return "cURL Error #:" . $err;

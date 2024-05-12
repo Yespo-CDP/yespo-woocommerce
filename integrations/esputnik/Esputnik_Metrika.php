@@ -39,7 +39,7 @@ class Esputnik_Metrika
         $args["userId"] = 2343423;
         $data = self::get_data($args);
         //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
-
+/*
                 $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
                 $data_to_append = ' export started ' . json_encode($data);
                 $file_handle = fopen($file_path, 'a');
@@ -47,13 +47,13 @@ class Esputnik_Metrika
                     fwrite($file_handle, $data_to_append);
                     fclose($file_handle);
                 }
-
+*/
     }
     public static function count_finish_exported(){
         $args["userId"] = 2343423;
         $data = self::get_data($args);
         //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
-
+/*
                 $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
                 $data_to_append = ' export finished ' . json_encode($data);
                 $file_handle = fopen($file_path, 'a');
@@ -61,7 +61,7 @@ class Esputnik_Metrika
                     fwrite($file_handle, $data_to_append);
                     fclose($file_handle);
                 }
-
+*/
     }
     public static function count_deactivations(){
         $args["userId"] = 2343423;

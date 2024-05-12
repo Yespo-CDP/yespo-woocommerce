@@ -8,6 +8,7 @@ class Esputnik_Export_Orders
 {
     private $period_selection = 300;
     private $number_for_export = 10;
+    //private $number_for_export = 1;
     private $table_name;
     private $table_posts;
     private $meta_key;
@@ -83,7 +84,7 @@ class Esputnik_Export_Orders
 
         if(count($orders) > 0 ){
             foreach ($orders as $order) {
-                (new Esputnik_Order())->create_order_on_yespo(wc_get_order($order), 'update');
+                (new Esputnik_Order())->create_order_on_yespo(wc_get_order($order), 'delete');
             }
         }
 
@@ -95,7 +96,8 @@ class Esputnik_Export_Orders
     }
 
     public function export_orders_to_esputnik(){
-        $orders = $this->get_orders_export_esputnik($this->get_orders_export_args());
+        $orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold));
+        if(count($orders) < 1) $orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order));
 
         if(count($orders) > 0 && isset($orders[0])){
             return (new Esputnik_Order())->create_order_on_yespo(

@@ -284,6 +284,7 @@ add_filter( 'cron_schedules', 'establish_custom_cron_interval' );
 
 /*** START CRON JOB ***/
 function yespo_export_data_cron_function(){
+    /*
     $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
     $data_to_append = ' cron-works-333 ';
     $file_handle = fopen($file_path, 'a');
@@ -291,13 +292,13 @@ function yespo_export_data_cron_function(){
         fwrite($file_handle, $data_to_append);
         fclose($file_handle);
     }
-
+*/
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
 
-
+/*
         $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
         $data_to_append = ' cron-works-0 ';
         $file_handle = fopen($file_path, 'a');
@@ -305,7 +306,7 @@ function yespo_export_data_cron_function(){
             fwrite($file_handle, $data_to_append);
             fclose($file_handle);
         }
-
+*/
 
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');

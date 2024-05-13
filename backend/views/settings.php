@@ -53,23 +53,15 @@
                         </div>
                     </div>
                 </div>
+                <div class="field-group">
+                    <div id="userExportMessage"><?php echo __('users export started',Y_TEXTDOMAIN) ?></div>
+                </div>
                 <div class="field-group exportContactData">
                     <div class="dataElement"><?php echo __('Contacts',Y_TEXTDOMAIN) ?> <span id="total-users">0</span></div>
                     <div class="dataElement"><?php echo __('Export contacts',Y_TEXTDOMAIN) ?> <span id="total-users-export">0</span></div>
                     <div class="dataElement"><?php echo __('Finish contacts',Y_TEXTDOMAIN) ?> <span id="exported-users">0</span></div>
                 </div>
-                <div class="field-group">
-                    <button id="export_users" class="button button-primary" disabled><?php echo __('Export information',Y_TEXTDOMAIN) ?></button>
-                </div>
             </div>
-        </div>
-    </section>
-
-    <section class="settingsSection">
-        <div class="sectionHeader">
-            <span class="number">3</span>
-            <h2><?php echo __('Export Orders',Y_TEXTDOMAIN) ?></h2>
-            <img class="imageArrow" src="<?php echo Y_PLUGIN_URL;?>assets/images/arrow.svg" width="16" height="32">
         </div>
         <div class="sectionBody">
             <div class="formBlock">
@@ -82,13 +74,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="field-group">
+                    <div id="orderExportMessage"><?php echo __('orders export started',Y_TEXTDOMAIN) ?></div>
+                </div>
                 <div class="field-group exportContactData">
                     <div class="dataElement"><?php echo __('Orders',Y_TEXTDOMAIN) ?> <span id="total-orders">0</span></div>
                     <div class="dataElement"><?php echo __('Export orders',Y_TEXTDOMAIN) ?> <span id="total-orders-export">0</span></div>
                     <div class="dataElement"><?php echo __('Finish orders',Y_TEXTDOMAIN) ?> <span id="exported-orders">0</span></div>
                 </div>
                 <div class="field-group">
-                    <button id="export_orders" class="button button-primary" disabled><?php echo __('Export information',Y_TEXTDOMAIN) ?></button>
+                    <button id="export_users" class="button button-primary" disabled><?php echo __('Export Data',Y_TEXTDOMAIN) ?></button>
                 </div>
             </div>
         </div>
@@ -96,7 +91,7 @@
 
     <section class="settingsSection">
         <div class="sectionHeader">
-            <span class="number">4</span>
+            <span class="number">3</span>
             <h2><?php echo __('Product Feed Configuration',Y_TEXTDOMAIN) ?></h2>
             <img class="imageArrow" src="<?php echo Y_PLUGIN_URL;?>assets/images/arrow.svg" width="16" height="32">
         </div>
@@ -258,10 +253,16 @@
     .yespo-settings-page .settingsSection .notAvailable{
         color: #fff;
     }
-    .yespo-settings-page .settingsSection #progressContainerUsers{
+    .yespo-settings-page .settingsSection #progressContainerUsers, .yespo-settings-page .settingsSection #progressContainerOrders{
         text-align: center;
     }
 
+    .yespo-settings-page #userExportMessage, .yespo-settings-page #orderExportMessage{
+        color: #135e96;
+        text-align: center;
+        font-weight: 400;
+        display: none;
+    }
 
     .yespo-settings-page .settingsSection .sectionBody .formBlock .totalExportedRow{
         display: flex;
@@ -399,7 +400,8 @@
             this.progressBarUsers = document.querySelector('#exportProgressBar');
             this.progressBarOrders = document.querySelector('#exportOrdersProgressBar');
             this.exportUsersButton = document.querySelector('#export_users');
-            this.exportOrdersButton = document.querySelector('#export_orders');
+            this.userExportMessage = document.getElementById('userExportMessage');
+            this.orderExportMessage = document.getElementById('orderExportMessage');
             this.users = null;
             this.usersExportStatus = false;
             this.total_users = null;
@@ -413,13 +415,13 @@
 
         /** get data when loading the page **/
         appendTotalNumber() {
-            this.getRequest('get_users_total', this.exportUsersButton, '#total-users', (response) => {
-                this.users = response;
-                if (parseInt(this.users) > 0){
-                    if (this.users !== null && document.querySelector('#total-users') && this.users > 0) document.querySelector('#total-users').innerHTML = this.users;
+            this.getRequest('get_users_total', '#total-users', (response) => {
+                this.total_users = response;
+                if (parseInt(this.total_users) > 0){
+                    if (this.total_users !== null && document.querySelector('#total-users') && this.total_users > 0) document.querySelector('#total-users').innerHTML = this.total_users;
                 }
             }).then(() => {
-                this.getRequest('get_users_total_export', this.exportUsersButton, '#total-users-export', (response) => {
+                this.getRequest('get_users_total_export', '#total-users-export', (response) => {
                     this.users = response;
                     if (parseInt(this.users) > 0) {
                         this.exportUsersButton.disabled = false;
@@ -430,17 +432,17 @@
                     }
                 });
             }).then(() => {
-                this.getRequest('get_orders_total', this.exportOrdersButton, '#total-orders-export', (response) => {
-                    this.orders = response;
-                    if (parseInt(this.orders) > 0) {
-                        if (this.orders !== null && document.querySelector('#total-orders') && this.orders > 0) document.querySelector('#total-orders').innerHTML = this.orders;
+                this.getRequest('get_orders_total', '#total-orders-export', (response) => {
+                    this.total_orders = response;
+                    if (parseInt(this.total_orders) > 0) {
+                        if (this.total_orders !== null && document.querySelector('#total-orders') && this.total_orders > 0) document.querySelector('#total-orders').innerHTML = this.total_orders;
                     }
                 });
             }).then(() => {
-                this.getRequest('get_orders_total_export', this.exportOrdersButton, '#total-orders-export', (response) => {
+                this.getRequest('get_orders_total_export', '#total-orders-export', (response) => {
                     this.orders = response;
                     if (parseInt(this.orders) > 0) {
-                        this.exportOrdersButton.disabled = false;
+                        this.exportUsersButton.disabled = false;
                         if (this.orders !== null && document.querySelector('#total-orders-export') && this.orders > 0) document.querySelector('#total-orders-export').innerHTML = this.orders;
                         document.querySelector('#exportOrdersTotal').innerHTML = this.orders;
                     } else {
@@ -450,7 +452,7 @@
             });
         }
 
-        getRequest(action, button, target, callback) {
+        getRequest(action, target, callback) {
             return new Promise((resolve, reject) => {
                 let xhr = new XMLHttpRequest();
                 xhr.open('GET', this.ajaxUrl + '?action=' + action, true);
@@ -469,13 +471,20 @@
 
         /** start export **/
         startExportUsers() {
-            this.startExport(
-                'export_user_data_to_esputnik',
-                'users'
-            );
+            if(this.users > 0) {
+                this.userExportMessage.style.display="block";
+                this.startExport(
+                    'export_user_data_to_esputnik',
+                    'users'
+                );
+            } else if(parseInt(this.orders) > 0){
+                //this.orderExportMessage.style.display="block";
+                this.startExportOrders();
+            }
         }
 
         startExportOrders() {
+            this.orderExportMessage.style.display="block";
             this.startExport(
                 'export_order_data_to_esputnik',
                 'orders'
@@ -502,7 +511,6 @@
                             this.processExportUsers();
                         }
                         if(service === 'orders'){
-                            this.exportOrdersButton.disabled = true;
                             this.processExportOrders();
                         }
                     } else console.error('Send error:', response.statusText);
@@ -518,7 +526,6 @@
             this.checkExportStatus(
                 'get_process_export_users_data_to_esputnik',
                 'users',
-                this.exportUsersButton,
                 '#total-users-export',
                 'export_user_data_to_esputnik',
                 '#progressContainerUsers',
@@ -530,7 +537,6 @@
             this.checkExportStatus(
                 'get_process_export_orders_data_to_esputnik',
                 'orders',
-                this.exportOrdersButton,
                 '#total-orders-export',
                 'export_orders_data_to_esputnik',
                 '#progressContainerOrders',
@@ -538,7 +544,7 @@
             );
         }
 
-        checkExportStatus(action, way, button, totalUnits, totalExport, progressUnits, exportedUnits) {
+        checkExportStatus(action, way, totalUnits, totalExport, progressUnits, exportedUnits) {
             this.getProcessData(action, (response) => {
                 response = JSON.parse(response);
                 if (response && parseInt(response.display) !== 1){
@@ -547,10 +553,10 @@
                         document.querySelector(exportedUnits).innerHTML = response.exported;
                     }
                     if (response.exported !== response.total && response.status === 'active') {
-                        button.disabled = true;
+                        //this.exportUsersButton.disabled = true;
                         setTimeout(() => {
                             if(way === 'users') this.processExportUsers();
-                            if (way === 'orders') this.processExportOrders();
+                            if(way === 'orders') this.processExportOrders();
                         }, 5000);
                     } else if(response.display === null){
                         console.log('inside response null');
@@ -589,8 +595,17 @@
                 if (this.eventSource) {
                     this.eventSource.close();
                 }
-                if(way === 'users') this.exportUsersButton.disabled=true;
-                else if(way === 'orders') this.exportOrdersButton.disabled=true;
+                if(way === 'users'){
+                    this.userExportMessage.style.display="none";
+                    console.log(this.orders);
+                    if(parseInt(this.orders) > 0) this.startExportOrders();
+                }
+                if(way === 'orders'){
+                    this.orderExportMessage.style.display="none";
+                }
+                this.exportUsersButton.disabled=true;
+                //if(way === 'users') this.exportUsersButton.disabled=true;
+                //else if(way === 'orders') this.exportOrdersButton.disabled=true;
             }
         }
 
@@ -620,15 +635,8 @@
         this.disabled = true;
     });
 
-    document.querySelector('#export_orders').addEventListener('click', function() {
-        usersOrdersExportEsputnik.startExportOrders();
-        this.disabled = true;
-    });
-
     usersOrdersExportEsputnik.processExportUsers();
-    usersOrdersExportEsputnik.processExportOrders();
 
     new importFeedUrls();
-
 
 </script>

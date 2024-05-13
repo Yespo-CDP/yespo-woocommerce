@@ -27,7 +27,7 @@ class Esputnik_Logging_Data
             $this->update_log_entry_user($user_id, $action, $response);
     }
 
-    public function create_entry_order(string $order_id, string $action){
+    public function create_entry_order($order_id, $action = 'update'){
         if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name_order'") === $this->table_name_order)
             return $this->create_log_entry_order($order_id, $action); //if success returns 1
     }

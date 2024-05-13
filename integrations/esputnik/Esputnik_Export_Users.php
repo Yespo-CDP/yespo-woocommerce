@@ -7,6 +7,7 @@ class Esputnik_Export_Users
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
     private $number_for_export = 30;
+    //private $number_for_export = 1;
     private $table_name;
     private $meta_key;
     private $wpdb;
@@ -57,6 +58,7 @@ class Esputnik_Export_Users
                 $current_status = 'completed';
                 $exported = $total;
                 Esputnik_Metrika::count_finish_exported();
+
             } else $exported += $live_exported;
 
             $this->update_table_data($status->id, $exported, $current_status);
@@ -134,7 +136,7 @@ class Esputnik_Export_Users
         return [
             'role__in'    => [self::CUSTOMER, self::SUBSCRIBER],
             'orderby' => 'registered',
-            'order'   => 'DESC',
+            'order'   => 'ASC',
             'fields'  => 'ID',
             'meta_query' => array(
                 'relation' => 'OR',

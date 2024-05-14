@@ -96,9 +96,9 @@ class Esputnik_Export_Orders
     }
 
     public function export_orders_to_esputnik(){
-        $orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold));
-        if(count($orders) < 1) $orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order));
-
+        //$orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold));
+        //if(count($orders) < 1) $orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order));
+        $orders = $this->get_orders_export_esputnik();
         if(count($orders) > 0 && isset($orders[0])){
             return (new Esputnik_Order())->create_order_on_yespo(
                 wc_get_order($orders[0])
@@ -140,16 +140,29 @@ class Esputnik_Export_Orders
     }
 
     public function get_total_orders(){
-        $orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order_placehold)));
-        if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order)));
-        return $orders;
+        //$orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order_placehold)));
+        //if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order)));
+        //return $orders;
+        return count($this->get_orders_from_database());
     }
     public function get_export_orders_count(){
-        $orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold)));
-        if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order)));
-        return $orders;
+        //$orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold)));
+        //if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order)));
+        //return $orders;
+        return count($this->get_orders_from_database_without_metakey());
+
     }
-    public function get_orders_export_esputnik($args){
+    //public function get_orders_export_esputnik($args){
+    public function get_orders_export_esputnik(){
+        $orders = $this->get_orders_from_database_without_metakey();
+        $order_ids = [];
+        if($orders && count($orders) > 0){
+            foreach ($orders as $order) {
+                $order_ids[] = $order->id;
+            }
+        }
+        return $order_ids;
+        /*
         $orders = [];
         $orders_query = new WP_Query( $args );
 
@@ -161,6 +174,7 @@ class Esputnik_Export_Orders
             wp_reset_postdata();
         }
         return $orders;
+        */
     }
     private function get_orders_args($shop_order){
         return [
@@ -199,6 +213,33 @@ class Esputnik_Export_Orders
             }
         }
         return $orders;
+    }
+
+    private function get_orders_from_database_without_metakey(){
+        return $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_posts
+            WHERE type = %s
+            AND status != %s
+            AND ID NOT IN (
+                SELECT post_id FROM {$this->wpdb->prefix}postmeta
+                WHERE meta_key = %s AND meta_value = 'true'
+            )",
+                'shop_order',
+                'wc-checkout-draft',
+                $this->meta_key
+            )
+        );
+    }
+
+    private function get_orders_from_database(){
+        return $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s",
+                'shop_order',
+                'wc-checkout-draft'
+            )
+        );
     }
 
     private function get_orders_from_db($time){

@@ -7,7 +7,7 @@
     <section class="settingsSection">
         <div class="sectionHeader">
             <span class="number">1</span>
-            <h2><?php echo __('Authorization',Y_TEXTDOMAIN) ?></h2>
+            <h2><?php echo __('Авторизація',Y_TEXTDOMAIN) ?></h2>
         </div>
         <?php
         if ( get_option( 'yespo_options' ) !== false ){
@@ -19,17 +19,18 @@
         <div class="sectionBody">
             <div class="formBlock">
                 <form id="check-authorization" method="post" action="">
+                    <h4><?php echo __( 'Для авторизації будь ласка введіть свій API Key', Y_TEXTDOMAIN ); ?></h4>
                     <div class="field-group">
                         <input type="text" id="api_key" name="yespo_api_key" placeholder="API Key" value="<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>" />
                     </div>
                     <div class="field-group">
-                        <span class="api-key-text"><?php echo __( 'Данный ключ вы можете получить по ссылке', Y_TEXTDOMAIN ); ?><a href="https://my.yespo.io/settings-ui/#/api-keys-list">https://my.yespo.io/settings-ui/#/api-keys-list</a></span>
+                        <span class="api-key-text"><?php echo __( 'API Key ви можете отримати за посиланням', Y_TEXTDOMAIN ); ?> <a href="https://my.yespo.io/settings-ui/#/api-keys-list">https://my.yespo.io/settings-ui/#/api-keys-list</a></span>
                     </div>
 
                     <?php wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' ); ?>
 
                     <div class="field-group">
-                        <input type="submit" id="send-auth-data" class="button button-primary" value="<?php echo __( 'Authorize', Y_TEXTDOMAIN ); ?>" />
+                        <input type="submit" id="send-auth-data" class="button button-primary" value="<?php echo __( 'Авторизуватися', Y_TEXTDOMAIN ); ?>" disabled />
                     </div>
                 </form>
             </div>
@@ -39,13 +40,14 @@
     <section class="settingsSection">
         <div class="sectionHeader">
             <span class="number">2</span>
-            <h2><?php echo __('Export Contacts',Y_TEXTDOMAIN) ?></h2>
+            <h2><?php echo __('Експорт контактів та замовлень',Y_TEXTDOMAIN) ?></h2>
             <img class="imageArrow" src="<?php echo Y_PLUGIN_URL;?>assets/images/arrow.svg" width="16" height="32">
         </div>
         <div class="sectionBody">
             <div class="formBlock">
                 <div class="field-group">
-                    <span class="exportText"><?php echo __('Для отправки информации о заказах клиентов нажмите кнопку «Экспорт информации о заказах»',Y_TEXTDOMAIN) ?></span>
+                    <span class="exportText"><?php echo __('Для початку передачі контактів і замовлень будь ласка натисніть кнопку «Експорт даних»',Y_TEXTDOMAIN) ?></span>
+                    <h5><?php echo __('Статус передачі контактів',Y_TEXTDOMAIN) ?></h5>
                 </div>
                 <div class="field-group">
                     <div class="progress-container" id="progressContainerUsers">
@@ -54,19 +56,19 @@
                     </div>
                 </div>
                 <div class="field-group">
-                    <div id="userExportMessage"><?php echo __('users export started',Y_TEXTDOMAIN) ?></div>
+                    <div id="userExportMessage"><?php echo __('Відбувається передача контактів',Y_TEXTDOMAIN) ?></div>
                 </div>
                 <div class="field-group exportContactData">
-                    <div class="dataElement"><?php echo __('Contacts',Y_TEXTDOMAIN) ?> <span id="total-users">0</span></div>
-                    <div class="dataElement"><?php echo __('Export contacts',Y_TEXTDOMAIN) ?> <span id="total-users-export">0</span></div>
-                    <div class="dataElement"><?php echo __('Finish contacts',Y_TEXTDOMAIN) ?> <span id="exported-users">0</span></div>
+                    <div class="dataElement"><?php echo __('Всього контактів',Y_TEXTDOMAIN) ?> <span id="total-users">0</span></div>
+                    <div class="dataElement"><?php echo __('Залишилось передати',Y_TEXTDOMAIN) ?> <span id="total-users-export">0</span></div>
+                    <div class="dataElement"><?php echo __('Передано контактів',Y_TEXTDOMAIN) ?> <span id="exported-users">0</span></div>
                 </div>
             </div>
         </div>
         <div class="sectionBody">
             <div class="formBlock">
                 <div class="field-group">
-                    <span class="exportText"><?php echo __('Для отправки информации о заказах клиентов нажмите кнопку «Экспорт информации о заказах»',Y_TEXTDOMAIN) ?></span>
+                    <h5><?php echo __('Статус передачі замовлень (передача замовлень почнеться після завершення передачі контактів)',Y_TEXTDOMAIN) ?></h5>
                 </div>
                 <div class="field-group">
                     <div class="progress-container" id="progressContainerOrders">
@@ -75,21 +77,21 @@
                     </div>
                 </div>
                 <div class="field-group">
-                    <div id="orderExportMessage"><?php echo __('orders export started',Y_TEXTDOMAIN) ?></div>
+                    <div id="orderExportMessage"><?php echo __('Відбувається передача замовлень',Y_TEXTDOMAIN) ?></div>
                 </div>
                 <div class="field-group exportContactData">
-                    <div class="dataElement"><?php echo __('Orders',Y_TEXTDOMAIN) ?> <span id="total-orders">0</span></div>
-                    <div class="dataElement"><?php echo __('Export orders',Y_TEXTDOMAIN) ?> <span id="total-orders-export">0</span></div>
-                    <div class="dataElement"><?php echo __('Finish orders',Y_TEXTDOMAIN) ?> <span id="exported-orders">0</span></div>
+                    <div class="dataElement"><?php echo __('Всього замовлень',Y_TEXTDOMAIN) ?> <span id="total-orders">0</span></div>
+                    <div class="dataElement"><?php echo __('Залишилось передати',Y_TEXTDOMAIN) ?> <span id="total-orders-export">0</span></div>
+                    <div class="dataElement"><?php echo __('Передано замовлень',Y_TEXTDOMAIN) ?> <span id="exported-orders">0</span></div>
                 </div>
                 <div class="field-group">
-                    <button id="export_users" class="button button-primary" disabled><?php echo __('Export Data',Y_TEXTDOMAIN) ?></button>
+                    <button id="export_users" class="button button-primary" disabled><?php echo __('Експорт даних',Y_TEXTDOMAIN) ?></button>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="settingsSection">
+    <section class="settingsSection" style="display:none">
         <div class="sectionHeader">
             <span class="number">3</span>
             <h2><?php echo __('Product Feed Configuration',Y_TEXTDOMAIN) ?></h2>
@@ -106,7 +108,7 @@
         </div>
     </section>
 
-    <section class="settingsSection">
+    <section class="settingsSection" style="display:none">
         <div class="sectionHeader">
             <span class="number number-total"><img src="<?php echo Y_PLUGIN_URL;?>assets/images/check.svg" width="7" height="7" alt="v" title="v"></span>
             <h2><?php echo __('Success page',Y_TEXTDOMAIN) ?></h2>
@@ -198,8 +200,8 @@
         margin:8px 0;
     }
     .yespo-settings-page .settingsSection .sectionBody .formBlock .field-group .api-key-text{
-        font-size: 8px;
-        line-height: 10px;
+        font-size: 11px;
+        line-height: 11px;
     }
 
     /* progress container */
@@ -306,6 +308,7 @@
                             var response = JSON.parse(xhr.responseText);
                             try {
                                 document.getElementById('yespo-notices').innerHTML = response.message;
+                                if (document.getElementById('send-auth-data')) document.getElementById('send-auth-data').disabled = true;
                             } catch (error) {
                                 console.error('Ошибка при парсинге JSON:', error);
                             }
@@ -313,7 +316,7 @@
                         } else {
                             console.error('Произошла ошибка при отправке данных на сервер');
                         }
-                        if (document.getElementById('send-auth-data')) document.getElementById('send-auth-data').disabled = false;
+                        //if (document.getElementById('send-auth-data')) document.getElementById('send-auth-data').disabled = false;
                     }
                 };
             });
@@ -410,46 +413,54 @@
             this.exported = null;
             this.eventSource = null;
             this.ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+            this.exportStatus = false;
             this.appendTotalNumber();
         }
 
         /** get data when loading the page **/
         appendTotalNumber() {
-            this.getRequest('get_users_total', '#total-users', (response) => {
-                this.total_users = response;
-                if (parseInt(this.total_users) > 0){
-                    if (this.total_users !== null && document.querySelector('#total-users') && this.total_users > 0) document.querySelector('#total-users').innerHTML = this.total_users;
-                }
-            }).then(() => {
+            Promise.all([
+                this.getRequest('get_users_total', '#total-users', (response) => {
+                    this.total_users = response;
+                    if (parseInt(this.total_users) > 0){
+                        if (this.total_users !== null && document.querySelector('#total-users') && this.total_users > 0) document.querySelector('#total-users').innerHTML = this.total_users;
+                    }
+                }),
                 this.getRequest('get_users_total_export', '#total-users-export', (response) => {
                     this.users = response;
                     if (parseInt(this.users) > 0) {
-                        this.exportUsersButton.disabled = false;
                         if (this.users !== null && document.querySelector('#total-users-export') && this.users > 0) document.querySelector('#total-users-export').innerHTML = this.users;
                         document.querySelector('#exportContactTotal').innerHTML = this.users;
                     } else {
-                        document.querySelector('#progressContainerUsers').innerHTML = '<span class="notFound">No new contacts found</span>';
+                        document.querySelector('#progressContainerUsers').innerHTML = '<span class="notFound">Контактів для передачі не знайдено</span>';
                     }
-                });
-            }).then(() => {
+                }),
                 this.getRequest('get_orders_total', '#total-orders-export', (response) => {
                     this.total_orders = response;
                     if (parseInt(this.total_orders) > 0) {
                         if (this.total_orders !== null && document.querySelector('#total-orders') && this.total_orders > 0) document.querySelector('#total-orders').innerHTML = this.total_orders;
                     }
-                });
-            }).then(() => {
+                }),
                 this.getRequest('get_orders_total_export', '#total-orders-export', (response) => {
                     this.orders = response;
                     if (parseInt(this.orders) > 0) {
-                        this.exportUsersButton.disabled = false;
                         if (this.orders !== null && document.querySelector('#total-orders-export') && this.orders > 0) document.querySelector('#total-orders-export').innerHTML = this.orders;
                         document.querySelector('#exportOrdersTotal').innerHTML = this.orders;
                     } else {
-                        document.querySelector('#progressContainerOrders').innerHTML = '<span class="notFound">No new orders found</span>';
+                        document.querySelector('#progressContainerOrders').innerHTML = '<span class="notFound">Замовлень для передачі не знайдено</span>';
                     }
-                });
+                })
+            ]).then(() => {
+                this.exportButtonVisibility();
             });
+        }
+
+        exportButtonVisibility(){
+            let totalExpUsers = document.querySelector('#total-users-export').textContent;
+            let exportedUsers = document.querySelector('#exported-users').textContent;
+            let totalExpOrders = document.querySelector('#total-orders-export').textContent;
+            let exportedOrders = document.querySelector('#exported-orders').textContent;
+            if( (parseInt(totalExpUsers) > 0 && parseInt(exportedUsers) < 1) || (parseInt(totalExpOrders) > 0 && parseInt(exportedOrders) < 1) ) this.exportUsersButton.disabled = false;
         }
 
         getRequest(action, target, callback) {
@@ -550,9 +561,11 @@
                 if (response && parseInt(response.display) !== 1){
                     if (response.exported !== null && document.querySelector(exportedUnits) && response.exported >= 0) {
                         this.updateProgress((response.exported / response.total) * 100, way);
+                        document.querySelector(totalUnits).innerHTML = response.total - response.exported;
                         document.querySelector(exportedUnits).innerHTML = response.exported;
                     }
                     if (response.exported !== response.total && response.status === 'active') {
+                        this.exportStatus = true;
                         //this.exportUsersButton.disabled = true;
                         setTimeout(() => {
                             if(way === 'users') this.processExportUsers();
@@ -629,6 +642,17 @@
         }
     }
 
+    let apiKeyInput = document.getElementById("api_key");
+    let sendAuthDataButton = document.getElementById("send-auth-data");
+
+    apiKeyInput.addEventListener("input", function() {
+        if(apiKeyInput.value.trim() !== "") {
+            sendAuthDataButton.disabled = false;
+        } else {
+            sendAuthDataButton.disabled = true;
+        }
+    });
+
     const usersOrdersExportEsputnik = new UsersOrdersExportEsputnik();
     document.querySelector('#export_users').addEventListener('click', function() {
         usersOrdersExportEsputnik.startExportUsers();
@@ -636,6 +660,7 @@
     });
 
     usersOrdersExportEsputnik.processExportUsers();
+    //usersOrdersExportEsputnik.exportButtonVisibility();
 
     new importFeedUrls();
 

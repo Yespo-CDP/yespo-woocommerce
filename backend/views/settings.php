@@ -419,49 +419,48 @@
 
         /** get data when loading the page **/
         appendTotalNumber() {
-            this.getRequest('get_users_total', '#total-users', (response) => {
-                this.total_users = response;
-                if (parseInt(this.total_users) > 0){
-                    if (this.total_users !== null && document.querySelector('#total-users') && this.total_users > 0) document.querySelector('#total-users').innerHTML = this.total_users;
-                }
-            }).then(() => {
+            Promise.all([
+                this.getRequest('get_users_total', '#total-users', (response) => {
+                    this.total_users = response;
+                    if (parseInt(this.total_users) > 0){
+                        if (this.total_users !== null && document.querySelector('#total-users') && this.total_users > 0) document.querySelector('#total-users').innerHTML = this.total_users;
+                    }
+                }),
                 this.getRequest('get_users_total_export', '#total-users-export', (response) => {
                     this.users = response;
                     if (parseInt(this.users) > 0) {
-                        this.exportUsersButton.disabled = false;
                         if (this.users !== null && document.querySelector('#total-users-export') && this.users > 0) document.querySelector('#total-users-export').innerHTML = this.users;
                         document.querySelector('#exportContactTotal').innerHTML = this.users;
                     } else {
                         document.querySelector('#progressContainerUsers').innerHTML = '<span class="notFound">Контактів для передачі не знайдено</span>';
                     }
-                });
-            }).then(() => {
+                }),
                 this.getRequest('get_orders_total', '#total-orders-export', (response) => {
                     this.total_orders = response;
                     if (parseInt(this.total_orders) > 0) {
                         if (this.total_orders !== null && document.querySelector('#total-orders') && this.total_orders > 0) document.querySelector('#total-orders').innerHTML = this.total_orders;
                     }
-                });
-            }).then(() => {
+                }),
                 this.getRequest('get_orders_total_export', '#total-orders-export', (response) => {
                     this.orders = response;
                     if (parseInt(this.orders) > 0) {
-                        this.exportUsersButton.disabled = false;
                         if (this.orders !== null && document.querySelector('#total-orders-export') && this.orders > 0) document.querySelector('#total-orders-export').innerHTML = this.orders;
                         document.querySelector('#exportOrdersTotal').innerHTML = this.orders;
                     } else {
                         document.querySelector('#progressContainerOrders').innerHTML = '<span class="notFound">Замовлень для передачі не знайдено</span>';
                     }
-                });
+                })
+            ]).then(() => {
+                this.exportButtonVisibility();
             });
         }
 
         exportButtonVisibility(){
-            //console.log( document.querySelector('#total-users-export').textContent);
-            console.log( this.users );
-            console.log(this.orders);
-            console.log(this.exportStatus);
-            if ((parseInt(this.users) > 0 || parseInt(this.orders) > 0) && this.exportStatus === false) this.exportUsersButton.disabled = false;
+            let totalExpUsers = document.querySelector('#total-users-export').textContent;
+            let exportedUsers = document.querySelector('#exported-users').textContent;
+            let totalExpOrders = document.querySelector('#total-orders-export').textContent;
+            let exportedOrders = document.querySelector('#exported-orders').textContent;
+            if( (parseInt(totalExpUsers) > 0 && parseInt(exportedUsers) < 1) || (parseInt(totalExpOrders) > 0 && parseInt(exportedOrders) < 1) ) this.exportUsersButton.disabled = false;
         }
 
         getRequest(action, target, callback) {

@@ -1,6 +1,6 @@
 
 <div class="wrap yespo-settings-page">
-    <div id="yespo-notices"></div>
+    <!--div id="yespo-notices"></div-->
     <div class="esputnikLogo">
         <img src="<?php echo Y_PLUGIN_URL;?>assets/images/esputnik-logo.svg" width="176" height="41" alt="<?php echo Y_NAME;?>" title="<?php echo Y_NAME;?>">
     </div>
@@ -16,7 +16,7 @@
             if(isset($options['yespo_api_key'])) $yespo_api_key = $options['yespo_api_key'];
         }
         ?>
-        <div class="sectionBody">
+        <div class="sectionBody sectionBodyAuth">
             <div class="formBlock">
                 <form id="check-authorization" method="post" action="">
                     <h4><?php echo __( 'Для авторизації будь ласка введіть свій API Key', Y_TEXTDOMAIN ); ?></h4>
@@ -34,6 +34,7 @@
                     </div>
                 </form>
             </div>
+            <div id="authorization-response"></div>
         </div>
     </section>
 
@@ -146,6 +147,9 @@
         display:inline-flex;
         align-items: center;
     }
+    .yespo-settings-page .settingsSection .sectionHeader .notice{
+        display:none !important;
+    }
     .yespo-settings-page .settingsSection .sectionHeader .number{
         color:#f0f0f1;
         background-color: #2b64cd;
@@ -158,6 +162,19 @@
         font-size: 14px;
         line-height: 17px;
     }
+    .yespo-settings-page .sectionBodyAuth{
+        display: flex;
+    }
+
+    .yespo-settings-page .sectionBodyAuth #authorization-response{
+        margin-top: auto;
+        margin-left: 5%;
+    }
+
+    .yespo-settings-page .sectionBodyAuth #authorization-response .notice{
+        margin: 10px 0;
+    }
+
     .yespo-settings-page .settingsSection .sectionHeader h2{
         font-size: 22px;
         font-weight: 500;
@@ -170,7 +187,8 @@
     }
 
     .yespo-settings-page .settingsSection .sectionBody .formBlock{
-        max-width: 365px;
+        /*max-width: 365px;*/
+        max-width: 450px;
     }
 
     .yespo-settings-page .settingsSection .sectionBody .formBlock input,
@@ -307,7 +325,8 @@
                         if (xhr.status === 200) {
                             var response = JSON.parse(xhr.responseText);
                             try {
-                                document.getElementById('yespo-notices').innerHTML = response.message;
+                                //document.getElementById('yespo-notices').innerHTML = response.message;
+                                document.getElementById('authorization-response').innerHTML = response.message;
                                 if (document.getElementById('send-auth-data')) document.getElementById('send-auth-data').disabled = true;
                             } catch (error) {
                                 console.error('Ошибка при парсинге JSON:', error);

@@ -45,7 +45,7 @@ function yespo_save_settings() {
         } else {
             $response_data = array(
                 'status' => 'error',
-                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Спроба авторизації невдала, перевірте будь-ласка API Key", Y_TEXTDOMAIN) . '</p></div>',
+                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Спроба авторизації невдала, перевірте будь-ласка API Key та спробуйте знову", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }

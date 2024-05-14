@@ -38,14 +38,14 @@ function yespo_save_settings() {
         if ($result === 200) {
             $response_data = array(
                 'status' => 'success',
-                'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Settings updated successfully!", Y_TEXTDOMAIN) . '</p></div>',
+                'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Авторизація успішна!", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed successfully!", Y_TEXTDOMAIN),
             );
             //Esputnik_Metrika::count_finish_connections();
         } else {
             $response_data = array(
                 'status' => 'error',
-                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Authorization failed, please check your credentials", Y_TEXTDOMAIN) . '</p></div>',
+                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Спроба авторизації невдала, перевірте будь-ласка API Key", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }
@@ -284,7 +284,7 @@ add_filter( 'cron_schedules', 'establish_custom_cron_interval' );
 
 /*** START CRON JOB ***/
 function yespo_export_data_cron_function(){
-    /*
+/*
     $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
     $data_to_append = ' cron-works-333 ';
     $file_handle = fopen($file_path, 'a');
@@ -306,8 +306,8 @@ function yespo_export_data_cron_function(){
             fwrite($file_handle, $data_to_append);
             fclose($file_handle);
         }
-*/
 
+*/
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
 
@@ -347,6 +347,9 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
+
+    $res = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_orders_export_esputnik();
+    var_dump($res);
     /*
     global $wpdb;
 

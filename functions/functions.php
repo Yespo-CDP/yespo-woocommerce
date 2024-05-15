@@ -38,14 +38,14 @@ function yespo_save_settings() {
         if ($result === 200) {
             $response_data = array(
                 'status' => 'success',
-                'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Авторизація успішна!", Y_TEXTDOMAIN) . '</p></div>',
+                'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed successfully!", Y_TEXTDOMAIN),
             );
             //Esputnik_Metrika::count_finish_connections();
         } else {
             $response_data = array(
                 'status' => 'error',
-                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Спроба авторизації невдала, перевірте будь-ласка API Key та спробуйте знову", Y_TEXTDOMAIN) . '</p></div>',
+                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("The authorization attempt failed, please check your API Key and try again", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }

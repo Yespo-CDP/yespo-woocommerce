@@ -7,7 +7,7 @@
     <section class="settingsSection">
         <div class="sectionHeader">
             <span class="number">1</span>
-            <h2><?php echo __('Авторизація',Y_TEXTDOMAIN) ?></h2>
+            <h2><?php echo __('Authorization',Y_TEXTDOMAIN) ?></h2>
         </div>
         <?php
         if ( get_option( 'yespo_options' ) !== false ){
@@ -19,18 +19,18 @@
         <div class="sectionBody sectionBodyAuth">
             <div class="formBlock">
                 <form id="check-authorization" method="post" action="">
-                    <h4><?php echo __( 'Для авторизації будь ласка введіть свій API Key', Y_TEXTDOMAIN ); ?></h4>
+                    <h4><?php echo __( 'Please enter your API Key for authorization', Y_TEXTDOMAIN ); ?></h4>
                     <div class="field-group">
                         <input type="text" id="api_key" name="yespo_api_key" placeholder="API Key" value="<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>" />
                     </div>
                     <div class="field-group">
-                        <span class="api-key-text"><?php echo __( 'API Key ви можете отримати за посиланням', Y_TEXTDOMAIN ); ?> <a href="https://my.yespo.io/settings-ui/#/api-keys-list">https://my.yespo.io/settings-ui/#/api-keys-list</a></span>
+                        <span class="api-key-text"><?php echo __( 'Get the API Key by following next link', Y_TEXTDOMAIN ); ?> <a href="https://my.yespo.io/settings-ui/#/api-keys-list">https://my.yespo.io/settings-ui/#/api-keys-list</a></span>
                     </div>
 
                     <?php wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' ); ?>
 
                     <div class="field-group">
-                        <input type="submit" id="send-auth-data" class="button button-primary" value="<?php echo __( 'Авторизуватися', Y_TEXTDOMAIN ); ?>" disabled />
+                        <input type="submit" id="send-auth-data" class="button button-primary" value="<?php echo __( 'Authorize', Y_TEXTDOMAIN ); ?>" disabled />
                     </div>
                 </form>
             </div>
@@ -41,52 +41,54 @@
     <section class="settingsSection">
         <div class="sectionHeader">
             <span class="number">2</span>
-            <h2><?php echo __('Експорт контактів та замовлень',Y_TEXTDOMAIN) ?></h2>
+            <h2><?php echo __('Contacts and orders export',Y_TEXTDOMAIN) ?></h2>
             <img class="imageArrow" src="<?php echo Y_PLUGIN_URL;?>assets/images/arrow.svg" width="16" height="32">
         </div>
         <div class="sectionBody">
             <div class="formBlock">
                 <div class="field-group">
-                    <span class="exportText"><?php echo __('Для початку передачі контактів і замовлень будь ласка натисніть кнопку «Експорт даних»',Y_TEXTDOMAIN) ?></span>
-                    <h5><?php echo __('Статус передачі контактів',Y_TEXTDOMAIN) ?></h5>
+                    <span class="exportText"><?php echo __('To start export contacts and orders, please click the «Data export» button',Y_TEXTDOMAIN) ?></span>
+                    <h5><?php echo __('Contacts export status',Y_TEXTDOMAIN) ?></h5>
                 </div>
                 <div class="field-group">
                     <div class="progress-container" id="progressContainerUsers">
                         <div class="progress-bar" id="exportProgressBar">
+                            <span class="notFound" id="usersNotFound"><?php echo __('Contacts for export are not found',Y_TEXTDOMAIN) ?></span>
                         </div>
                     </div>
                 </div>
                 <div class="field-group">
-                    <div id="userExportMessage"><?php echo __('Відбувається передача контактів',Y_TEXTDOMAIN) ?></div>
+                    <div id="userExportMessage"><?php echo __('Contacts are being transferred',Y_TEXTDOMAIN) ?></div>
                 </div>
                 <div class="field-group exportContactData">
-                    <div class="dataElement"><?php echo __('Всього контактів',Y_TEXTDOMAIN) ?> <span id="total-users">0</span></div>
-                    <div class="dataElement"><?php echo __('Залишилось передати',Y_TEXTDOMAIN) ?> <span id="total-users-export">0</span></div>
-                    <div class="dataElement"><?php echo __('Передано контактів',Y_TEXTDOMAIN) ?> <span id="exported-users">0</span></div>
+                    <div class="dataElement"><?php echo __('Total contacts',Y_TEXTDOMAIN) ?> <span id="total-users">0</span></div>
+                    <div class="dataElement"><?php echo __('Remains export users',Y_TEXTDOMAIN) ?> <span id="total-users-export">0</span></div>
+                    <div class="dataElement"><?php echo __('Exported contacts',Y_TEXTDOMAIN) ?> <span id="exported-users">0</span></div>
                 </div>
             </div>
         </div>
         <div class="sectionBody">
             <div class="formBlock">
                 <div class="field-group">
-                    <h5><?php echo __('Статус передачі замовлень (передача замовлень почнеться після завершення передачі контактів)',Y_TEXTDOMAIN) ?></h5>
+                    <h5><?php echo __('Orders export status (orders transferring will start after the export of contacts are completed)',Y_TEXTDOMAIN) ?></h5>
                 </div>
                 <div class="field-group">
                     <div class="progress-container" id="progressContainerOrders">
                         <div class="progress-bar" id="exportOrdersProgressBar">
+                            <span class="notFound" id="ordersNotFound"><?php echo __('Orders for export are not found',Y_TEXTDOMAIN) ?></span>
                         </div>
                     </div>
                 </div>
                 <div class="field-group">
-                    <div id="orderExportMessage"><?php echo __('Відбувається передача замовлень',Y_TEXTDOMAIN) ?></div>
+                    <div id="orderExportMessage"><?php echo __('Orders are being transferred',Y_TEXTDOMAIN) ?></div>
                 </div>
                 <div class="field-group exportContactData">
-                    <div class="dataElement"><?php echo __('Всього замовлень',Y_TEXTDOMAIN) ?> <span id="total-orders">0</span></div>
-                    <div class="dataElement"><?php echo __('Залишилось передати',Y_TEXTDOMAIN) ?> <span id="total-orders-export">0</span></div>
-                    <div class="dataElement"><?php echo __('Передано замовлень',Y_TEXTDOMAIN) ?> <span id="exported-orders">0</span></div>
+                    <div class="dataElement"><?php echo __('Total orders',Y_TEXTDOMAIN) ?> <span id="total-orders">0</span></div>
+                    <div class="dataElement"><?php echo __('Remains export orders',Y_TEXTDOMAIN) ?> <span id="total-orders-export">0</span></div>
+                    <div class="dataElement"><?php echo __('Exported orders',Y_TEXTDOMAIN) ?> <span id="exported-orders">0</span></div>
                 </div>
                 <div class="field-group">
-                    <button id="export_users" class="button button-primary" disabled><?php echo __('Експорт даних',Y_TEXTDOMAIN) ?></button>
+                    <button id="export_users" class="button button-primary" disabled><?php echo __('Data export',Y_TEXTDOMAIN) ?></button>
                 </div>
             </div>
         </div>
@@ -269,6 +271,9 @@
     }
     .yespo-settings-page .settingsSection .notFound{
         color: #DF260D;
+        position: absolute;
+        margin-left:150px;
+        display:none;
     }
     .yespo-settings-page .settingsSection .notAvailable{
         color: #fff;
@@ -451,7 +456,8 @@
                         if (this.users !== null && document.querySelector('#total-users-export') && this.users > 0) document.querySelector('#total-users-export').innerHTML = this.users;
                         document.querySelector('#exportContactTotal').innerHTML = this.users;
                     } else {
-                        document.querySelector('#progressContainerUsers').innerHTML = '<span class="notFound">Контактів для передачі не знайдено</span>';
+                        //document.querySelector('#progressContainerUsers').innerHTML = '<span class="notFound">Contacts for export are not found</span>';
+                        document.querySelector('#usersNotFound').style.display="block";
                     }
                 }),
                 this.getRequest('get_orders_total', '#total-orders-export', (response) => {
@@ -466,7 +472,8 @@
                         if (this.orders !== null && document.querySelector('#total-orders-export') && this.orders > 0) document.querySelector('#total-orders-export').innerHTML = this.orders;
                         document.querySelector('#exportOrdersTotal').innerHTML = this.orders;
                     } else {
-                        document.querySelector('#progressContainerOrders').innerHTML = '<span class="notFound">Замовлень для передачі не знайдено</span>';
+                        //document.querySelector('#progressContainerOrders').innerHTML = '<span class="notFound">Замовлень для передачі не знайдено</span>';
+                        document.querySelector('#ordersNotFound').style.display="block";
                     }
                 })
             ]).then(() => {

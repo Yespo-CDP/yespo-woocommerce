@@ -14,8 +14,9 @@ class Esputnik_Order_Mapping
     public static function order_woo_to_yes($order){
         $orderArray = self::order_transformation_to_array($order);
         if (isset($orderArray['phone']) && !empty($orderArray['phone'])) {
-            if(!empty($orderArray['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($orderArray['phone'], $orderArray['country_id']);
-            else $phoneNumber = preg_replace("/[^0-9]/", "", $orderArray['phone']);
+            //if(!empty($orderArray['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($orderArray['phone'], $orderArray['country_id']);
+            //else $phoneNumber = preg_replace("/[^0-9]/", "", $orderArray['phone']);
+            $phoneNumber = $orderArray['phone'];
         } else $phoneNumber = '';
 
         $data['orders'][0]['status'] = $orderArray['status'];

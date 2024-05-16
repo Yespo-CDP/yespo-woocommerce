@@ -5,6 +5,14 @@ namespace Yespo\Integrations\Esputnik;
 class Esputnik_Contact_Mapping
 {
     public static function woo_to_yes($user_data){
+        /*
+        echo "<pre>";
+        print_r($user_data );
+        echo "</pre>";
+        var_dump( get_user_meta($user_data->ID, 'locale', true) );
+        var_dump( get_bloginfo('language') );
+        die();
+        */
         return self::data_woo_to_yes(self::user_transformation_to_array($user_data));
     }
 
@@ -129,7 +137,7 @@ class Esputnik_Contact_Mapping
             'address_2' => !empty($user->billing_address_2) ? $user->billing_address_2 : (!empty($user->shipping_address_2) ? $user->shipping_address_2 : ''),
             'phone' => !empty($user->billing_phone) ? $user->billing_phone : (!empty($user->shipping_phone) ? $user->shipping_phone : ''),
             'postcode' => !empty($user->billing_postcode) ? $user->billing_postcode : (!empty($user->shipping_postcode) ? $user->shipping_postcode : ''),
-            'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ''
+            'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ( get_bloginfo('language') ? get_bloginfo('language') : '')
         ];
     }
 

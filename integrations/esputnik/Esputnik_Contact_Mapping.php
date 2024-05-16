@@ -38,8 +38,9 @@ class Esputnik_Contact_Mapping
             'type' => 'email'
         ];
         if (isset($user['phone']) && !empty($user['phone'])) {
-            if(!empty($user['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($user['phone'], $user['country_id']);
-            else $phoneNumber = preg_replace("/[^0-9]/", "", $user['phone']);
+            //if(!empty($user['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($user['phone'], $user['country_id']);
+            //else $phoneNumber = preg_replace("/[^0-9]/", "", $user['phone']);
+            $phoneNumber = preg_replace("/[^0-9]/", "", $user['phone']);
         } else $phoneNumber = ' ';
         $data['channels'][] = [
             'value' => $phoneNumber,

@@ -2,11 +2,9 @@
 
 namespace Yespo\Integrations\Plugins;
 
-use \Yespo\Integrations\Plugins\Plugin_Dealing_Trait;
-
 class Newsletter
 {
-    use Plugin_Dealing_Trait;
+/*
 
     private $table = 'newsletter';
 
@@ -16,13 +14,13 @@ class Newsletter
         if(!empty($emails) && is_array($emails) && count($emails) > 0){
             foreach ($emails as $email){
                 return $email;
-                /*
-                (new Yespo\Integrations\Esputnik\Esputnik_Contact())->create_plugin_subscribed_on_yespo(
-                    $this->getUserMap(
-                        Plugin_Dealing_Trait::getUserByEmail($this->table, $email)
-                    )
-                );
-                */
+
+                //(new Yespo\Integrations\Esputnik\Esputnik_Contact())->create_plugin_subscribed_on_yespo(
+                //    $this->getUserMap(
+                //        Plugin_Dealing_Trait::getUserByEmail($this->table, $email)
+                //    )
+                //);
+
             }
         }
     }
@@ -56,5 +54,5 @@ class Newsletter
             return $data;
         }
     }
-
+*/
 }

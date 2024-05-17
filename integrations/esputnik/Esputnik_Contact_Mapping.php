@@ -5,14 +5,6 @@ namespace Yespo\Integrations\Esputnik;
 class Esputnik_Contact_Mapping
 {
     public static function woo_to_yes($user_data){
-        /*
-        echo "<pre>";
-        print_r($user_data );
-        echo "</pre>";
-        var_dump( get_user_meta($user_data->ID, 'locale', true) );
-        var_dump( get_bloginfo('language') );
-        die();
-        */
         return self::data_woo_to_yes(self::user_transformation_to_array($user_data));
     }
 

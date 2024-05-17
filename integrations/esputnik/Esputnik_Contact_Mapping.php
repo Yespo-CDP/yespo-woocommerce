@@ -129,7 +129,7 @@ class Esputnik_Contact_Mapping
             'address_2' => !empty($user->billing_address_2) ? $user->billing_address_2 : (!empty($user->shipping_address_2) ? $user->shipping_address_2 : ''),
             'phone' => !empty($user->billing_phone) ? $user->billing_phone : (!empty($user->shipping_phone) ? $user->shipping_phone : ''),
             'postcode' => !empty($user->billing_postcode) ? $user->billing_postcode : (!empty($user->shipping_postcode) ? $user->shipping_postcode : ''),
-            'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ''
+            'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ( get_bloginfo('language') ? get_bloginfo('language') : '')
         ];
     }
 

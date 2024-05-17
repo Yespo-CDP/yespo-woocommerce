@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Plugins;
 
-trait Plugin_Dealing_Trait
+class Plugin_Dealing_Class
 {
     protected static $wpdb;
     protected static $users = 'users';

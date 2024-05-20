@@ -34,7 +34,8 @@ class Notices extends Base {
 		/*
 		 * Review plugin notice.
 		 */
-		new \WP_Review_Me(
+        /*
+		new WP_Review_Me(
 			array(
 				'days_after' => 15,
 				'type'       => 'plugin',
@@ -44,6 +45,7 @@ class Notices extends Base {
 				'link_label' => \__( 'Click here to review', Y_TEXTDOMAIN ),
 			)
 		);
+        */
 
 		/*
 		 * Alert after few days to suggest to contribute to the localization if it is incomplete

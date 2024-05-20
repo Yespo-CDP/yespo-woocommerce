@@ -4,8 +4,76 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "37975748c6579c60235d4f5183927bdf",
+    "content-hash": "4b09259801c12ecb312eb756dea42e71",
     "packages": [
+        {
+            "name": "inpsyde/assets",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/inpsyde/assets.git",
+                "reference": "8bd2a3c5d227fdda36194abefe7c6885f1083673"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/inpsyde/assets/zipball/8bd2a3c5d227fdda36194abefe7c6885f1083673",
+                "reference": "8bd2a3c5d227fdda36194abefe7c6885f1083673",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-json": "*",
+                "inpsyde/wp-context": "^1.3",
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "brain/monkey": "^2.5.0",
+                "inpsyde/php-coding-standards": "^1",
+                "johnpbloch/wordpress-core": ">=6.0",
+                "mikey179/vfsstream": "^1.6.8",
+                "php-stubs/wordpress-stubs": ">=6.0@stable",
+                "phpunit/phpunit": "^8.5.14 || ^9.0",
+                "vimeo/psalm": "@stable"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "wordpress-install-dir": "vendor/wordpress/wordpress"
+            },
+            "autoload": {
+                "files": [
+                    "inc/functions.php",
+                    "inc/bootstrap.php"
+                ],
+                "psr-4": {
+                    "Inpsyde\\Assets\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Inpsyde",
+                    "email": "hello@inpsyde.com",
+                    "homepage": "https://inpsyde.com",
+                    "role": "Company"
+                },
+                {
+                    "name": "Christian Leucht",
+                    "email": "c.leucht@inpsyde.com",
+                    "homepage": "https://www.chrico.info",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Package to manage assets in WordPress.",
+            "support": {
+                "issues": "https://github.com/inpsyde/assets/issues",
+                "source": "https://github.com/inpsyde/assets/tree/master"
+            },
+            "time": "2024-03-07T06:12:01+00:00"
+        },
         {
             "name": "inpsyde/wp-context",
             "version": "dev-main",
@@ -160,12 +228,195 @@
                 "source": "https://github.com/micropackage/requirements/tree/develop"
             },
             "time": "2023-06-23T09:01:10+00:00"
+        },
+        {
+            "name": "wpbp/debug",
+            "version": "1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WPBP/Debug.git",
+                "reference": "ae41bc2777639ed964ea947675c09e79fe06bb9d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WPBP/Debug/zipball/ae41bc2777639ed964ea947675c09e79fe06bb9d",
+                "reference": "ae41bc2777639ed964ea947675c09e79fe06bb9d",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "debug.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Daniele Scasciafratte",
+                    "email": "mte90net@gmail.com",
+                    "homepage": "http://mte90.net"
+                }
+            ],
+            "description": "Add your plugin to Query Monitor",
+            "homepage": "https://github.com/WPBP/Debug",
+            "keywords": [
+                "debug",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/WPBP/Debug/issues",
+                "source": "https://github.com/WPBP/Debug/tree/1.1.3"
+            },
+            "time": "2020-10-19T09:58:03+00:00"
+        },
+        {
+            "name": "wpbp/i18n-notice",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WPBP/i18n-notice.git",
+                "reference": "0ef6a2c84e91e8583fcb90769b965c88116a839a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WPBP/i18n-notice/zipball/0ef6a2c84e91e8583fcb90769b965c88116a839a",
+                "reference": "0ef6a2c84e91e8583fcb90769b965c88116a839a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Team Yoast",
+                    "email": "support@yoast.com",
+                    "homepage": "https://yoast.com"
+                }
+            ],
+            "description": "Handle i18n for plugins, based on Yoast i18n-module ",
+            "homepage": "https://github.com/WPBP/i18n-notice",
+            "keywords": [
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/WPBP/i18n-notice/issues",
+                "source": "https://github.com/WPBP/i18n-notice"
+            },
+            "time": "2023-01-18T15:42:53+00:00"
+        },
+        {
+            "name": "wpdesk/wp-builder",
+            "version": "2.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.wpdesk.dev/wpdesk/wp-builder",
+                "reference": "bf30b1ac6f94f39654a29552cb26d8dad5dda085"
+            },
+            "require": {
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "10up/wp_mock": "*",
+                "mockery/mockery": "*",
+                "phpunit/phpunit": "<7",
+                "squizlabs/php_codesniffer": "^3.0.2",
+                "wimg/php-compatibility": "^8",
+                "wp-coding-standards/wpcs": "^0.14.1"
+            },
+            "type": "library",
+            "extra": {
+                "text-domain": "wpdesk-wp-builder",
+                "translations-folder": "lang",
+                "po-files": {
+                    "pl_PL": "pl_PL.po"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "WPDesk\\PluginBuilder\\": "src/"
+                },
+                "classmap": [
+                    "src/Plugin/WithoutNamespace"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Krzysiek",
+                    "email": "krzysiek@wpdesk.pl"
+                }
+            ],
+            "time": "2023-12-12T11:21:37+00:00"
+        },
+        {
+            "name": "wpdesk/wp-notice",
+            "version": "3.2.4",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.wpdesk.dev/wpdesk/wp-notice",
+                "reference": "d884c9e7decd10abc7acf5a5db33749cc5fb0994"
+            },
+            "require": {
+                "php": ">=7.0.8",
+                "wpdesk/wp-builder": "^1.0|^2.0"
+            },
+            "require-dev": {
+                "10up/wp_mock": "*",
+                "mockery/mockery": "*",
+                "squizlabs/php_codesniffer": "^3.0.2",
+                "wimg/php-compatibility": "^8",
+                "wp-coding-standards/wpcs": "^0.14.1",
+                "wpdesk/wp-codeception": "^2.7"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/WPDesk/notice-functions.php"
+                ],
+                "psr-4": {
+                    "WPDesk\\Notice\\": "src/WPDesk/Notice/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "grola",
+                    "email": "grola@wpdesk.net"
+                }
+            ],
+            "description": "Library for displaying Wordpress notices.",
+            "homepage": "https://gitlab.com/wpdesk/wp-notice",
+            "keywords": [
+                "admin",
+                "notice",
+                "wordpress"
+            ],
+            "time": "2024-03-11T13:48:44+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "wpbp/i18n-notice": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

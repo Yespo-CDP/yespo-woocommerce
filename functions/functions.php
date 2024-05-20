@@ -297,6 +297,7 @@ function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
+    (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_woo_registered_user();
 
 /*
         $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
@@ -306,8 +307,8 @@ function yespo_export_data_cron_function(){
             fwrite($file_handle, $data_to_append);
             fclose($file_handle);
         }
-
 */
+
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
 
@@ -348,8 +349,9 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
 function get_all_users($post)
 {
 
-    $res = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_orders_export_esputnik();
-    var_dump($res);
+    //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_woo_registered_user();
+    //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_orders_export_esputnik();
+    //var_dump($res);
     /*
     global $wpdb;
 

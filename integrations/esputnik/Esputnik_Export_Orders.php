@@ -84,7 +84,19 @@ class Esputnik_Export_Orders
 
         if(count($orders) > 0 ){
             foreach ($orders as $order) {
-                (new Esputnik_Order())->create_order_on_yespo(wc_get_order($order), 'delete');
+                $item = wc_get_order($order);
+                if ($item) {
+                    (new Esputnik_Order())->create_order_on_yespo($item, 'delete');
+
+                    if ($email = $item->get_billing_email()) {
+                        if ($user = get_user_by('email', $email)) {
+                            if ($item->get_billing_phone()){
+                                update_user_meta($user->ID, 'phone_number', $item->get_billing_phone());
+                                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_on_yespo($user);
+                            }
+                        }
+                    }
+                }
             }
         }
 

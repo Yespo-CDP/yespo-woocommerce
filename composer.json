@@ -19,7 +19,12 @@
     "php": ">=7.2",
     "ext-json": "*",
     "micropackage/requirements": "*",
-    "inpsyde/wp-context": "*"
+    "inpsyde/wp-context": "*",
+    "inpsyde/assets": "*",
+
+    "wpbp/debug": "1.1.*",
+    "wpbp/i18n-notice": "dev-main",
+    "wpdesk/wp-notice": "^3.2"
   },
   "bin": [
     "bin/wpbp-generator"

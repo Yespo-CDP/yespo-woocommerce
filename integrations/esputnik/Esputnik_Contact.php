@@ -7,7 +7,9 @@ class Esputnik_Contact
 {
     private $period_selection_since = 7200;
     private $period_selection_up = 600;
+    private $period_selection = 300;
     private $table_log_users;
+    private $table_users;
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const REMOTE_CONTACTS_ESPUTNIK_URL = "https://esputnik.com/api/v1/contacts";
     const CUSTOM_REQUEST = "POST";
@@ -21,6 +23,7 @@ class Esputnik_Contact
         $this->wpdb = $wpdb;
         $this->authData = get_option('yespo_options');
         $this->table_log_users = $this->wpdb->prefix . 'yespo_contact_log';
+        $this->table_users = $this->wpdb->prefix . 'users';
     }
 
     public function create_on_yespo($email, $wc_id){
@@ -58,6 +61,17 @@ class Esputnik_Contact
             return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
         }
     }
+
+    public function update_woo_registered_user(){
+        $users = $this->get_latest_created_users();
+        if($users && is_array($users) && count($users) > 0){
+            foreach($users as $userID){
+                $user = get_user_by('id', $userID);
+                if($user && $this->check_user_role($user)) $this->update_on_yespo($user);
+            }
+        }
+    }
+
 
     public function remove_user_phone_on_yespo($email){
         if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
@@ -175,6 +189,15 @@ class Esputnik_Contact
                 date('Y-m-d H:i:s', time() - $this->period_selection_since),
                 date('Y-m-d H:i:s', time() - $this->period_selection_up),
                 200
+            )
+        );
+    }
+
+    private function get_latest_created_users(){
+        return $this->wpdb->get_col(
+            $this->wpdb->prepare(
+                "SELECT ID FROM $this->table_users WHERE user_registered > %s",
+                date('Y-m-d H:i:s', time() - $this->period_selection)
             )
         );
     }

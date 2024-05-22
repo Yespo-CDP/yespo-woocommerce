@@ -10,7 +10,6 @@ class Esputnik_Order_Mapping
     const DELIVERED = 'DELIVERED';
     const NO_CATEGORY = 'no category';
 
-
     public static function order_woo_to_yes($order){
         $orderArray = self::order_transformation_to_array($order);
         if (isset($orderArray['phone']) && !empty($orderArray['phone'])) {
@@ -70,7 +69,8 @@ class Esputnik_Order_Mapping
         return [
             'externalOrderId' => $order->id,
             //'externalCustomerId' => $order->customer_id ?? $order->get_billing_email(),
-            'externalCustomerId' => !empty($order->customer_id) ? $order->customer_id : (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email()) ? $order->get_billing_email() : 'deleted@site.invalid'),
+            //'externalCustomerId' => !empty($order->customer_id) ? $order->customer_id : (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email()) ? $order->get_billing_email() : 'deleted@site.invalid'),
+            'externalCustomerId' => !empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email()) && self::get_user_id($order->get_billing_email())? self::get_user_id($order->get_billing_email()) : '',
             'totalCost' => $order->total,
             'status' => self::get_order_status($order->status) ? self::get_order_status($order->status) : self::INITIALIZED,
             //'email' => $order->get_billing_email(),
@@ -185,5 +185,9 @@ class Esputnik_Order_Mapping
                 return $states[$state_id];
             }
         }
+    }
+
+    private static function get_user_id($email){
+        return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->get_user_id_by_email($email);
     }
 }

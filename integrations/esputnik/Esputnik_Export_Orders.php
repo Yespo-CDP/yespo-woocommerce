@@ -6,7 +6,9 @@ use WP_Query;
 
 class Esputnik_Export_Orders
 {
-    private $period_selection = 300;
+    //private $period_selection = 300;
+    private $period_selection_since = 300;
+    private $period_selection_up = 30;
     private $number_for_export = 10;
     //private $number_for_export = 1;
     private $table_name;
@@ -88,6 +90,7 @@ class Esputnik_Export_Orders
                 if ($item) {
                     (new Esputnik_Order())->create_order_on_yespo($item, 'delete');
 
+                    /*
                     if ($email = $item->get_billing_email()) {
                         if ($user = get_user_by('email', $email)) {
                             if ($item->get_billing_phone()){
@@ -96,6 +99,7 @@ class Esputnik_Export_Orders
                             }
                         }
                     }
+                    */
                 }
             }
         }
@@ -257,10 +261,11 @@ class Esputnik_Export_Orders
     private function get_orders_from_db($time){
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
-                "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s AND date_updated_gmt >= %s",
+                "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s AND date_updated_gmt BETWEEN %s AND %s",
                 'shop_order',
                 'wc-checkout-draft',
-                date('Y-m-d H:i:s', $time)
+                date('Y-m-d H:i:s', time() - $this->period_selection_since),
+                date('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
         );
     }

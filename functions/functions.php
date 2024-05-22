@@ -87,6 +87,9 @@ function register_woocommerce_admin_guest_user_esputnik($order_id, $post) {
 
 /** update user profile on Yespo service **/
 function update_user_profile_esputnik($user_id, $old_user_data) {
+    if (!is_admin()) {
+        return;
+    }
     if(!empty($user_id)) {
         $user = get_user_by('id', $user_id);
         if(empty($user->billing_phone) && empty($user->shipping_phone)) (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_phone_on_yespo($user->data->user_email);
@@ -297,7 +300,7 @@ function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
-    (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_woo_registered_user();
+    //(new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_woo_registered_user();
 
 /*
         $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
@@ -348,6 +351,8 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
+    //$id = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->get_user_id_by_email('vadym.gmurya+2900@asper.pro');
+    //var_dump($id);
 
     //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_woo_registered_user();
     //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_orders_export_esputnik();

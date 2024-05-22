@@ -148,6 +148,13 @@ class Esputnik_Contact
         return self::USER_META_KEY;
     }
 
+    public function get_user_id_by_email($email){
+        if ($user = get_user_by('email', $email)) {
+            return $user->ID;
+        }
+        return false;
+    }
+
     public function check_user_role($user){
         if (isset($user->roles) &&
             is_array($user->roles) &&

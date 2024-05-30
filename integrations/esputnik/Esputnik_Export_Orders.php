@@ -6,11 +6,11 @@ use WP_Query;
 
 class Esputnik_Export_Orders
 {
-    //private $period_selection = 300;
+    private $period_selection = 300;
     private $period_selection_since = 300;
     private $period_selection_up = 30;
-    private $number_for_export = 10;
-    //private $number_for_export = 1;
+    //private $number_for_export = 10;
+    private $number_for_export = 1;
     private $table_name;
     private $table_posts;
     private $meta_key;
@@ -31,7 +31,7 @@ class Esputnik_Export_Orders
     }
 
     public function add_orders_export_task(){
-        $status = $this->get_order_export_status_active();
+        $status = $this->get_order_export_status_processed('active');
         if(empty($status)){
             $data = [
                 'export_type' => 'orders',
@@ -48,7 +48,7 @@ class Esputnik_Export_Orders
     }
 
     public function start_export_orders() {
-        $status = $this->get_order_export_status_active();
+        $status = $this->get_order_export_status_processed('active');
         if(!empty($status) && $status->status == 'active'){
             $total = intval($status->total);
             $exported = intval($status->exported);
@@ -126,6 +126,27 @@ class Esputnik_Export_Orders
         return $this->get_order_export_status();
     }
 
+    public function stop_export_orders(){
+        $status = $this->get_order_export_status_processed('active');
+        if(!empty($status) && $status->status == 'active'){
+            $this->update_table_data($status->id, intval($status->exported), 'stopped', true);
+            return $status;
+        }
+    }
+
+    public function check_orders_for_stopped(){
+        $status = $this->get_order_export_status_processed('stopped');
+        if($status) return true;
+        return false;
+    }
+    public function resume_export_orders(){
+        $status = $this->get_order_export_status_processed('stopped');
+        if(!empty($status) && $status->status == 'stopped'){
+            $this->update_table_data($status->id, intval($status->exported), 'active', true);
+            return $status;
+        }
+    }
+
     public function get_order_export_status(){
         return $this->wpdb->get_row(
             $this->wpdb->prepare(
@@ -135,12 +156,12 @@ class Esputnik_Export_Orders
         );
     }
 
-    public function get_order_export_status_active(){
+    public function get_order_export_status_processed($action){
         return $this->wpdb->get_row(
             $this->wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
                 'orders',
-                'active'
+                $action
             )
         );
     }

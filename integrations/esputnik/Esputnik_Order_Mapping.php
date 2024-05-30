@@ -20,7 +20,7 @@ class Esputnik_Order_Mapping
 
         $data['orders'][0]['status'] = $orderArray['status'];
         $data['orders'][0]['externalOrderId'] = $orderArray['externalOrderId'];
-        $data['orders'][0]['externalCustomerId'] = $orderArray['externalCustomerId'];
+        if($orderArray['externalCustomerId']) $data['orders'][0]['externalCustomerId'] = $orderArray['externalCustomerId'];
         $data['orders'][0]['totalCost'] = $orderArray['totalCost'];
         $data['orders'][0]['email'] = $orderArray['email'];
         $data['orders'][0]['date'] = $orderArray['date'];

@@ -6,8 +6,8 @@ class Esputnik_Export_Users
 {
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
-    private $number_for_export = 30;
-    //private $number_for_export = 1;
+    //private $number_for_export = 30;
+    private $number_for_export = 1;
     private $table_name;
     private $meta_key;
     private $wpdb;
@@ -20,7 +20,7 @@ class Esputnik_Export_Users
     }
 
     public function add_users_export_task(){
-        $status = $this->get_user_export_status_active();
+        $status = $this->get_user_export_status_processed('active');
         if(empty($status)){
             $data = [
                 'export_type' => 'users',
@@ -37,7 +37,7 @@ class Esputnik_Export_Users
     }
 
     public function start_export_users() {
-        $status = $this->get_user_export_status_active();
+        $status = $this->get_user_export_status_processed('active');
         if(!empty($status) && $status->status == 'active'){
             $total = intval($status->total);
             $exported = intval($status->exported);
@@ -79,6 +79,26 @@ class Esputnik_Export_Users
         return $this->get_user_export_status();
     }
 
+    public function stop_export_users(){
+        $status = $this->get_user_export_status_processed('active');
+        if(!empty($status) && $status->status == 'active'){
+            $this->update_table_data($status->id, intval($status->exported), 'stopped', true);
+            return $status;
+        }
+    }
+    public function check_user_for_stopped(){
+        $status = $this->get_user_export_status_processed('stopped');
+        if($status) return true;
+        return false;
+    }
+    public function resume_export_users(){
+        $status = $this->get_user_export_status_processed('stopped');
+        if(!empty($status) && $status->status == 'stopped'){
+            $this->update_table_data($status->id, intval($status->exported), 'active', true);
+            return $status;
+        }
+    }
+
     private function get_user_export_status(){
         return $this->wpdb->get_row(
             $this->wpdb->prepare(
@@ -87,12 +107,12 @@ class Esputnik_Export_Users
             )
         );
     }
-    private function get_user_export_status_active(){
+    private function get_user_export_status_processed($action){
         return $this->wpdb->get_row(
             $this->wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
                 'users',
-                'active'
+                $action
             )
         );
     }

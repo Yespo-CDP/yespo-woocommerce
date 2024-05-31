@@ -6,8 +6,8 @@ class Esputnik_Export_Users
 {
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
-    //private $number_for_export = 30;
-    private $number_for_export = 1;
+    private $number_for_export = 700;
+    //private $number_for_export = 1;
     private $table_name;
     private $meta_key;
     private $wpdb;

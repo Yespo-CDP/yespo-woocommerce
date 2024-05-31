@@ -29,7 +29,7 @@ class Notices extends Base {
 			return;
 		}
 
-		\wpdesk_wp_notice( \__( 'Updated Messages', Y_TEXTDOMAIN ), 'updated' );
+		//\wpdesk_wp_notice( \__( 'Updated Messages', Y_TEXTDOMAIN ), 'updated' );
 
 		/*
 		 * Review plugin notice.

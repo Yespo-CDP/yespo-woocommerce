@@ -48,7 +48,7 @@ function y_uninstall_multisite() {
 		}
 	}
 
-	//y_uninstall();
+	y_uninstall();
 }
 
 /**
@@ -58,65 +58,22 @@ function y_uninstall_multisite() {
  * @return void
  */
 function y_uninstall() { // phpcs:ignore
-	global $wp_roles;
-	/*
-	@TODO
-	// Delete all transient and options
-	delete_transient( 'TRANSIENT_NAME' );
-	delete_option( 'OPTION_NAME' );
-	remove_role( 'advanced' );
-	// Remove custom file directory
-	$upload_dir = wp_upload_dir();
-	$directory = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . "CUSTOM_DIRECTORY_NAME" . DIRECTORY_SEPARATOR;
-	if (is_dir($directory)) {
-	foreach(glob($directory.'*.*') as $v){
-	unlink($v);
-	}
-	rmdir($directory);
-	// Delete post meta data
-	$posts = get_posts(array('posts_per_page' => -1));
-	foreach ($posts as $post) {
-	$post_meta = get_post_meta($post->ID);
-	delete_post_meta($post->ID, 'your-post-meta');
-	}
-	// Delete user meta data
-	$users = get_users();
-	foreach ($users as $user) {
-	delete_user_meta($user->ID, 'your-user-meta');
-	}
-	// Remove and optimize tables
-	$GLOBALS['wpdb']->query("DROP TABLE `".$GLOBALS['wpdb']->prefix."TABLE_NAME`");
-	$GLOBALS['wpdb']->query("OPTIMIZE TABLE `" .$GLOBALS['wpdb']->prefix."options`");
-	 */
+    global $wpdb;
 
-	// Remove the capabilities of the plugin
-	if ( !isset( $wp_roles ) ) {
-		$wp_roles = new WP_Roles; // phpcs:ignore
-	}
+    $contact_log = $wpdb->prefix . 'yespo_contact_log';
+    $export_status_log = $wpdb->prefix . 'yespo_export_status_log';
+    $order_log = $wpdb->prefix . 'yespo_order_log';
 
-	$caps = array(
-		'create_plugins',
-		'read_demo',
-		'read_private_demoes',
-		'edit_demo',
-		'edit_demoes',
-		'edit_private_demoes',
-		'edit_published_demoes',
-		'edit_others_demoes',
-		'publish_demoes',
-		'delete_demo',
-		'delete_demoes',
-		'delete_private_demoes',
-		'delete_published_demoes',
-		'delete_others_demoes',
-		'manage_demoes',
-	);
+    $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
+    $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
+    $wpdb->query( "DROP TABLE IF EXISTS $order_log" );
 
-	foreach ( $wp_roles as $role ) {
-		foreach ( $caps as $cap ) {
-			$role->remove_cap( $cap );
-		}
-	}
+    delete_option('yespo_options');
+    delete_option('yespo-version');
+    
+    if (wp_next_scheduled('yespo_export_data_cron')) {
+        wp_clear_scheduled_hook('yespo_export_data_cron');
+    }
 
 }
 

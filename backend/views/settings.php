@@ -612,11 +612,11 @@
             xhr.open('POST', this.ajaxUrl, true);
             var formData = new FormData(form);
             formData.append('action', 'check_api_key_esputnik');
-            spinner.style.display = 'block';
+            //spinner.style.display = 'block';
             xhr.send(formData);
             xhr.onreadystatechange = () => {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
-                    spinner.style.display = 'none';
+                    //spinner.style.display = 'none';
                     if (xhr.status === 200) {
                         var response = JSON.parse(xhr.responseText);
                         try {
@@ -674,12 +674,14 @@
             let total = parseInt(users.export) + parseInt(orders.export);
             let status = false;
             if(users.status || orders.status) status = true;
-            this.percentTransfered = users.percent;
+            if( parseInt(users.percent) < 100 ) this.percentTransfered = users.percent;
+            else if( parseInt(orders.percent) < 100 ) this.percentTransfered = orders.percent;
             if(total > 0 && status) {
                 this.stopExportData();
             } else if(total > 0) {
                 this.startExportData();
-                this.startExportUsers();
+                if(parseInt(users.export) > 0) this.startExportUsers();
+                if(parseInt(orders.export) > 0) this.startExportOrders();
             } else {
                 this. addSuccessMessage();
             }
@@ -688,8 +690,6 @@
         startExportData(){
             this.showExportProgress(this.percentTransfered);
             this.updateProgress(this.percentTransfered, 'export');
-
-
 
             console.log('export started inside method');
         }
@@ -773,8 +773,9 @@
                 })
             ]).then(() => {
                 console.log('resume scenario');
-                this.startExportData();
+                //this.startExportData();
                 this.stopExportEventListener();
+                this.getNumberDataExport();
             });
 
         }
@@ -789,10 +790,14 @@
                     'export_user_data_to_esputnik',
                     'users'
                 );
-            } else if(parseInt(this.orders.export) > 0){
+            } /*else if(parseInt(this.orders.export) > 0){
                 //this.orderExportMessage.style.display="block";
                 this.startExportOrders();
-            }
+            }*/
+        }
+
+        startExport(action, service){
+            this.startExportChunk(action, service);
         }
 
         startExportOrders() {
@@ -800,10 +805,6 @@
                 'export_order_data_to_esputnik',
                 'orders'
             );
-        }
-
-        startExport(action, service){
-            this.startExportChunk(action, service);
         }
 
         startExportChunk(action, service) {
@@ -858,10 +859,19 @@
             this.getProcessData(action, (response) => {
                 response = JSON.parse(response);
                 if (response && parseInt(response.display) !== 1){
-                    if (response.exported !== null && document.querySelector(exportedUnits) && response.exported >= 0) {
-                        this.updateProgress((response.exported / response.total) * 100, way);
-                        document.querySelector(totalUnits).innerHTML = response.total - response.exported;
-                        document.querySelector(exportedUnits).innerHTML = response.exported;
+                    //if (response.exported !== null && document.querySelector(exportedUnits) && response.exported >= 0) {
+                    if (response.exported !== null && response.exported >= 0) {
+                        console.log('before update progress');
+
+
+                        this.updateProgress(Math.floor( (response.exported / response.total) * 100), 'export');
+
+                        console.log(Math.floor( (response.exported / response.total) * 100), way);
+                        //document.querySelector(totalUnits).innerHTML = response.total - response.exported;
+                        //document.querySelector(exportedUnits).innerHTML = response.exported;
+                    }
+                    if( response.percent === 100 && way === 'users' && response.status === 'completed'){
+                        this.startExportOrders();
                     }
                     if (response.exported !== response.total && response.status === 'active') {
                         this.exportStatus = true;
@@ -872,8 +882,8 @@
                         }, 5000);
                     } else if(response.display === null){
                         console.log('inside response null');
-                        if(way === 'users') this.userFinalExportChunk();
-                        if(way === 'orders') this.orderFinalExportChunk();
+                        //if(way === 'users') this.userFinalExportChunk();
+                        //if(way === 'orders') this.orderFinalExportChunk();
                     } else {
                         this.usersExportStatus = false;
                     }
@@ -905,14 +915,18 @@
             if(way === 'export' && document.querySelector('#exportProgressBar')) progressBar = document.querySelector('#exportProgressBar');
             else if(document.querySelector('#exportProgressBarStopped')) progressBar = document.querySelector('#exportProgressBarStopped');
 
-            //this.progressBarOrders = document.querySelector('#exportOrdersProgressBar');
+            if(document.querySelector('.processPercent ')) document.querySelector('.processPercent ').textContent = `${progress}%`;
+
             if(progressBar){
                 progressBar.style.width = `${progress}%`;
                 if (progress >= 100) {
                     if (this.eventSource) {
                         this.eventSource.close();
                     }
-                    //this.exportUsersButton.disabled=true;
+                    if( document.querySelector('#stop-send-data') ) document.querySelector('#stop-send-data').disabled = true;
+                    setTimeout(() => {
+                        this. addSuccessMessage();
+                    }, 5000);
                 }
             }
 

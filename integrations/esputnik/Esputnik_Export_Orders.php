@@ -9,8 +9,8 @@ class Esputnik_Export_Orders
     private $period_selection = 300;
     private $period_selection_since = 300;
     private $period_selection_up = 30;
-    //private $number_for_export = 10;
-    private $number_for_export = 1;
+    private $number_for_export = 10;
+    //private $number_for_export = 1;
     private $table_name;
     private $table_posts;
     private $meta_key;

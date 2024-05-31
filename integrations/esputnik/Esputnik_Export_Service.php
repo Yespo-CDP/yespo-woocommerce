@@ -22,7 +22,9 @@ class Esputnik_Export_Service
 
     public static function get_export_total(){
         $service = new self();
-        return intval($service->contactClass->get_users_total_count()) + intval($service->orderClass->get_total_orders());
+        $total = intval($service->contactClass->get_users_total_count()) + intval($service->orderClass->get_total_orders());
+        if($total === 0) $total = 1;
+        return $total;
     }
 
     public static function get_exported_number(){

@@ -28,10 +28,12 @@ class Esputnik_Export_Users
                 'exported' => 0,
                 'status' => 'active'
             ];
-            $result = $this->wpdb->insert($this->table_name, $data);
+            if($data['total'] > 0) {
+                $result = $this->wpdb->insert($this->table_name, $data);
 
-            if ($result !== false) return true;
-            else return false;
+                if ($result !== false) return true;
+                else return false;
+            }
         }
         else return false;
     }

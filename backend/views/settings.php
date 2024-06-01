@@ -370,6 +370,7 @@
             this.orders = null;
 
             this.eventListeners();
+            if(document.querySelector('#checkYespoAuthorization')) this.checkSynchronization(document.querySelector('#checkYespoAuthorization'));
 
             // Call functions to create and replace content with the user panels
             /*
@@ -681,7 +682,7 @@
             } else if(total > 0) {
                 this.startExportData();
                 if(parseInt(users.export) > 0) this.startExportUsers();
-                if(parseInt(orders.export) > 0) this.startExportOrders();
+                else if(parseInt(orders.export) > 0) this.startExportOrders();
             } else {
                 this. addSuccessMessage();
             }
@@ -776,6 +777,8 @@
                 //this.startExportData();
                 this.stopExportEventListener();
                 this.getNumberDataExport();
+                console.log('start progress bar');
+                this.processExportUsers();
             });
 
         }
@@ -856,9 +859,11 @@
         }
 
         checkExportStatus(action, way, totalUnits, totalExport, progressUnits, exportedUnits) {
+            console.log('started checkExportStatus');
             this.getProcessData(action, (response) => {
                 response = JSON.parse(response);
-                if (response && parseInt(response.display) !== 1){
+                console.log('got response');
+                //if (response && parseInt(response.display) !== 1){
                     //if (response.exported !== null && document.querySelector(exportedUnits) && response.exported >= 0) {
                     if (response.exported !== null && response.exported >= 0) {
                         console.log('before update progress');
@@ -870,9 +875,11 @@
                         //document.querySelector(totalUnits).innerHTML = response.total - response.exported;
                         //document.querySelector(exportedUnits).innerHTML = response.exported;
                     }
+                    console.log(response.percent);
                     if( response.percent === 100 && way === 'users' && response.status === 'completed'){
+                        console.log('inside to start export orders');
                         this.startExportOrders();
-                    }
+                    } else if(response.percent === 100 && way === 'orders' && response.status === 'completed') this.updateProgress(100);
                     if (response.exported !== response.total && response.status === 'active') {
                         this.exportStatus = true;
                         //this.exportUsersButton.disabled = true;
@@ -887,7 +894,7 @@
                     } else {
                         this.usersExportStatus = false;
                     }
-                }
+                //}
             });
         }
 

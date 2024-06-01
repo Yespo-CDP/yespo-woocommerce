@@ -9,7 +9,7 @@ class Esputnik_Export_Orders
     private $period_selection = 300;
     private $period_selection_since = 300;
     private $period_selection_up = 30;
-    private $number_for_export = 10;
+    private $number_for_export = 700;
     //private $number_for_export = 1;
     private $table_name;
     private $table_posts;
@@ -39,10 +39,12 @@ class Esputnik_Export_Orders
                 'exported' => 0,
                 'status' => 'active'
             ];
-            $result = $this->wpdb->insert($this->table_name, $data);
+            if($data['total'] > 0) {
+                $result = $this->wpdb->insert($this->table_name, $data);
 
-            if ($result !== false) return true;
-            else return false;
+                if ($result !== false) return true;
+                else return false;
+            }
         }
         else return false;
     }

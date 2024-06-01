@@ -101,6 +101,19 @@ class Esputnik_Export_Users
         }
     }
 
+    public function update_after_activation(){
+        $user = $this->get_user_export_status_processed('active');
+        if(empty($user)) $user = $this->get_user_export_status_processed('stopped');
+        if(!empty($user) && ($user->status == 'stopped' || $user->status == 'active') ){
+            $exportEntry = intval($user->total) - intval($user->exported);
+            $export = $this->get_users_export_count();
+            if($exportEntry != $export){
+                $newTotal = intval($user->total) + ($export - $exportEntry);
+                $this->update_table_total($user->id, $newTotal);
+            }
+        }
+    }
+
     private function get_user_export_status(){
         return $this->wpdb->get_row(
             $this->wpdb->prepare(
@@ -144,6 +157,15 @@ class Esputnik_Export_Users
             array('exported' => $exported, 'status' => $status, 'display' => $display),
             array('id' => $id),
             array('%d', '%s', '%s'),
+            array('%d')
+        );
+    }
+    private function update_table_total($id, $total){
+        return $this->wpdb->update(
+            $this->table_name,
+            array('total' => $total),
+            array('id' => $id),
+            array('%d'),
             array('%d')
         );
     }

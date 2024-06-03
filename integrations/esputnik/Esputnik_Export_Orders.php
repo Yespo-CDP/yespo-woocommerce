@@ -9,7 +9,7 @@ class Esputnik_Export_Orders
     private $period_selection = 300;
     private $period_selection_since = 300;
     private $period_selection_up = 30;
-    private $number_for_export = 10;
+    private $number_for_export = 700;
     //private $number_for_export = 1;
     private $table_name;
     private $table_posts;
@@ -39,10 +39,12 @@ class Esputnik_Export_Orders
                 'exported' => 0,
                 'status' => 'active'
             ];
-            $result = $this->wpdb->insert($this->table_name, $data);
+            if($data['total'] > 0) {
+                $result = $this->wpdb->insert($this->table_name, $data);
 
-            if ($result !== false) return true;
-            else return false;
+                if ($result !== false) return true;
+                else return false;
+            }
         }
         else return false;
     }
@@ -163,6 +165,29 @@ class Esputnik_Export_Orders
                 'orders',
                 $action
             )
+        );
+    }
+
+    public function update_after_activation(){
+        $order = $this->get_order_export_status_processed('active');
+        if(empty($order)) $order = $this->get_order_export_status_processed('stopped');
+        if(!empty($order) && ($order->status == 'stopped' || $order->status == 'active') ){
+            $exportEntry = intval($order->total) - intval($order->exported);
+            $export = $this->get_export_orders_count();
+            if($exportEntry != $export){
+                $newTotal = intval($order->total) + ($export - $exportEntry);
+                $this->update_table_total($order->id, $newTotal);
+            }
+        }
+    }
+
+    private function update_table_total($id, $total){
+        return $this->wpdb->update(
+            $this->table_name,
+            array('total' => $total),
+            array('id' => $id),
+            array('%d'),
+            array('%d')
         );
     }
 

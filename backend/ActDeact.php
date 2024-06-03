@@ -237,6 +237,8 @@ class ActDeact extends Base {
         self::create_databases(self::$wpdb);
 		self::add_capabilities();
 		self::upgrade_procedure();
+        (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->update_after_activation();
+        (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->update_after_activation();
 
 		// Clear the permalinks
 		\flush_rewrite_rules();

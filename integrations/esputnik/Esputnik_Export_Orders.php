@@ -90,7 +90,7 @@ class Esputnik_Export_Orders
             foreach ($orders as $order) {
                 $item = wc_get_order($order);
                 if ($item) {
-                    (new Esputnik_Order())->create_order_on_yespo($item, 'delete');
+                    (new Esputnik_Order())->create_order_on_yespo($item, 'update');
 
                     /*
                     if ($email = $item->get_billing_email()) {

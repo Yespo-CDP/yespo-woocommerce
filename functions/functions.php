@@ -45,7 +45,7 @@ function yespo_save_settings() {
         } else {
             $response_data = array(
                 'status' => 'error',
-                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("The authorization attempt failed, please check your API Key and try again", Y_TEXTDOMAIN) . '</p></div>',
+                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Invalid API key", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }
@@ -457,4 +457,4 @@ function get_all_users($post)
     //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
     //var_dump($res);
 }
-add_action('save_post', 'get_all_users' , 10 , 1);
+//add_action('save_post', 'get_all_users' , 10 , 1);

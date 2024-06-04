@@ -36,6 +36,7 @@ class Esputnik_Order_Mapping
         //$data['orders']['deliveryMethod'] = $orderArray['deliveryMethod'];
         $data['orders'][0]['paymentMethod'] = $orderArray['paymentMethod'];
         $data['orders'][0]['items'] = self::get_orders_items($order);
+        if($orderArray['additionalInfo']) $data['orders'][0]['additionalInfo']['comment'] = $orderArray['additionalInfo'];
 
         return $data;
     }
@@ -89,6 +90,7 @@ class Esputnik_Order_Mapping
             //'deliveryMethod' => $order['method_title'],
             'paymentMethod' => ($order->payment_method) ? $order->payment_method : '',
             'country_id' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_country') && !empty($order->get_billing_country())) ? $order->get_billing_country() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_country') && !empty($order->get_shipping_country()) ? $order->get_shipping_country() : ''),
+            'additionalInfo' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_customer_note') && !empty($order->get_customer_note()))? $order->get_customer_note():''
         ];
     }
 

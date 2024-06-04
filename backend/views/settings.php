@@ -152,12 +152,13 @@
         line-height: 11px;
     }
     .yespo-settings-page .settingsSection .sectionBody .formBlock #sendYespoAuthData{
-        width:117px;
+        min-width:117px;
         height: 34px;
         font-weight: 400;
     }
     .yespo-settings-page .settingsSection .sectionBody .formBlock #sendYespoAuthData{
-        width:117px;
+        max-width: 200px;
+        min-width:117px;
         height: 34px;
         font-weight: 400;
         font-size: 16px;
@@ -214,7 +215,8 @@
         line-height: 18px;
         color: #000;
         background-color: #fff;
-        width: 63px;
+        min-width: 63px;
+        max-width: 200px;
         height: 34px;
     }
 
@@ -253,7 +255,7 @@
 
     .yespo-settings-page .settingsSection .messageButton button,
     .yespo-settings-page .settingsSection .messageButtonError #resume-send-data{
-        width: 107px;
+        min-width: 107px;
         height: 34px;
     }
     .yespo-settings-page .settingsSection .messageButton button img,
@@ -288,6 +290,10 @@
         line-height: 17.58px;
     }
 
+    .yespo-settings-page .settingsSection .messageIconError{
+        min-width: 36px;
+        text-align: -webkit-center;
+    }
     .yespo-settings-page .settingsSection .messageIconError > img{
         height: 100%;
     }
@@ -300,11 +306,12 @@
 
     .yespo-settings-page .settingsSection .messageButtonError {
         position: relative;
-        display: inline-block;
+        /*display: inline-block;*/
     }
 
     .yespo-settings-page .settingsSection .messageButtonError #contact-support {
-        width: 166px;
+        /*width: 166px;*/
+        max-width:300px;
         height: 34px;
         box-shadow: 0px 2px 4px 0px #0000001F;
         border: 1px solid #e3e3e3;
@@ -353,13 +360,15 @@
         constructor() {
             this.h1 = '<?php echo __('Synchronization progress', Y_TEXTDOMAIN)?>';
             this.outSideText = '<?php echo __('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', Y_TEXTDOMAIN)?>';
-            this.h4 = '<?php echo __('The first data export will take some time, it will happen in the background, it is not necessary to stay on the page', Y_TEXTDOMAIN)?>';
-            this.resume = '<?php echo __( 'The synchronization process has been stopped, you can resume it from the moment of stopping without losing the previous progress', Y_TEXTDOMAIN ); ?>';
-            this.error = '<?php echo __('Some error has occurred. Try to resume synchronization.<br>If it doesn’t help, contact Support', Y_TEXTDOMAIN)?>';
+            this.h4 = '<?php echo __('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', Y_TEXTDOMAIN)?>';
+            this.resume = '<?php echo __( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', Y_TEXTDOMAIN ); ?>';
+            this.error = '<?php echo __('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', Y_TEXTDOMAIN)?>';
             this.success = '<?php echo __( 'Data is successfully synchronized', Y_TEXTDOMAIN ); ?>';
             //this.tableArea = document.querySelector('#importFeedUrls');
             this.pluginUrl = '<?php echo Y_PLUGIN_URL?>';
+            this.pauseButton = '<?php echo __('Pause', Y_TEXTDOMAIN)?>';
             this.resumeButton = '<?php echo __('Resume', Y_TEXTDOMAIN)?>';
+            this.contactSupportButton = '<?php echo __('Contact Support', Y_TEXTDOMAIN)?>';
             this.ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
             this.eventSource = null;
@@ -371,6 +380,7 @@
 
             this.eventListeners();
             if(document.querySelector('#checkYespoAuthorization')) this.checkSynchronization(document.querySelector('#checkYespoAuthorization'));
+
 
             // Call functions to create and replace content with the user panels
             /*
@@ -538,10 +548,10 @@
                     this.pluginUrl + 'assets/images/union.svg',
                     this.resumeButton,
                     this.pluginUrl + 'assets/images/subtract.svg',
-                    '<?php echo __('Contact support', Y_TEXTDOMAIN)?>'
+                    this.contactSupportButton
                 );
             } else {
-                sectionContent = this.createElement('input', { type: 'submit', id: 'stop-send-data', className: 'button btn-light', value: 'Stop' });
+                sectionContent = this.createElement('input', { type: 'submit', id: 'stop-send-data', className: 'button btn-light', value: this.pauseButton });
             }
             fieldGroup2.appendChild(sectionContent);
 
@@ -624,7 +634,7 @@
                             //step 2. Start export
                             console.log('step2');
                             this.getNumberDataExport();
-                            document.getElementById('authorization-response1').innerHTML = response.message;
+                            //document.getElementById('authorization-response1').innerHTML = response.message;
                             if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = true;
                         } catch (error) {
                             console.error('Ошибка при парсинге JSON:', error);

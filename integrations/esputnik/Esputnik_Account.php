@@ -40,4 +40,8 @@ class Esputnik_Account
             return "Error: " . $e->getMessage();
         }
     }
+
+    public function get_profile_name(){
+        return Esputnik_Curl_Request::curl_request(self::REMOTE_ESPUTNIK_URL, 'GET', get_option('yespo_options'));
+    }
 }

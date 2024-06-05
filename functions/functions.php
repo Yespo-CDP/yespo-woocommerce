@@ -21,12 +21,57 @@ function y_get_settings() {
     return apply_filters( 'y_get_settings', get_option( Y_TEXTDOMAIN . '-settings' ) );
 }
 
-function yespo_save_settings() {
+/*** Get profile username on Yespo ***/
+function get_account_profile_name(){
+    if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'get_account_yespo_name' ) {
+        if ( get_option( 'yespo_options' ) !== false ) {
+            $options = get_option('yespo_options', array());
+            if (isset($options['yespo_username'])) $organisationName = $options['yespo_username'];
+        }
+        if(!isset($organisationName)){
+            $response = (new Yespo\Integrations\Esputnik\Esputnik_Account())->get_profile_name();
+            if (!empty($response)) {
+                $objResponse = json_decode($response);
+                $organisationName = $objResponse->organisationName;
+                $options['yespo_username'] = $organisationName;
+                update_option('yespo_options', $options);
+            }
+        }
+        if($organisationName){
+            echo json_encode(['username' => $organisationName]);
+        } else echo json_encode(0);
+    }
+    wp_die();
+}
+add_action('wp_ajax_get_account_yespo_name', 'get_account_profile_name');
+add_action('wp_ajax_nopriv_get_account_yespo_name', 'get_account_profile_name');
 
+/** check authorization **/
+function check_api_authorization(){
+    if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'check_api_authorization_yespo' ) {
+        if ( get_option( 'yespo_options' ) !== false ) {
+            $options = get_option('yespo_options', array());
+            if (isset($options['yespo_api_key'])) $yespo_api_key = $options['yespo_api_key'];
+        }
+        if(isset($yespo_api_key)){
+            $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($yespo_api_key);
+            if ($result === 200) {
+                echo json_encode(['auth' => 'success']);
+            }
+        } else echo json_encode(0);
+    }
+    wp_die();
+}
+add_action('wp_ajax_check_api_authorization_yespo', 'check_api_authorization');
+add_action('wp_ajax_nopriv_check_api_authorization_yespo', 'check_api_authorization');
+
+/** check authorization via form **/
+function yespo_save_settings() {
+/*
     if ( ! isset( $_POST['yespo_plugin_settings_nonce'] ) || ! wp_verify_nonce( $_POST['yespo_plugin_settings_nonce'], 'yespo_plugin_settings_save' ) ) {
         return;
     }
-
+*/
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
@@ -421,10 +466,14 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
-    $res = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total();
-    $res2 = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number();
-    var_dump($res . ' --- ' . $res2);
+    //$res = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total();
+    //$res2 = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number();
+    //var_dump($res . ' --- ' . $res2);
 
+    $response = (new Yespo\Integrations\Esputnik\Esputnik_Account())->get_profile_name();
+    $res = (json_decode($response))->organisationName;
+    var_dump($res);
+    //var_dump($response->organisationName);
     //$id = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->get_user_id_by_email('test');
     //var_dump($id);
 

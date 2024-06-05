@@ -60,7 +60,7 @@ class Settings_Page extends Base {
          *
          */
         \add_menu_page( \__( 'Yespo Settings', Y_TEXTDOMAIN ), 'Yespo', 'manage_options', Y_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
-
+/*
         add_submenu_page(
             Y_TEXTDOMAIN,
             __('Settings', Y_TEXTDOMAIN),
@@ -69,6 +69,7 @@ class Settings_Page extends Base {
             'yespo_settings',
             array($this, 'display_plugin_settings_page')
         );
+*/
         /*
         add_filter('parent_file', function($parent_file) {
             global $submenu_file;
@@ -81,7 +82,7 @@ class Settings_Page extends Base {
             return $parent_file;
         });
         */
-
+/*
         add_action('admin_menu', function() {
             global $submenu;
 
@@ -89,7 +90,7 @@ class Settings_Page extends Base {
                 unset($submenu[Y_TEXTDOMAIN][0]);
             }
         }, 999);
-
+*/
     }
 
     /**
@@ -99,8 +100,8 @@ class Settings_Page extends Base {
      * @return void
      */
     public function display_plugin_admin_page() {
-        include_once Y_PLUGIN_ROOT . 'backend/views/admin.php';
-        //include_once Y_PLUGIN_ROOT . 'backend/views/settings.php';
+        //include_once Y_PLUGIN_ROOT . 'backend/views/admin.php';
+        include_once Y_PLUGIN_ROOT . 'backend/views/settings.php';
     }
 
     public function display_plugin_settings_page() {
@@ -117,7 +118,8 @@ class Settings_Page extends Base {
     public function add_action_links( array $links ) {
         return \array_merge(
             array(
-                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . Y_TEXTDOMAIN . '_settings' ) . '">' . \__( 'Settings', Y_TEXTDOMAIN ) . '</a>',
+                //'settings' => '<a href="' . \admin_url( 'admin.php?page=' . Y_TEXTDOMAIN . '_settings' ) . '">' . \__( 'Settings', Y_TEXTDOMAIN ) . '</a>',
+                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . Y_TEXTDOMAIN ) . '">' . \__( 'Settings', Y_TEXTDOMAIN ) . '</a>',
             ),
             $links
         );

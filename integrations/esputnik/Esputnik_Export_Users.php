@@ -171,14 +171,14 @@ class Esputnik_Export_Users
     }
     private function get_users_total_args(){
         return [
-            'role__in'    => [self::CUSTOMER, self::SUBSCRIBER],
+            'role__in'    => [self::CUSTOMER],
             'orderby' => 'registered',
             'order'   => 'DESC',
         ];
     }
     private function get_users_export_args(){
         return [
-            'role__in'    => [self::CUSTOMER, self::SUBSCRIBER],
+            'role__in'    => [self::CUSTOMER],
             'orderby' => 'registered',
             'order'   => 'ASC',
             'fields'  => 'ID',

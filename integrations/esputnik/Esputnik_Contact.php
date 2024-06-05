@@ -5,6 +5,8 @@ namespace Yespo\Integrations\Esputnik;
 
 class Esputnik_Contact
 {
+    const CUSTOMER = 'customer';
+    const SUBSCRIBER = 'subscriber';
     private $period_selection_since = 7200;
     private $period_selection_up = 600;
     private $period_selection = 300;
@@ -85,7 +87,7 @@ class Esputnik_Contact
         }
     }
 
-    public function delete_from_yespo($user_id){
+    public function delete_from_yespo($user_id, $relocate = false){
         //$yespo_id = $this->get_user_metafield_id($user_id);
         /*
         if (!empty($this->authData) && !empty($yespo_id)) {
@@ -93,7 +95,7 @@ class Esputnik_Contact
         }
         */
         if (!empty($this->authData) && !empty($user_id)) {
-            return $this->process_on_yespo(null, 'delete', null, $user_id);
+            return $this->process_on_yespo(null, 'delete', null, $user_id, $relocate);
         }
     }
 
@@ -108,7 +110,7 @@ class Esputnik_Contact
         }
     }
 
-    private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null) {
+    private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null, $relocate = false) {
         if (empty($this->authData)) {
             return __( 'Empty user authorization data', Y_TEXTDOMAIN );
         }
@@ -116,9 +118,12 @@ class Esputnik_Contact
         $url = self::REMOTE_CONTACT_ESPUTNIK_URL;
         $request = self::CUSTOM_REQUEST;
         if($operation === 'delete'){
-            $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
+            if($relocate) $erase = '&erase=false';
+            else $erase = '&erase=true';
+            $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . $erase;
+            //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
             //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
-            //$request = self::CUSTOM_REQUEST_DELETE;
+
             $response = Esputnik_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
             (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
         } else {
@@ -164,8 +169,7 @@ class Esputnik_Contact
     }
     private function get_user_type_allowed(){
         return [
-            'subscriber',
-            'customer'
+            self::CUSTOMER
         ];
     }
 

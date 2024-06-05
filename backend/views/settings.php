@@ -1,56 +1,26 @@
-
+<?php
+if ( get_option( 'yespo_options' ) !== false ){
+    $options = get_option('yespo_options', array());
+    if(isset($options['yespo_username'])) $yespo_username = $options['yespo_username'];
+    if(isset($options['yespo_api_key'])) $yespo_api_key = $options['yespo_api_key'];
+}
+?>
 <div class="yespo-settings-page">
     <!--div id="yespo-notices"></div-->
     <section class="topPanel">
         <div class="contentPart panelBox">
             <img src="<?php echo Y_PLUGIN_URL;?>assets/images/yespologosmall.svg" width="33" height="33" alt="<?php echo Y_NAME;?>" title="<?php echo Y_NAME;?>">
-            <div class="panelUser"><?php echo __('My account',Y_TEXTDOMAIN) ?></div>
+            <div class="panelUser">
+                <?php
+                if($yespo_username) echo $yespo_username;
+                else echo __('My account',Y_TEXTDOMAIN);
+                ?>
+            </div>
         </div>
     </section>
     <div id="spinner" style="display: none;">Loading...</div>
     <section class="userPanel">
-        <div class="contentPart">
-            <h1><?php echo __('Data synchronization',Y_TEXTDOMAIN) ?></h1>
-            <p><?php echo __('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools',Y_TEXTDOMAIN) ?></p>
-
-            <div class="settingsSection">
-                <?php
-                if ( get_option( 'yespo_options' ) !== false ){
-                    $options = get_option('yespo_options', array());
-                    if(isset($options['yespo_username'])) $yespo_username = $options['yespo_username'];
-                    if(isset($options['yespo_api_key'])) $yespo_api_key = $options['yespo_api_key'];
-                }
-                ?>
-                <div class="sectionBody sectionBodyAuth">
-                    <div class="formBlock">
-                        <form id="checkYespoAuthorization" method="post" action="">
-                            <h4><?php echo __( 'API Key', Y_TEXTDOMAIN ); ?></h4>
-                            <div class="field-group">
-                                <input type="text" id="api_key" name="yespo_api_key" placeholder="API Key" value="<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>" />
-                            </div>
-
-                            <div class="field-group">
-                                <div class="informationText"><span class="api-key-text"><?php echo __( 'The API key to connect account can be received by the', Y_TEXTDOMAIN ); ?></span> <a href="https://my.yespo.io/settings-ui/#/api-keys-list"><?php echo __( 'link', Y_TEXTDOMAIN ); ?></a></div>
-                            </div>
-
-                            <?php wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' ); ?>
-
-                            <div class="field-group">
-                                <input type="submit" id="sendYespoAuthData" class="button button-primary" value="<?php echo __( 'Synchronize', Y_TEXTDOMAIN ); ?>" />
-                            </div>
-
-                        </form>
-                    </div>
-                    <div id="authorization-response1"></div>
-                </div>
-
-            </div>
-        </div>
     </section>
-
-
-
-
 </div>
 <style>
     #wpcontent{
@@ -358,7 +328,8 @@
 
     class YespoExportData {
         constructor() {
-            this.h1 = '<?php echo __('Synchronization progress', Y_TEXTDOMAIN)?>';
+            //this.h1 = '<?php //echo __('Synchronization progress', Y_TEXTDOMAIN)?>';
+            this.h1 = '<?php echo __('Data synchronization',Y_TEXTDOMAIN) ?>';
             this.outSideText = '<?php echo __('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', Y_TEXTDOMAIN)?>';
             this.h4 = '<?php echo __('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', Y_TEXTDOMAIN)?>';
             this.resume = '<?php echo __( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', Y_TEXTDOMAIN ); ?>';
@@ -371,6 +342,12 @@
             this.contactSupportButton = '<?php echo __('Contact Support', Y_TEXTDOMAIN)?>';
             this.ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
+            this.apiKeyValue = '<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>';
+            this.apiKeyText = '<?php echo __( 'The API key to connect account can be received by the', Y_TEXTDOMAIN ); ?> ';
+            this.yespoLink = 'https://my.yespo.io/settings-ui/#/api-keys-list';
+            this.yespoLinkText = '<?php echo __( 'link', Y_TEXTDOMAIN ); ?>';
+            this.wpNonce = '<?php wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' ); ?>';
+
             this.eventSource = null;
             this.percentTransfered = 0;
 
@@ -378,8 +355,13 @@
             this.usersExportStatus = false;
             this.orders = null;
 
-            this.eventListeners();
-            if(document.querySelector('#checkYespoAuthorization')) this.checkSynchronization(document.querySelector('#checkYespoAuthorization'));
+            //this.eventListeners();
+            //if(document.querySelector('#checkYespoAuthorization')) this.checkSynchronization(document.querySelector('#checkYespoAuthorization'));
+
+            this.getAccountYespoName();
+            this.checkAuthorization()
+
+            //this.showApiKeyForm();
 
 
             // Call functions to create and replace content with the user panels
@@ -418,6 +400,31 @@
              */
 
         }
+
+        // get top account name
+        getAccountYespoName(){
+            this.getRequest('get_account_yespo_name',  (response) => {
+                response = JSON.parse(response);
+                if(document.querySelector('.panelUser') && response.username !== undefined) document.querySelector('.panelUser').innerHTML=response.username;
+                //console.log(response.username);
+            });
+        }
+
+        /**
+        * check authomatic authorization
+        **/
+        checkAuthorization(){
+            this.getRequest('check_api_authorization_yespo',  (response) => {
+                response = JSON.parse(response);
+                if(response.auth && response.auth === 'success'){
+                    this.getNumberDataExport();
+                }
+                else {
+                    this.showApiKeyForm();
+                    this.startExportEventListener();
+                }
+            });
+        }
         /*
         * Methods create html elements
         * */
@@ -450,6 +457,10 @@
 
         createFieldGroup() {
             return this.createElement("div", { className: "field-group" });
+        }
+
+        createInputField() {
+            return this.createElement("input", { type: 'text', name: "yespo_api_key", id: "api_key", placeholder: "API Key", value: this.apiKeyValue });
         }
 
         createButton(id, className, text, iconSrc, iconClass) {
@@ -573,6 +584,11 @@
         }
 
         addSuccessMessage() {
+            const contentPart = this.createElement('div', { className: 'contentPart ' });
+            const h1 = this.createHeading(1, this.h1);
+            const p = this.createParagraph(this.outSideText);
+
+            const settingsSection = this.createElement('div', { className: 'settingsSection' });
             const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodySuccess' });
             const formBlock = this.createElement('div', { className: 'formBlock' });
             const fieldGroup = this.createElement('div', { className: 'field-group' });
@@ -597,16 +613,73 @@
             fieldGroup.appendChild(messageNonceSuccess);
             formBlock.appendChild(fieldGroup);
             sectionBody.appendChild(formBlock);
+            settingsSection.appendChild(sectionBody);
+            contentPart.append(h1, p, settingsSection);
 
-            const messageContainer = document.querySelector('.settingsSection');
+            const messageContainer = document.querySelector('.userPanel');
             if (messageContainer) {
                 messageContainer.innerHTML = '';
-                messageContainer.appendChild(sectionBody);
+                messageContainer.appendChild(contentPart);
             } else {
                 console.error('Parent element with class "sectionBodySuccess" not found.');
             }
         }
 
+        /**
+         * AUTHORIZATION FORM **/
+        showApiKeyForm(){
+            const sectionClass = '.userPanel';
+            const contentPart = this.createElement('div', { className: 'contentPart' });
+
+            const h1 = this.createHeading(1, this.h1);
+            const p = this.createParagraph(this.outSideText);
+
+            const settingsSection = this.createElement('div', { className: 'settingsSection' });
+            const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodyAuth' });
+            const formBlock = this.createElement('div', { className: 'formBlock' });
+
+            let formId = 'checkYespoAuthorization';
+
+            const form = this.createForm(formId, 'post', '');
+            const h4 = this.createHeading(4, '<?php echo __( 'API Key', Y_TEXTDOMAIN ); ?>');
+
+            const fieldGroup0 = this.createFieldGroup();
+            const inputField = this.createInputField();
+
+            fieldGroup0.appendChild(inputField);
+
+            const fieldGroup1 = this.createFieldGroup();
+            const divEl = this.createElement("div", { className: 'informationText' });
+            const spanEl = this.createElement("span", { className: 'api-key-text' }, this.apiKeyText);
+            const aEl = this.createElement("a", { href: this.yespoLink }, this.yespoLinkText);
+            divEl.appendChild(spanEl);
+            divEl.appendChild(aEl);
+            fieldGroup1.appendChild(divEl);
+
+            const fieldGroup2 = this.createFieldGroup();
+
+            let sectionContent = '';
+
+            sectionContent = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo __( 'Synchronize', Y_TEXTDOMAIN ); ?>' });
+            fieldGroup2.appendChild(sectionContent);
+
+            //form.append(h4, fieldGroup0,fieldGroup1, fieldGroup2, this.wpNonce );
+            form.append(h4, fieldGroup0,fieldGroup1, fieldGroup2);
+
+            formBlock.appendChild(form);
+            sectionBody.appendChild(formBlock);
+            settingsSection.appendChild(sectionBody);
+            contentPart.append(h1, p, settingsSection);
+
+            const mainContainer = document.querySelector(sectionClass);
+            if (mainContainer) {
+                mainContainer.innerHTML = '';
+                //mainContainer.appendChild(userPanel);
+                mainContainer.appendChild(contentPart);
+            } else {
+                console.error(`Parent element with class "${sectionClass}" not found.`);
+            }
+        }
         /*
         * Methods dealing export data
         * */

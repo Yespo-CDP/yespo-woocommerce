@@ -67,11 +67,11 @@ add_action('wp_ajax_nopriv_check_api_authorization_yespo', 'check_api_authorizat
 
 /** check authorization via form **/
 function yespo_save_settings() {
-/*
+
     if ( ! isset( $_POST['yespo_plugin_settings_nonce'] ) || ! wp_verify_nonce( $_POST['yespo_plugin_settings_nonce'], 'yespo_plugin_settings_save' ) ) {
         return;
     }
-*/
+
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
@@ -79,12 +79,21 @@ function yespo_save_settings() {
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'check_api_key_esputnik' ) {
         //Esputnik_Metrika::count_start_connections();
         $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
+        update_option('yespo_options', $options);
         $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($options['yespo_api_key']);
         if ($result === 200) {
+            $userData = (new Yespo\Integrations\Esputnik\Esputnik_Account())->get_profile_name();
+            if (!empty($userData)) {
+                $objResponse = json_decode($userData);
+                $organisationName = $objResponse->organisationName;
+                $options['yespo_username'] = $organisationName;
+                update_option('yespo_options', $options);
+            }
             $response_data = array(
                 'status' => 'success',
                 'message' => '<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed successfully!", Y_TEXTDOMAIN),
+                'username' => isset($organisationName) ? $organisationName : ''
             );
             //Esputnik_Metrika::count_finish_connections();
         } else {
@@ -94,7 +103,6 @@ function yespo_save_settings() {
                 'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }
-        update_option('yespo_options', $options);
         echo json_encode( $response_data );
         exit;
     }
@@ -466,11 +474,29 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
-    $order = wc_get_order(555);
-    $res = Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::order_woo_to_yes($order);
+    global $wpdb;
+
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM $wpdb->usermeta WHERE meta_key = %s",
+            'yespo_contact_id'
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (
+            SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order'
+        )",
+            'sent_order_to_yespo'
+        )
+    );
+
+    //$order = wc_get_order(555);
+    //$res = Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::order_woo_to_yes($order);
     //$res = (new Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order);
     //$email = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid';
-    var_dump($res);
+    //var_dump($res);
     //$res = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total();
     //$res2 = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number();
     //var_dump($res . ' --- ' . $res2);

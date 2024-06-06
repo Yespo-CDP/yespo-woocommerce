@@ -167,6 +167,7 @@ class Esputnik_Contact
             in_array($user->roles[0], $this->get_user_type_allowed())
         ) return true;
     }
+
     private function get_user_type_allowed(){
         return [
             self::CUSTOMER

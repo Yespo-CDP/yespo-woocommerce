@@ -18,8 +18,13 @@ if ( get_option( 'yespo_options' ) !== false ){
             </div>
         </div>
     </section>
-    <div id="spinner" style="display: none;">Loading...</div>
     <section class="userPanel">
+        <div class="contentPart">
+            <h1><?php echo __('Data synchronization',Y_TEXTDOMAIN) ?></h1>
+            <p><?php echo __('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools',Y_TEXTDOMAIN) ?></p>
+            <div class="settingsSection">
+            </div>
+        </div>
     </section>
 </div>
 <style>
@@ -88,6 +93,10 @@ if ( get_option( 'yespo_options' ) !== false ){
         font-size: 13px;
         line-height: 15.23px;
         font-weight: 400;
+    }
+    .yespo-settings-page #checkYespoAuthorization h4 {
+        font-weight: 700;
+        color:#525252;
     }
 
     .yespo-settings-page .settingsSection .sectionBody .formBlock #api_key,
@@ -328,8 +337,8 @@ if ( get_option( 'yespo_options' ) !== false ){
 
     class YespoExportData {
         constructor() {
-            //this.h1 = '<?php //echo __('Synchronization progress', Y_TEXTDOMAIN)?>';
-            this.h1 = '<?php echo __('Data synchronization',Y_TEXTDOMAIN) ?>';
+            this.h1 = '<?php echo __('Synchronization progress', Y_TEXTDOMAIN)?>';
+            //this.h1 = '<?php echo __('Data synchronization',Y_TEXTDOMAIN) ?>';
             this.outSideText = '<?php echo __('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', Y_TEXTDOMAIN)?>';
             this.h4 = '<?php echo __('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', Y_TEXTDOMAIN)?>';
             this.resume = '<?php echo __( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', Y_TEXTDOMAIN ); ?>';
@@ -342,6 +351,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             this.contactSupportButton = '<?php echo __('Contact Support', Y_TEXTDOMAIN)?>';
             this.ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
+            this.nonceApiKeyForm = '<?php echo wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false ); ?>';
             this.apiKeyValue = '<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>';
             this.apiKeyText = '<?php echo __( 'The API key to connect account can be received by the', Y_TEXTDOMAIN ); ?> ';
             this.yespoLink = 'https://my.yespo.io/settings-ui/#/api-keys-list';
@@ -460,7 +470,7 @@ if ( get_option( 'yespo_options' ) !== false ){
         }
 
         createInputField() {
-            return this.createElement("input", { type: 'text', name: "yespo_api_key", id: "api_key", placeholder: "API Key", value: this.apiKeyValue });
+            return this.createElement("input", { type: 'text', name: "yespo_api_key", id: "api_key", value: this.apiKeyValue });
         }
 
         createButton(id, className, text, iconSrc, iconClass) {
@@ -509,13 +519,7 @@ if ( get_option( 'yespo_options' ) !== false ){
         }
 
         appendUserPanel(sectionClass, progressContainer, exportProgressBar, progressText, progressPercent, percentClass, stopped) {
-            //const userPanel = this.createElement('section', { className: 'userPanel' });
-            const contentPart = this.createElement('div', { className: 'contentPart' });
-
-            const h1 = this.createHeading(1, this.h1);
-            const p = this.createParagraph(this.outSideText);
-
-            const settingsSection = this.createElement('div', { className: 'settingsSection' });
+            const settingsSection = '.settingsSection';
             const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodyAuth' });
             const formBlock = this.createElement('div', { className: 'formBlock' });
 
@@ -569,26 +573,19 @@ if ( get_option( 'yespo_options' ) !== false ){
             form.append(h4, fieldGroup1, fieldGroup2);
             formBlock.appendChild(form);
             sectionBody.appendChild(formBlock);
-            settingsSection.appendChild(sectionBody);
-            contentPart.append(h1, p, settingsSection);
             //userPanel.appendChild(contentPart);
 
-            const mainContainer = document.querySelector(sectionClass);
+            const mainContainer = document.querySelector(settingsSection);
             if (mainContainer) {
                 mainContainer.innerHTML = '';
                 //mainContainer.appendChild(userPanel);
-                mainContainer.appendChild(contentPart);
+                mainContainer.appendChild(sectionBody);
             } else {
-                console.error(`Parent element with class "${sectionClass}" not found.`);
+                console.error(`Parent element with class "${settingsSection}" not found.`);
             }
         }
 
         addSuccessMessage() {
-            const contentPart = this.createElement('div', { className: 'contentPart ' });
-            const h1 = this.createHeading(1, this.h1);
-            const p = this.createParagraph(this.outSideText);
-
-            const settingsSection = this.createElement('div', { className: 'settingsSection' });
             const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodySuccess' });
             const formBlock = this.createElement('div', { className: 'formBlock' });
             const fieldGroup = this.createElement('div', { className: 'field-group' });
@@ -613,13 +610,11 @@ if ( get_option( 'yespo_options' ) !== false ){
             fieldGroup.appendChild(messageNonceSuccess);
             formBlock.appendChild(fieldGroup);
             sectionBody.appendChild(formBlock);
-            settingsSection.appendChild(sectionBody);
-            contentPart.append(h1, p, settingsSection);
 
-            const messageContainer = document.querySelector('.userPanel');
+            const messageContainer = document.querySelector('.settingsSection');
             if (messageContainer) {
                 messageContainer.innerHTML = '';
-                messageContainer.appendChild(contentPart);
+                messageContainer.appendChild(sectionBody);
             } else {
                 console.error('Parent element with class "sectionBodySuccess" not found.');
             }
@@ -627,14 +622,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 
         /**
          * AUTHORIZATION FORM **/
-        showApiKeyForm(){
-            const sectionClass = '.userPanel';
-            const contentPart = this.createElement('div', { className: 'contentPart' });
-
-            const h1 = this.createHeading(1, this.h1);
-            const p = this.createParagraph(this.outSideText);
-
-            const settingsSection = this.createElement('div', { className: 'settingsSection' });
+        showApiKeyForm() {
             const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodyAuth' });
             const formBlock = this.createElement('div', { className: 'formBlock' });
 
@@ -656,28 +644,22 @@ if ( get_option( 'yespo_options' ) !== false ){
             divEl.appendChild(aEl);
             fieldGroup1.appendChild(divEl);
 
+            const nonceField = this.createElement('div', { id: 'nonceField' });
+            nonceField.innerHTML = this.nonceApiKeyForm;
+
             const fieldGroup2 = this.createFieldGroup();
 
-            let sectionContent = '';
+            const submitButton = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo __( 'Synchronize', Y_TEXTDOMAIN ); ?>' });
+            fieldGroup2.appendChild(submitButton);
 
-            sectionContent = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo __( 'Synchronize', Y_TEXTDOMAIN ); ?>' });
-            fieldGroup2.appendChild(sectionContent);
-
-            //form.append(h4, fieldGroup0,fieldGroup1, fieldGroup2, this.wpNonce );
-            form.append(h4, fieldGroup0,fieldGroup1, fieldGroup2);
-
+            form.append(h4, fieldGroup0, fieldGroup1, nonceField, fieldGroup2);
             formBlock.appendChild(form);
             sectionBody.appendChild(formBlock);
-            settingsSection.appendChild(sectionBody);
-            contentPart.append(h1, p, settingsSection);
 
-            const mainContainer = document.querySelector(sectionClass);
+            const mainContainer = document.querySelector('.settingsSection');
             if (mainContainer) {
                 mainContainer.innerHTML = '';
-                //mainContainer.appendChild(userPanel);
-                mainContainer.appendChild(contentPart);
-            } else {
-                console.error(`Parent element with class "${sectionClass}" not found.`);
+                mainContainer.appendChild(sectionBody);
             }
         }
         /*
@@ -706,6 +688,7 @@ if ( get_option( 'yespo_options' ) !== false ){
                         try {
                             //step 2. Start export
                             console.log('step2');
+                            if(document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML=response.username;
                             this.getNumberDataExport();
                             //document.getElementById('authorization-response1').innerHTML = response.message;
                             if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = true;

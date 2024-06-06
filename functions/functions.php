@@ -207,7 +207,7 @@ add_action('wp_ajax_nopriv_final_export_users_data_to_esputnik', 'get_final_expo
 
 /** remove woocommerce user **/
 function delete_woocommerce_user( $user_id ) {
-    (new Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user_id);
+    (new Yespo\Integrations\Esputnik\Esputnik_Contact())->delete_from_yespo($user_id, true);
 }
 add_action( 'delete_user', 'delete_woocommerce_user');
 
@@ -466,13 +466,19 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
+    $order = wc_get_order(555);
+    $res = Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::order_woo_to_yes($order);
+    //$res = (new Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order);
+    //$email = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid';
+    var_dump($res);
     //$res = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total();
     //$res2 = Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number();
     //var_dump($res . ' --- ' . $res2);
-
+/*
     $response = (new Yespo\Integrations\Esputnik\Esputnik_Account())->get_profile_name();
     $res = (json_decode($response))->organisationName;
     var_dump($res);
+*/
     //var_dump($response->organisationName);
     //$id = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->get_user_id_by_email('vadym.gmurya+2900@asper.pro');
     //var_dump($id);

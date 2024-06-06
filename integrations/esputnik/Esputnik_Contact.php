@@ -167,6 +167,13 @@ class Esputnik_Contact
             in_array($user->roles[0], $this->get_user_type_allowed())
         ) return true;
     }
+
+    public function remove_meta_key(){
+        $users = get_users();
+        foreach ( $users as $user ) {
+            delete_user_meta( $user->ID, self::USER_META_KEY );
+        }
+    }
     private function get_user_type_allowed(){
         return [
             self::CUSTOMER

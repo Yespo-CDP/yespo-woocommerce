@@ -68,8 +68,25 @@ function y_uninstall() { // phpcs:ignore
     $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
     $wpdb->query( "DROP TABLE IF EXISTS $order_log" );
 
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM $wpdb->usermeta WHERE meta_key = %s",
+            'yespo_contact_id'
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (
+            SELECT ID FROM $wpdb->posts WHERE post_type IN ('shop_order', 'shop_order_placehold')
+        )",
+            'sent_order_to_yespo'
+        )
+    );
+
     delete_option('yespo_options');
     delete_option('yespo-version');
+
     
     if (wp_next_scheduled('yespo_export_data_cron')) {
         wp_clear_scheduled_hook('yespo_export_data_cron');

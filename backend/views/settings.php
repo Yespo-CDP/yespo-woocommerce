@@ -12,8 +12,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             <img src="<?php echo Y_PLUGIN_URL;?>assets/images/yespologosmall.svg" width="33" height="33" alt="<?php echo Y_NAME;?>" title="<?php echo Y_NAME;?>">
             <div class="panelUser">
                 <?php
-                if($yespo_username) echo $yespo_username;
-                else echo __('My account',Y_TEXTDOMAIN);
+                if(isset($yespo_username)) echo $yespo_username;
                 ?>
             </div>
         </div>

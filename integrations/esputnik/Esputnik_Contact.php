@@ -14,8 +14,10 @@ class Esputnik_Contact
     private $table_users;
     const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
     const REMOTE_CONTACTS_ESPUTNIK_URL = "https://esputnik.com/api/v1/contacts";
+    const GET_EXPORT_BULK_ESPUTNIK_URL = "https://esputnik.com/api/v1/importstatus/";
     const CUSTOM_REQUEST = "POST";
     const CUSTOM_REQUEST_DELETE = "DELETE";
+    const CUSTOM_REQUEST_GET = "GET";
     const USER_META_KEY = 'yespo_contact_id';
     private $authData;
     private $wpdb;
@@ -74,6 +76,58 @@ class Esputnik_Contact
         }
     }
 
+    //method export bulk
+    public function export_bulk_users($data){
+        if(!empty($data)){
+            $response = $this->process_on_yespo($data, 'bulk');
+            if($response) $response = json_decode($response, true);
+
+            if(isset($response["asyncSessionId"])){
+                (new Esputnik_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
+
+                return $this->get_bulk_response($response["asyncSessionId"]);
+            }
+        }
+    }
+
+    //make private method
+    public function get_bulk_response($sessionId) {
+        if (isset($sessionId) && !empty($sessionId)) {
+            do {
+                $response = Esputnik_Curl_Request::curl_request(self::GET_EXPORT_BULK_ESPUTNIK_URL . $sessionId, self::CUSTOM_REQUEST_GET, $this->authData);
+
+                if ($response) {
+                    $response = json_decode($response, true);
+
+                    if ($response && $response["status"] === "FINISHED") {
+                        if (isset($response["mapping"]) && is_array($response["mapping"])) {
+                            $response["sessionId"] = $sessionId;
+                            return $response;
+                        }
+                    } else {
+                        sleep(10);
+                    }
+                }
+            } while ($response && $response["status"] !== "FINISHED");
+        }
+        return false;
+    }
+    /*
+    public function get_bulk_response($sessionId){
+        //$sessionId = 'e76ec64c-4243-4124-a9e7-b50a2a7a6c90';
+        if(isset($sessionId) && !empty($sessionId) ){
+            $response = json_decode(Esputnik_Curl_Request::curl_request(self::GET_EXPORT_BULK_ESPUTNIK_URL . $sessionId, self::CUSTOM_REQUEST_GET, $this->authData));
+            if($response) $response = json_decode($response, true);
+
+            if($response && $response["status"] === "FINISHED"){
+                if (isset($response["mapping"]) && is_array($response["mapping"])) {
+                    return $response["mapping"];
+                }
+            }
+            return false;
+        }
+    }
+    */
 
     public function remove_user_phone_on_yespo($email){
         if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
@@ -117,8 +171,8 @@ class Esputnik_Contact
 
         $url = self::REMOTE_CONTACT_ESPUTNIK_URL;
         $request = self::CUSTOM_REQUEST;
-        if($operation === 'delete'){
-            if($relocate) $erase = '&erase=false';
+        if($operation === 'delete') {
+            if ($relocate) $erase = '&erase=false';
             else $erase = '&erase=true';
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . $erase;
             //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
@@ -126,6 +180,8 @@ class Esputnik_Contact
 
             $response = Esputnik_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
             (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
+        } else if($operation === 'bulk'){
+            return Esputnik_Curl_Request::curl_request(self::REMOTE_CONTACTS_ESPUTNIK_URL, $request, $this->authData, $data);
         } else {
             if ($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;
 
@@ -178,7 +234,7 @@ class Esputnik_Contact
         return get_user_meta($user_id, self::USER_META_KEY, true);
     }
 
-    private function add_esputnik_id_to_userprofile($user_id, $external_id){
+    public function add_esputnik_id_to_userprofile($user_id, $external_id){
         if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);
     }

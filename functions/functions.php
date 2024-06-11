@@ -419,7 +419,8 @@ function yespo_export_data_cron_function(){
     }
 */
 
-    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
+    //(new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
+    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_bulk_export_users();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
@@ -474,6 +475,7 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
+
     global $wpdb;
 
     $wpdb->query(
@@ -491,7 +493,30 @@ function get_all_users($post)
             'sent_order_to_yespo'
         )
     );
+/*
+    $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users())->get_users_bulk_export();
+    var_dump($users);
+*/
+/*
+    $users = [];
+    for($i = 1; $i <= 500; $i++){
+        //$user = new stdClass();
+        $user = [];
+        $user['email'] = 'testmail+' . $i . '@test.com.ua';
+        $user['ID'] = 'te' . $i;
+        $users[] = $user;
+    }
 
+    $usersObj = (new Yespo\Integrations\Esputnik\Esputnik_Contact_Mapping())->create_bulk_export_array($users);
+
+    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
+    $data_to_append = json_encode($usersObj);
+    $file_handle = fopen($file_path, 'a');
+    if ($file_handle) {
+        fwrite($file_handle, $data_to_append);
+        fclose($file_handle);
+    }
+*/
     //$order = wc_get_order(555);
     //$res = Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::order_woo_to_yes($order);
     //$res = (new Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order);

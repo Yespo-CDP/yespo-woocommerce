@@ -307,6 +307,34 @@ class ActDeact extends Base {
 
             $wpdb->query($wpdb->prepare($sqlExport));
         }
+
+        $table_yespo_queue = $wpdb->prefix . 'yespo_queue';
+        $charset_collate_export = $wpdb->get_charset_collate();
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_queue'") != $table_yespo_queue) {
+            $sqlQueue = "CREATE TABLE $table_yespo_queue (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                session_id varchar(255) NOT NULL,
+                export_status varchar(255) default NULL,
+                local_status varchar(255) default NULL,
+                PRIMARY KEY  (id)
+            ) $charset_collate_export;";
+
+            $wpdb->query($wpdb->prepare($sqlQueue));
+        }
+
+        $table_yespo_queue_items = $wpdb->prefix . 'yespo_queue_items';
+        $charset_collate_export = $wpdb->get_charset_collate();
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_queue_items'") != $table_yespo_queue_items) {
+            $sqlQueueItems = "CREATE TABLE $table_yespo_queue_items (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                session_id varchar(255) default NULL,
+                contact_id varchar(255) NOT NULL,
+                yespo_id varchar(255) default NULL,
+                PRIMARY KEY  (id)
+            ) $charset_collate_export;";
+
+            $wpdb->query($wpdb->prepare($sqlQueueItems));
+        }
     }
 
     public static function yespo_crone_deactivate(){

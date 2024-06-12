@@ -68,6 +68,24 @@ class Esputnik_Contact_Mapping
         return $data;
     }
 
+    //array users for bulk export
+    public static function create_bulk_export_array($users){
+        $data = [];
+        $contact = new Esputnik_Export_Users();
+        if($users && count($users) > 0){
+            $data['dedupeOn'] = 'email';
+            foreach($users as $user){
+                $data['contacts'][] = self::data_woo_to_yes(
+                    self::user_transformation_to_array(get_user_by('id', $user))
+                );
+                $contact->add_entry_queue_items(
+                    (get_userdata($user))->user_email
+                );
+            }
+        }
+        return $data;
+    }
+
     //remove user phone
     private static function remove_phone_number_array($email){
         return [

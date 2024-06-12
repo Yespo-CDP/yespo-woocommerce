@@ -340,18 +340,6 @@ function stop_export_to_yespo(){
         $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users())->stop_export_users();
         $orders = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->stop_export_orders();
         if($exported !== $total) {
-            /*
-            $total = 0;
-            $exported = 0;
-            if ($users){
-                $total += $users->total;
-                $exported += $users->exported;
-            }
-            if($orders){
-                $total += $orders->total;
-                $exported += $orders->exported;
-            }
-            */
             //echo json_encode(floor( ($exported / $total) * 100));
             echo json_encode(floor( ($exported / $total) * 100));
         } else echo json_encode(0);
@@ -373,18 +361,6 @@ function resume_export_to_yespo(){
         $orders = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->resume_export_orders();
         //if($users || $orders) {
         if($exported !== $total) {
-            /*
-            $total = 0;
-            $exported = 0;
-            if ($users){
-                $total += $users->total;
-                $exported += $users->exported;
-            }
-            if($orders){
-                $total += $orders->total;
-                $exported += $orders->exported;
-            }
-            */
             //echo json_encode(floor( ($exported / $total) * 100));
             echo json_encode(floor( ($exported / $total) * 100));
         } else echo json_encode(0);

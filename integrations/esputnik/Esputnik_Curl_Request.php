@@ -11,7 +11,8 @@ class Esputnik_Curl_Request
         $url,
         $custom_request,
         $auth_data,
-        $user_data = ''
+        $user_data = '',
+        $type_response = ''
     ){
         try {
             $curl = curl_init();
@@ -36,7 +37,7 @@ class Esputnik_Curl_Request
             $err = curl_error($curl);
 
             $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            if($custom_request === 'DELETE') $response = $http_code;
+            if($custom_request === 'DELETE' || $type_response === 'orders') $response = $http_code;
             curl_close($curl);
 
             if ($err) return "cURL Error #:" . $err;

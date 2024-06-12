@@ -340,18 +340,6 @@ function stop_export_to_yespo(){
         $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users())->stop_export_users();
         $orders = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->stop_export_orders();
         if($exported !== $total) {
-            /*
-            $total = 0;
-            $exported = 0;
-            if ($users){
-                $total += $users->total;
-                $exported += $users->exported;
-            }
-            if($orders){
-                $total += $orders->total;
-                $exported += $orders->exported;
-            }
-            */
             //echo json_encode(floor( ($exported / $total) * 100));
             echo json_encode(floor( ($exported / $total) * 100));
         } else echo json_encode(0);
@@ -373,18 +361,6 @@ function resume_export_to_yespo(){
         $orders = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->resume_export_orders();
         //if($users || $orders) {
         if($exported !== $total) {
-            /*
-            $total = 0;
-            $exported = 0;
-            if ($users){
-                $total += $users->total;
-                $exported += $users->exported;
-            }
-            if($orders){
-                $total += $orders->total;
-                $exported += $orders->exported;
-            }
-            */
             //echo json_encode(floor( ($exported / $total) * 100));
             echo json_encode(floor( ($exported / $total) * 100));
         } else echo json_encode(0);
@@ -419,8 +395,10 @@ function yespo_export_data_cron_function(){
     }
 */
 
-    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
-    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
+    //(new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
+    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_bulk_export_users();
+    //(new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
+    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_bulk_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
     //(new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_woo_registered_user();
@@ -474,6 +452,26 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
+    /*
+    $orders = \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array((new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders());
+    var_dump($orders['orders']);
+*//*
+    $export_res = (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_bulk_orders_on_yespo(
+        \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array(
+            (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders()),
+        'update');
+    var_dump($export_res);
+*/
+    /*
+    $orders = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders();
+    $arr = \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array($orders);
+
+    var_dump($arr);
+
+    $orders = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders();
+    var_dump($orders);
+*/
+/*
     global $wpdb;
 
     $wpdb->query(
@@ -491,7 +489,31 @@ function get_all_users($post)
             'sent_order_to_yespo'
         )
     );
+*/
+/*
+    $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users())->get_users_bulk_export();
+    var_dump($users);
+*/
+/*
+    $users = [];
+    for($i = 1; $i <= 500; $i++){
+        //$user = new stdClass();
+        $user = [];
+        $user['email'] = 'testmail+' . $i . '@test.com.ua';
+        $user['ID'] = 'te' . $i;
+        $users[] = $user;
+    }
 
+    $usersObj = (new Yespo\Integrations\Esputnik\Esputnik_Contact_Mapping())->create_bulk_export_array($users);
+
+    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
+    $data_to_append = json_encode($usersObj);
+    $file_handle = fopen($file_path, 'a');
+    if ($file_handle) {
+        fwrite($file_handle, $data_to_append);
+        fclose($file_handle);
+    }
+*/
     //$order = wc_get_order(555);
     //$res = Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::order_woo_to_yes($order);
     //$res = (new Yespo\Integrations\Esputnik\Esputnik_Order())->create_order_on_yespo($order);

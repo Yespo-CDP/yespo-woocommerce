@@ -9,9 +9,10 @@ class Esputnik_Export_Orders
     private $period_selection = 300;
     private $period_selection_since = 300;
     private $period_selection_up = 30;
-    private $number_for_export = 700;
-    //private $number_for_export = 1;
+    private $number_for_export = 500;
+    //private $number_for_export = 50;
     private $table_name;
+    private $table_yespo_queue_orders;
     private $table_posts;
     private $meta_key;
     private $wpdb;
@@ -26,6 +27,7 @@ class Esputnik_Export_Orders
         $this->wpdb = $wpdb;
         $this->table_posts = $this->wpdb->prefix . 'wc_orders';
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
+        $this->table_yespo_queue_orders = $this->wpdb->prefix . 'yespo_queue_orders';
         $this->time_limit = current_time('timestamp') - $this->period_selection;
         $this->gmt = time() - $this->period_selection;
     }
@@ -91,18 +93,41 @@ class Esputnik_Export_Orders
                 $item = wc_get_order($order);
                 if ($item) {
                     (new Esputnik_Order())->create_order_on_yespo($item, 'update');
-
-                    /*
-                    if ($email = $item->get_billing_email()) {
-                        if ($user = get_user_by('email', $email)) {
-                            if ($item->get_billing_phone()){
-                                update_user_meta($user->ID, 'phone_number', $item->get_billing_phone());
-                                (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_on_yespo($user);
-                            }
-                        }
-                    }
-                    */
                 }
+            }
+        }
+
+    }
+    public function start_bulk_export_orders(){
+        $status = $this->get_order_export_status_processed('active');
+        $orders = $this->get_bulk_export_orders();
+        if(!empty($status) && $status->status == 'active' && !$this->check_queue_items_for_session()){
+            $total = intval($status->total);
+            $exported = intval($status->exported);
+            $current_status = $status->status;
+            $live_exported = 0;
+
+            if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
+
+
+            $export_res = (new Esputnik_Order())->create_bulk_orders_on_yespo(Esputnik_Order_Mapping::create_bulk_order_export_array($orders), 'update');
+
+            if($export_res) {
+                $live_exported = $export_res;
+                $this->update_entry_queue_items('FINISHED');
+            }
+
+            if($total <= $exported + $live_exported){
+                $current_status = 'completed';
+                $exported = $total;
+                //Esputnik_Metrika::count_finish_exported();
+            } else $exported += $live_exported;
+
+            $this->update_table_data($status->id, $exported, $current_status);
+        } else {
+            $status = $this->get_order_export_status();
+            if(!empty($status) && $status->status === 'completed' && $status->display === null){
+                $this->update_table_data($status->id, intval($status->total), $status->status);
             }
         }
 
@@ -224,19 +249,6 @@ class Esputnik_Export_Orders
             }
         }
         return $order_ids;
-        /*
-        $orders = [];
-        $orders_query = new WP_Query( $args );
-
-        if ( $orders_query->have_posts() ) {
-            while ( $orders_query->have_posts() ) {
-                $orders_query->the_post();
-                $orders[] = $orders_query->post->ID;
-            }
-            wp_reset_postdata();
-        }
-        return $orders;
-        */
     }
     private function get_orders_args($shop_order){
         return [
@@ -262,6 +274,53 @@ class Esputnik_Export_Orders
         ];
     }
 
+    /**
+     * entry to yespo queue orders
+     **/
+
+    public function add_entry_queue_items() {
+        $count = $this->check_last_entry_status('STARTED');
+
+        if ($count == 0) {
+            $data = [
+                'yespo_status' => 'STARTED'
+            ];
+            return $this->wpdb->insert($this->table_yespo_queue_orders, $data);
+        }
+
+        return false;
+    }
+
+    public function update_entry_queue_items($status) {
+        $last_id = $this->wpdb->get_var(
+            "SELECT ID 
+        FROM {$this->table_yespo_queue_orders} 
+        ORDER BY ID DESC 
+        LIMIT 1"
+        );
+
+        if ($last_id) {
+            $data = ['yespo_status' => $status];
+            $where = ['ID' => $last_id];
+            return $this->wpdb->update($this->table_yespo_queue_orders, $data, $where);
+        }
+
+        return false;
+    }
+    public function check_queue_items_for_session() {
+        return $this->check_last_entry_status('STARTED');
+    }
+    private function check_last_entry_status($status) {
+        $last_status = $this->wpdb->get_var(
+            "SELECT yespo_status 
+        FROM {$this->table_yespo_queue_orders} 
+        ORDER BY ID DESC 
+        LIMIT 1"
+        );
+        return $last_status === $status;
+    }
+
+
     private function get_latest_orders(){
         $results = $this->get_orders_from_db($this->time_limit);
         if(empty($results)) $results = $this->get_orders_from_db($this->gmt);
@@ -269,12 +328,35 @@ class Esputnik_Export_Orders
         $orders = [];
         if(count($results) > 0){
             foreach ($results as $post){
-                //if(get_post_meta( $post->ID, $this->meta_key, true )) $orders[] = $post->ID;
-                //else
                 $orders[] = $post->id;
             }
         }
         return $orders;
+    }
+
+    public function get_bulk_export_orders(){
+        $period_start = date('Y-m-d H:i:s', time() - $this->period_selection);
+
+        return $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_posts
+            WHERE type = %s
+            AND status != %s
+            AND ID NOT IN (
+                SELECT post_id FROM {$this->wpdb->prefix}postmeta
+                WHERE meta_key = %s AND meta_value = 'true'
+            )
+            AND date_created_gmt < %s
+            ORDER BY ID ASC
+            LIMIT %d",
+                'shop_order',
+                'wc-checkout-draft',
+                $this->meta_key,
+                $period_start,
+                $this->number_for_export
+            ),
+            OBJECT
+        );
     }
 
     private function get_orders_from_database_without_metakey(){

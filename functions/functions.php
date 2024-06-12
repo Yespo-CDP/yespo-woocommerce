@@ -421,7 +421,8 @@ function yespo_export_data_cron_function(){
 
     //(new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_export_users();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->start_bulk_export_users();
-    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
+    //(new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_export_orders();
+    (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->start_bulk_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
     //(new \Yespo\Integrations\Esputnik\Esputnik_Contact())->update_woo_registered_user();
@@ -475,7 +476,26 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
  */
 function get_all_users($post)
 {
+    /*
+    $orders = \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array((new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders());
+    var_dump($orders['orders']);
+*//*
+    $export_res = (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_bulk_orders_on_yespo(
+        \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array(
+            (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders()),
+        'update');
+    var_dump($export_res);
+*/
+    /*
+    $orders = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders();
+    $arr = \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array($orders);
 
+    var_dump($arr);
+
+    $orders = (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders();
+    var_dump($orders);
+*/
+/*
     global $wpdb;
 
     $wpdb->query(
@@ -493,6 +513,7 @@ function get_all_users($post)
             'sent_order_to_yespo'
         )
     );
+*/
 /*
     $users = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users())->get_users_bulk_export();
     var_dump($users);

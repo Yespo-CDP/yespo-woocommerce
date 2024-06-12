@@ -335,6 +335,18 @@ class ActDeact extends Base {
 
             $wpdb->query($wpdb->prepare($sqlQueueItems));
         }
+
+        $table_yespo_queue_orders = $wpdb->prefix . 'yespo_queue_orders';
+        $charset_collate_export = $wpdb->get_charset_collate();
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_queue_orders'") != $table_yespo_queue_orders) {
+            $sqlQueueOrders = "CREATE TABLE $table_yespo_queue_orders (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                yespo_status varchar(255) NOT NULL,
+                PRIMARY KEY  (id)
+            ) $charset_collate_export;";
+
+            $wpdb->query($wpdb->prepare($sqlQueueOrders));
+        }
     }
 
     public static function yespo_crone_deactivate(){

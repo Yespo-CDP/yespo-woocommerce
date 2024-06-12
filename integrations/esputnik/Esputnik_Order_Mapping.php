@@ -41,6 +41,48 @@ class Esputnik_Order_Mapping
         return $data;
     }
 
+    //array users for bulk export
+    public static function order_bulk_woo_to_yes($order){
+        $orderArray = self::order_transformation_to_array($order);
+        if (isset($orderArray['phone']) && !empty($orderArray['phone'])) {
+            //if(!empty($orderArray['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($orderArray['phone'], $orderArray['country_id']);
+            //else $phoneNumber = preg_replace("/[^0-9]/", "", $orderArray['phone']);
+            $phoneNumber = $orderArray['phone'];
+        } else $phoneNumber = '';
+
+        $data['status'] = $orderArray['status'];
+        $data['externalOrderId'] = $orderArray['externalOrderId'];
+        if($orderArray['externalCustomerId']) $data['externalCustomerId'] = $orderArray['externalCustomerId'];
+        $data['totalCost'] = $orderArray['totalCost'];
+        $data['email'] = $orderArray['email'];
+        $data['date'] = $orderArray['date'];
+        $data['currency'] = $orderArray['currency'];
+        if(Esputnik_Contact_Validation::name_validation($orderArray['firstName'])) $data['firstName'] = $orderArray['firstName'];
+        if(Esputnik_Contact_Validation::lastname_validation($orderArray['lastName'])) $data['lastName'] = $orderArray['lastName'];
+        $data['deliveryAddress'] = $orderArray['deliveryAddress'];
+        $data['phone'] = preg_replace("/[^0-9]/", "", $phoneNumber);
+        $data['shipping'] = $orderArray['shipping'];
+        $data['discount'] = $orderArray['discount'];
+        $data['taxes'] = $orderArray['taxes'];
+        $data['source'] = $orderArray['source'];
+        //$data['orders']['deliveryMethod'] = $orderArray['deliveryMethod'];
+        $data['paymentMethod'] = $orderArray['paymentMethod'];
+        $data['items'] = self::get_orders_items($order);
+        if($orderArray['additionalInfo']) $data['additionalInfo']['comment'] = $orderArray['additionalInfo'];
+
+        return $data;
+    }
+    public static function create_bulk_order_export_array($orders){
+        $data = [];
+        if($orders && count($orders) > 0){
+            $i = 0;
+            foreach($orders as $order){
+                $data['orders'][] = self::order_bulk_woo_to_yes(wc_get_order($order->id));
+            }
+        }
+        return $data;
+    }
+
     public static function map_clean_user_data_order($order){
         $orderArray = self::order_transformation_to_array($order);
 

@@ -6,17 +6,24 @@ class Esputnik_Export_Users
 {
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
-    private $number_for_export = 700;
-    //private $number_for_export = 1;
+    private $number_for_export = 500;
+    //private $number_for_export = 50;
     private $table_name;
+    private $table_yespo_queue;
+    private $table_yespo_queue_items;
     private $meta_key;
     private $wpdb;
+    private $esputnikContact;
 
     public function __construct(){
         global $wpdb;
-        $this->meta_key = (new Esputnik_Contact())->get_meta_key();
+        $this->esputnikContact = new Esputnik_Contact();
+        $this->meta_key = $this->esputnikContact->get_meta_key();
+        //$this->meta_key = (new Esputnik_Contact())->get_meta_key();
         $this->wpdb = $wpdb;
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
+        $this->table_yespo_queue = $this->wpdb->prefix . 'yespo_queue';
+        $this->table_yespo_queue_items = $this->wpdb->prefix . 'yespo_queue_items';
     }
 
     public function add_users_export_task(){
@@ -72,6 +79,62 @@ class Esputnik_Export_Users
         }
     }
 
+    //after getting result bulk users export
+    public function start_bulk_export_users() {
+        $status = $this->get_user_export_status_processed('active');
+        $queue = $this->get_yespo_queue_statuses();
+        if (
+            !empty($status) &&
+            $status->status == 'active' &&
+            (
+                empty($queue) ||
+                (
+                    !empty($queue) &&
+                    $queue->export_status === 'FINISHED' &&
+                    $queue->local_status === 'FINISHED'
+                )
+            )
+
+        ){
+            $total = intval($status->total);
+            $exported = intval($status->exported);
+            $current_status = $status->status;
+            $live_exported = 0;
+
+            if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
+
+            //new code
+            if($this->number_for_export > 0){
+                $response = $this->esputnikContact->export_bulk_users($this->get_users_bulk_export());
+
+                if(is_array($response["mapping"]) && count($response["mapping"]) > 0){
+                    foreach ($response["mapping"] as $user){
+
+                        if(isset($user['dedupeValue']) && isset($user['contactId'])) {
+                            $this->esputnikContact->add_esputnik_id_to_userprofile((get_user_by('email', $user['dedupeValue']))->ID, $user['contactId']);
+                            $this->update_entry_queue_items($response["sessionId"], $user['dedupeValue'], $user['contactId']);
+                        }
+                        $live_exported += 1;
+                    }
+                    if($total <= $exported + $live_exported){
+                        $current_status = 'completed';
+                        $exported = $total;
+                        //Esputnik_Metrika::count_finish_exported();
+                    } else $exported += $live_exported;
+
+                    $this->update_table_data($status->id, $exported, $current_status);
+                    if(isset($response["sessionId"]) && $this->check_queue_items_for_session($response["sessionId"])) $this->update_entry_yespo_queue($response["sessionId"], "FINISHED", "FINISHED");
+                }
+            }
+
+        } else {
+            $status = $this->get_user_export_status();
+            if(!empty($status) && $status->status === 'completed' && $status->display === null){
+                $this->update_table_data($status->id, intval($status->total), $status->status);
+            }
+        }
+    }
+
     public function get_final_users_exported(){
         $status = $this->get_user_export_status();
         return $this->update_table_data($status->id, intval($status->total), $status->status, true);
@@ -114,6 +177,12 @@ class Esputnik_Export_Users
         }
     }
 
+    public function get_users_bulk_export(){
+        return Esputnik_Contact_Mapping::create_bulk_export_array(
+            $this->get_users_object($this->get_bulk_users_export_args())
+        );
+    }
+
     private function get_user_export_status(){
         return $this->wpdb->get_row(
             $this->wpdb->prepare(
@@ -151,6 +220,76 @@ class Esputnik_Export_Users
     public function get_users_object($args){
         return get_users($args);
     }
+    //method for testing functionality
+    /*
+    public function get_users_for_export(){
+        return $this->get_users_object($this->get_users_export_args());
+    }
+    */
+    /**
+     * entry to yespo queue
+     **/
+    public function add_entry_yespo_queue($session_id){
+        $data = [
+            'session_id' => $session_id,
+            'export_status' => 'IMPORTING',
+            'local_status' => ''
+        ];
+        return $this->wpdb->insert($this->table_yespo_queue, $data);
+    }
+    public function update_entry_yespo_queue($session_id, $export_status = '', $local_status = '') {
+        $data = [];
+        if(!empty($export_status)) $data['export_status'] = $export_status;
+        if(!empty($local_status)) $data['local_status'] = $local_status;
+        $where = ['session_id' => $session_id];
+
+        return $this->wpdb->update($this->table_yespo_queue, $data, $where);
+    }
+    public function get_yespo_queue_statuses() {
+        $result = $this->wpdb->get_row(
+            "SELECT export_status, local_status 
+        FROM {$this->table_yespo_queue} 
+        ORDER BY id DESC 
+        LIMIT 1",
+            OBJECT
+        );
+
+        return $result;
+    }
+
+    /**
+     * entry to yespo queue items
+     **/
+    public function add_entry_queue_items($user_id){
+        $data = [
+            'session_id' =>'',
+            'contact_id' => $user_id,
+            'yespo_id' =>''
+        ];
+        return $this->wpdb->insert($this->table_yespo_queue_items, $data);
+    }
+    public function update_entry_queue_items($session_id, $user_id, $yespo_id = null) {
+        $data = [
+            'session_id' => $session_id,
+            'yespo_id' => $yespo_id
+        ];
+        $where = ['contact_id' => $user_id];
+
+        return $this->wpdb->update($this->table_yespo_queue_items, $data, $where);
+    }
+    public function check_queue_items_for_session($session_id) {
+        $count = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT COUNT(*) 
+                FROM {$this->table_yespo_queue_items} 
+                WHERE session_id = %s 
+                AND (yespo_id IS NULL OR yespo_id = '')",
+                $session_id
+            )
+        );
+        return $count == 0;
+    }
+
     private function update_table_data($id, $exported, $status, $display = null){
         return $this->wpdb->update(
             $this->table_name,
@@ -182,6 +321,28 @@ class Esputnik_Export_Users
             'orderby' => 'registered',
             'order'   => 'ASC',
             'fields'  => 'ID',
+            'meta_query' => array(
+                'relation' => 'OR',
+                array(
+                    'key'     => $this->meta_key,
+                    'compare' => 'NOT EXISTS',
+                ),
+                array(
+                    'key'     => $this->meta_key,
+                    'value'   => '',
+                    'compare' => '=',
+                ),
+            ),
+        ];
+    }
+
+    private function get_bulk_users_export_args(){
+        return [
+            'role__in'    => [self::CUSTOMER],
+            'orderby' => 'registered',
+            'order'   => 'ASC',
+            'fields'  => 'ID',
+            'number' => $this->number_for_export,
             'meta_query' => array(
                 'relation' => 'OR',
                 array(

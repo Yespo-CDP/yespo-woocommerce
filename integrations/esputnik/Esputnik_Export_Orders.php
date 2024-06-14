@@ -21,6 +21,8 @@ class Esputnik_Export_Orders
     private $shop_order = 'shop_order';
     private $shop_order_placehold = 'shop_order_placehold';
 
+    private $table_yespo_orders_json;
+
     public function __construct(){
         global $wpdb;
         $this->meta_key = (new Esputnik_Order())->get_meta_key();
@@ -30,6 +32,8 @@ class Esputnik_Export_Orders
         $this->table_yespo_queue_orders = $this->wpdb->prefix . 'yespo_queue_orders';
         $this->time_limit = current_time('timestamp') - $this->period_selection;
         $this->gmt = time() - $this->period_selection;
+
+        $this->table_yespo_orders_json = $wpdb->prefix . 'yespo_orders_json';
     }
 
     public function add_orders_export_task(){
@@ -396,6 +400,20 @@ class Esputnik_Export_Orders
                 date('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
         );
+    }
+
+
+
+    //add json of exported orders
+    public function add_json_log_entry($orders) {
+        $json = json_encode($orders);
+        if ($json !== false) {
+            $data = [
+                'text' => $json,
+                'created_at' => current_time('mysql')
+            ];
+            $this->wpdb->insert($this->table_yespo_orders_json, $data);
+        }
     }
 
 }

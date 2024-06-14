@@ -450,12 +450,16 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
 /***
 /////////////////////////////////// TEST /////////////////////////////////
  */
+
+
+
 function get_all_users($post)
 {
-    /*
-    $orders = \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array((new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders());
-    var_dump($orders['orders']);
-*//*
+    
+
+    //$orders = \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array((new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders());
+    //var_dump($orders['orders']);
+/*
     $export_res = (new \Yespo\Integrations\Esputnik\Esputnik_Order())->create_bulk_orders_on_yespo(
         \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array(
             (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders()),
@@ -483,9 +487,9 @@ function get_all_users($post)
 
     $wpdb->query(
         $wpdb->prepare(
-            "DELETE FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (
-            SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order'
-        )",
+            "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (
+                SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
+            )",
             'sent_order_to_yespo'
         )
     );

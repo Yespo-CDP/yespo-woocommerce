@@ -36,21 +36,25 @@ class Esputnik_Order
             return __( 'Empty user authorization data', Y_TEXTDOMAIN );
         }
 
-        $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders,'orders');
+        (new Esputnik_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
 
-        (new Esputnik_Export_Orders())->add_entry_queue_items();
+        if($orders['orders'] > 0) {
+            $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders, 'orders');
 
-        if($response > 199 && $response < 300){
-            $orderCounter = 0;
-            foreach ($orders['orders'] as $item){
-                $order = wc_get_order($item['externalOrderId']);
-                if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
-                    update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
-                    (new Esputnik_Logging_Data())->create_entry_order($order->get_id(), $operation); //add entry to logfile
-                    $orderCounter++;
+            (new Esputnik_Export_Orders())->add_entry_queue_items();
+
+            if ($response > 199 && $response < 300) {
+                $orderCounter = 0;
+                foreach ($orders['orders'] as $item) {
+                    $order = wc_get_order($item['externalOrderId']);
+                    if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
+                        update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
+                        (new Esputnik_Logging_Data())->create_entry_order($order->get_id(), $operation); //add entry to logfile
+                        $orderCounter++;
+                    }
                 }
+                return $orderCounter;
             }
-            return $orderCounter;
         }
         return false;
     }

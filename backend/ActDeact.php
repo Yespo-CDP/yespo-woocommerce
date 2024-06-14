@@ -347,6 +347,20 @@ class ActDeact extends Base {
 
             $wpdb->query($wpdb->prepare($sqlQueueOrders));
         }
+
+        $table_yespo_orders_json = $wpdb->prefix . 'yespo_orders_json';
+        $charset_yespo_orders_json = $wpdb->get_charset_collate();
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_orders_json'") != $table_yespo_orders_json) {
+            $sqlOrdersJson = "CREATE TABLE $table_yespo_orders_json (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                text longtext default NULL,
+                created_at datetime default NULL,
+                PRIMARY KEY  (id)
+            )$charset_yespo_orders_json;";
+            $wpdb->query($wpdb->prepare($sqlOrdersJson));
+        }
+
     }
 
     public static function yespo_crone_deactivate(){

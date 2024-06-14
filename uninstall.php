@@ -66,6 +66,7 @@ function y_uninstall() { // phpcs:ignore
     $table_yespo_queue = $wpdb->prefix . 'yespo_queue';
     $table_yespo_queue_items = $wpdb->prefix . 'yespo_queue_items';
     $table_yespo_queue_orders = $wpdb->prefix . 'yespo_queue_orders';
+    $table_yespo_orders_json = $wpdb->prefix . 'yespo_orders_json'; //logging jsons to yespo
 
     $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
     $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
@@ -73,6 +74,7 @@ function y_uninstall() { // phpcs:ignore
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_items" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_orders" );
+    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_orders_json" );
 
     $wpdb->query(
         $wpdb->prepare(
@@ -83,9 +85,9 @@ function y_uninstall() { // phpcs:ignore
 
     $wpdb->query(
         $wpdb->prepare(
-            "DELETE FROM $wpdb->postmeta WHERE meta_key = %s AND post_id IN (
-            SELECT ID FROM $wpdb->posts WHERE post_type IN ('shop_order', 'shop_order_placehold')
-        )",
+            "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (
+                SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
+            )",
             'sent_order_to_yespo'
         )
     );

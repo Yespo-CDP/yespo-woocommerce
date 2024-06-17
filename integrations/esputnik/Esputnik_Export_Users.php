@@ -89,7 +89,6 @@ class Esputnik_Export_Users
             (
                 empty($queue) ||
                 (
-                    !empty($queue) &&
                     $queue->export_status === 'FINISHED' &&
                     $queue->local_status === 'FINISHED'
                 )

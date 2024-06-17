@@ -361,6 +361,20 @@ class ActDeact extends Base {
             $wpdb->query($wpdb->prepare($sqlOrdersJson));
         }
 
+        $table_yespo_auth = $wpdb->prefix . 'yespo_auth_log';
+        $charset_yespo_auth = $wpdb->get_charset_collate();
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_auth'") != $table_yespo_auth) {
+            $sqlYespoAuth = "CREATE TABLE $table_yespo_auth (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                api_key varchar(255) default NULL,
+                response varchar(255) default NULL,
+                time datetime default NULL,
+                PRIMARY KEY  (id)
+            )$charset_yespo_auth;";
+            $wpdb->query($wpdb->prepare($sqlYespoAuth));
+        }
+
     }
 
     public static function yespo_crone_deactivate(){

@@ -24,6 +24,7 @@ function y_get_settings() {
 /*** Get profile username on Yespo ***/
 function get_account_profile_name(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'get_account_yespo_name' ) {
+        $organisationName = '';
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
             if (isset($options['yespo_username'])) $organisationName = $options['yespo_username'];
@@ -56,7 +57,11 @@ function check_api_authorization(){
         if(isset($yespo_api_key)){
             $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($yespo_api_key);
             if ($result === 200) {
+                (new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
                 echo json_encode(['auth' => 'success']);
+            } else {
+                (new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
+                echo json_encode(0);
             }
         } else echo json_encode(0);
     }
@@ -78,11 +83,14 @@ function yespo_save_settings() {
 
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'check_api_key_esputnik' ) {
         //Esputnik_Metrika::count_start_connections();
+        $options = [];
         $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
-        update_option('yespo_options', $options);
-        $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($options['yespo_api_key']);
+        //update_option('yespo_options', $options);
+        $accountClass = new \Yespo\Integrations\Esputnik\Esputnik_Account();
+        $result = $accountClass->send_keys($options['yespo_api_key']);
         if ($result === 200) {
-            $userData = (new Yespo\Integrations\Esputnik\Esputnik_Account())->get_profile_name();
+            update_option('yespo_options', $options);
+            $userData = $accountClass->get_profile_name();
             if (!empty($userData)) {
                 $objResponse = json_decode($userData);
                 $organisationName = $objResponse->organisationName;
@@ -103,6 +111,7 @@ function yespo_save_settings() {
                 'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }
+        $accountClass->add_entry_auth_log($options['yespo_api_key'], $result);
         echo json_encode( $response_data );
         exit;
     }
@@ -455,8 +464,31 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
 
 function get_all_users($post)
 {
-    
 
+    $email = 'test';
+    //$email = 'test';
+    if(!empty($email)){
+
+        $result = (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->create_single_contact_log($email);
+
+        var_dump($result);
+        /*
+        $user = get_user_by('email', $email);
+
+
+        if($user && $user->ID){
+            $result = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->get_yespo_user_id($user->ID);
+            //$yespo_contact_id = get_user_meta($user->ID, 'yespo_contact_id', true);
+            var_dump($result);
+        }
+        */
+    }
+
+    //(new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log('apiapi', '200');
+    /*
+    $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys('712C72C7EFF83A56CAD2F7462714398E');
+    var_dump($result);
+*/
     //$orders = \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping::create_bulk_order_export_array((new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_bulk_export_orders());
     //var_dump($orders['orders']);
 /*

@@ -76,9 +76,26 @@ class Esputnik_Contact
         }
     }
 
+    public function get_yespo_user_id($id){
+        $url = "https://esputnik.com/api/v1/contacts?externalCustomerId=" . $id ."&startindex=1&maxrows=500";
+        $result = $this->process_on_yespo($url, 'add_meta_key');
+        if($result){
+            $response = json_decode($result);
+            if($response[0]->id) {
+                var_dump($response[0]->id);
+                update_user_meta($id, self::USER_META_KEY, $response[0]->id);
+                return $response[0]->id;
+            }
+        }
+    }
+
+
     //method export bulk
     public function export_bulk_users($data){
         if(!empty($data)){
+
+            (new Esputnik_Export_Orders())->add_json_log_entry($data);// add log entry to DB
+
             $response = $this->process_on_yespo($data, 'bulk');
             if($response) $response = json_decode($response, true);
 
@@ -180,6 +197,8 @@ class Esputnik_Contact
 
             $response = Esputnik_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
             (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
+        } else if($operation === 'add_meta_key'){
+            return Esputnik_Curl_Request::curl_request($data, self::CUSTOM_REQUEST_GET, $this->authData);
         } else if($operation === 'bulk'){
             return Esputnik_Curl_Request::curl_request(self::REMOTE_CONTACTS_ESPUTNIK_URL, $request, $this->authData, $data);
         } else {

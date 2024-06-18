@@ -67,6 +67,7 @@ function y_uninstall() { // phpcs:ignore
     $table_yespo_queue_items = $wpdb->prefix . 'yespo_queue_items';
     $table_yespo_queue_orders = $wpdb->prefix . 'yespo_queue_orders';
     $table_yespo_orders_json = $wpdb->prefix . 'yespo_orders_json'; //logging jsons to yespo
+    $table_yespo_auth_log = $wpdb->prefix . 'yespo_auth_log'; //auth logging
 
     $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
     $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
@@ -75,6 +76,7 @@ function y_uninstall() { // phpcs:ignore
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_items" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_orders" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_orders_json" );
+    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_auth_log" );
 
     $wpdb->query(
         $wpdb->prepare(

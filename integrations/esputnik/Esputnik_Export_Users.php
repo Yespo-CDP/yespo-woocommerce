@@ -107,13 +107,19 @@ class Esputnik_Export_Users
                 $response = $this->esputnikContact->export_bulk_users($this->get_users_bulk_export());
 
                 if(is_array($response["mapping"]) && count($response["mapping"]) > 0){
-                    foreach ($response["mapping"] as $user){
 
-                        if(isset($user['dedupeValue']) && isset($user['contactId'])) {
-                            $this->esputnikContact->add_esputnik_id_to_userprofile((get_user_by('email', $user['dedupeValue']))->ID, $user['contactId']);
-                            $this->update_entry_queue_items($response["sessionId"], $user['dedupeValue'], $user['contactId']);
-                        }
+                    if (count($response["mapping"]) === 2 && is_string($response["mapping"]['dedupeValue']) && is_int($response["mapping"]['contactId'])) {
+                        $this->esputnikContact->add_esputnik_id_to_userprofile((get_user_by('email', $response["mapping"]['dedupeValue']))->ID, $response["mapping"]['contactId']);
+                        $this->update_entry_queue_items($response["sessionId"],$response["mapping"]['dedupeValue'], $response["mapping"]['contactId']);
                         $live_exported += 1;
+                    } else{
+                        foreach ($response["mapping"] as $user){
+                            if(isset($user['dedupeValue']) && isset($user['contactId'])) {
+                                $this->esputnikContact->add_esputnik_id_to_userprofile((get_user_by('email', $user['dedupeValue']))->ID, $user['contactId']);
+                                $this->update_entry_queue_items($response["sessionId"], $user['dedupeValue'], $user['contactId']);
+                            }
+                            $live_exported += 1;
+                        }
                     }
                     if($total <= $exported + $live_exported){
                         $current_status = 'completed';

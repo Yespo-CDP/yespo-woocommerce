@@ -146,6 +146,9 @@ if ( get_option( 'yespo_options' ) !== false ){
         padding:0px;
     }
 
+    .yespo-settings-page .settingsSection .sectionBody .formBlock .inputApiLine{
+        display:flex;
+    }
     .yespo-settings-page .settingsSection .processTitles{
         display: flex;
         justify-content: space-between;
@@ -187,6 +190,13 @@ if ( get_option( 'yespo_options' ) !== false ){
 
     .yespo-settings-page .settingsSection #exportProgressBarStopped {
         background-color:#9b9b9b;
+    }
+    .yespo-settings-page .settingsSection .synhronizationStarted{
+        color:#5989EA;
+        font-size: 18px;
+        font-weight: 700;
+        text-align: center;
+        margin-top: 20px;
     }
     .yespo-settings-page .settingsSection #stop-send-data{
         font-size: 16px;
@@ -343,6 +353,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             this.resume = '<?php echo __( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', Y_TEXTDOMAIN ); ?>';
             this.error = '<?php echo __('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', Y_TEXTDOMAIN)?>';
             this.success = '<?php echo __( 'Data is successfully synchronized', Y_TEXTDOMAIN ); ?>';
+            this.synhStarted = '<?php echo __( 'Data synchronization has started', Y_TEXTDOMAIN ); ?>';
             //this.tableArea = document.querySelector('#importFeedUrls');
             this.pluginUrl = '<?php echo Y_PLUGIN_URL?>';
             this.pauseButton = '<?php echo __('Pause', Y_TEXTDOMAIN)?>';
@@ -531,6 +542,9 @@ if ( get_option( 'yespo_options' ) !== false ){
             const fieldGroup1 = this.createFieldGroup();
             const processTitles = this.createProcessTitles(progressText, progressPercent, percentClass);
             const progressBar = this.createProgressBar(progressContainer, exportProgressBar, progressPercent);
+            const mesSynhStarted = this.createElement("div", { className: 'synhronizationStarted' });
+            progressBar.appendChild(mesSynhStarted);
+
 
             fieldGroup1.appendChild(processTitles);
             fieldGroup1.appendChild(progressBar);
@@ -631,9 +645,13 @@ if ( get_option( 'yespo_options' ) !== false ){
             const h4 = this.createHeading(4, '<?php echo __( 'API Key', Y_TEXTDOMAIN ); ?>');
 
             const fieldGroup0 = this.createFieldGroup();
+            const inputApiLine = this.createElement("div", { className: 'inputApiLine' });
             const inputField = this.createInputField();
+            const errorAuth = this.createElement("div", { className: 'sendYespoAuthData' });
 
-            fieldGroup0.appendChild(inputField);
+            inputApiLine.appendChild(inputField);
+            inputApiLine.appendChild(errorAuth);
+            fieldGroup0.appendChild(inputApiLine);
 
             const fieldGroup1 = this.createFieldGroup();
             const divEl = this.createElement("div", { className: 'informationText' });
@@ -678,19 +696,27 @@ if ( get_option( 'yespo_options' ) !== false ){
             var formData = new FormData(form);
             formData.append('action', 'check_api_key_esputnik');
             //spinner.style.display = 'block';
+            document.querySelector('.sendYespoAuthData').innerHTML = '';
             xhr.send(formData);
             xhr.onreadystatechange = () => {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     //spinner.style.display = 'none';
                     if (xhr.status === 200) {
                         var response = JSON.parse(xhr.responseText);
+                        console.log(response.status);
                         try {
-                            //step 2. Start export
-                            console.log('step2');
-                            if(document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML=response.username;
-                            this.getNumberDataExport();
-                            //document.getElementById('authorization-response1').innerHTML = response.message;
-                            if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = true;
+                            if(response.status === 'success') {
+                                //step 2. Start export
+                                console.log('step2');
+                                if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
+                                this.getNumberDataExport();
+                                //document.getElementById('authorization-response1').innerHTML = response.message;
+                                //if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = true;
+                            } else {
+                                //console.log(response.message);
+                                document.querySelector('.sendYespoAuthData').innerHTML = response.message;
+                                if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = false;
+                            }
                         } catch (error) {
                             console.error('Ошибка при парсинге JSON:', error);
                         }
@@ -770,6 +796,7 @@ if ( get_option( 'yespo_options' ) !== false ){
                 '',
                 ''
             );
+            if(document.querySelector('.synhronizationStarted')) document.querySelector('.synhronizationStarted').innerHTML=this.synhStarted;
         }
         startExportEventListener() {
             if(document.querySelector('#checkYespoAuthorization')) {
@@ -991,7 +1018,11 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             if(progressBar){
                 progressBar.style.width = `${progress}%`;
+                if(progress > 0){
+                    if(document.querySelector('.synhronizationStarted')) document.querySelector('.synhronizationStarted').innerHTML='';
+                }
                 if (progress >= 100) {
+
                     if (this.eventSource) {
                         this.eventSource.close();
                     }

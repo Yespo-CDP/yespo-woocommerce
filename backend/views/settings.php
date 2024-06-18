@@ -1018,8 +1018,11 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             if(progressBar){
                 progressBar.style.width = `${progress}%`;
-                if (progress >= 100) {
+                if(progress > 0){
                     if(document.querySelector('.synhronizationStarted')) document.querySelector('.synhronizationStarted').innerHTML='';
+                }
+                if (progress >= 100) {
+
                     if (this.eventSource) {
                         this.eventSource.close();
                     }

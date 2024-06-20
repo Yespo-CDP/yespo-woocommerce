@@ -83,6 +83,14 @@ msgstr "Възобновяване"
 msgid "Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support"
 msgstr "Възникна грешка. Опитайте да възобновите синхронизацията. Ако това не помогне се свържете със съпорта"
 
+#: backend/views/settings.php:361
+msgid "Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost."
+msgstr "Невалиден API ключ. Моля, изтрийте плъгина и започнете конфигурацията отначало, използвайки валиден API ключ. Данните няма да бъдат загубени."
+
+#: backend/views/settings.php:362
+msgid "Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss."
+msgstr "Изходящата активност на сървъра е блокирана. Свържете се с вашия доставчик, за да разрешите проблема. Синхронизирането на данни може да бъде възобновено след това без загуба на данни."
+
 #: backend/views/settings.php:86
 msgid "Contact Support"
 msgstr "Свържете се със съпорта"
@@ -90,3 +98,7 @@ msgstr "Свържете се със съпорта"
 #: backend/views/settings.php:87
 msgid "Data is successfully synchronized"
 msgstr "Данните са успешно синхронизирани"
+
+#: backend/views/settings.php:89
+msgid "Data synchronization has started"
+msgstr "Синхронизация на данни е започнала"

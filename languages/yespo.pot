@@ -411,3 +411,7 @@ msgstr ""
 #: templates/content-demo.php:4
 msgid "Insert here your custom HTML"
 msgstr ""
+
+#: templates/content-demo.php:4
+msgid "Data synchronization has started"
+msgstr ""

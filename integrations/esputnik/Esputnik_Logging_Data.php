@@ -27,9 +27,19 @@ class Esputnik_Logging_Data
             $this->update_log_entry_user($user_id, $action, $response);
     }
 
-    public function create_entry_order($order_id, $action = 'update'){
+    public function create_entry_order($order_id, $action = 'update', $status){
         if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name_order'") === $this->table_name_order)
-            return $this->create_log_entry_order($order_id, $action); //if success returns 1
+            return $this->create_log_entry_order($order_id, $action, $status); //if success returns 1
+    }
+
+    public function create_single_contact_log($email){
+        if(!empty($email)){
+            $user = get_user_by('email', $email);
+            if($user && $user->ID){
+                $yespo_contact_id = (new Esputnik_Contact())->get_yespo_user_id($user->ID);
+                if(!empty($yespo_contact_id)) return $this->create_log_entry_user($user->ID, $yespo_contact_id, 'update');
+            }
+        }
     }
 
     /** create new log user entry in database **/
@@ -66,12 +76,12 @@ class Esputnik_Logging_Data
     }
 
     /** create new log order entry in database **/
-    private function create_log_entry_order(string $order_id, string $action){
+    private function create_log_entry_order(string $order_id, string $action, $status){
         if(!$this->check_presence_in_database($order_id, $action, 'completed')) {
             $data = [
                 'order_id' => $order_id,
                 'action' => $action,
-                'status' => 'completed',
+                'status' => $status,
                 'created_at' => current_time('mysql', 1)
             ];
 

@@ -32,6 +32,7 @@ class Esputnik_Account
             }
 
             $result = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            //$result = 0;//test blocking server
             curl_close($curl);
 
             return $result;
@@ -43,5 +44,19 @@ class Esputnik_Account
 
     public function get_profile_name(){
         return Esputnik_Curl_Request::curl_request(self::REMOTE_ESPUTNIK_URL, 'GET', get_option('yespo_options'));
+    }
+
+    public function add_entry_auth_log($api_key, $response){
+        global $wpdb;
+        $table_yespo_auth = $wpdb->prefix . 'yespo_auth_log';
+
+        $data = [
+            'api_key' => $api_key,
+            'response' => $response,
+            'time' => date('Y-m-d H:i:s', time())
+        ];
+
+        $wpdb->insert($table_yespo_auth, $data);
+
     }
 }

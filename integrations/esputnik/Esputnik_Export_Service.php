@@ -61,11 +61,11 @@ class Esputnik_Export_Service
         else return false;
     }
 
-    private function update_entry_db($id, $exported, $status, $total = null, $display = null)
+    private function update_entry_db($id, $exported, $status, $total = null, $code = null)
     {
         return $this->wpdb->update(
             $this->table_name,
-            array('exported' => $exported, 'status' => $status, 'display' => $display),
+            array('exported' => $exported, 'status' => $status, 'code' => $code),
             array('id' => $id),
             array('%d', '%s', '%s'),
             array('%d')

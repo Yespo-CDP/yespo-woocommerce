@@ -34,10 +34,17 @@ function error_api_key_admin_notice() {
         $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($yespo_api_key);
         (new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
     }
-    if(!empty($yespo_api_key) && $result !== 200){
+    if(!empty($yespo_api_key) && $result === 401){
         ?>
         <div class="notice notice-error is-dismissible">
             <p><?php echo __("Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.", Y_TEXTDOMAIN); ?></p>
+        </div>
+        <?php
+    }
+    if($result === 0){
+        ?>
+        <div class="notice notice-error is-dismissible">
+            <p><?php echo __('Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss.', Y_TEXTDOMAIN)?></p>
         </div>
         <?php
     }

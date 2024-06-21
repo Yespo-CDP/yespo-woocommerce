@@ -145,6 +145,7 @@ if ( get_option( 'yespo_options' ) !== false ){
     .yespo-settings-page .settingsSection .sectionBody .formBlock #api_key{
         padding:0px;
     }
+
 /*
     .yespo-settings-page .settingsSection .sectionBody .formBlock .inputApiLine{
         display:flex;
@@ -533,7 +534,6 @@ if ( get_option( 'yespo_options' ) !== false ){
             const processTitles = this.createProcessTitles(progressText, progressPercent, percentClass);
             const progressBar = this.createProgressBar(progressContainer, exportProgressBar, progressPercent);
             //progressBar.appendChild(mesSynhStarted);
-
 
             fieldGroup1.appendChild(processTitles);
             fieldGroup1.appendChild(progressBar);

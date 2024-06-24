@@ -97,12 +97,15 @@ class Esputnik_Contact
             (new Esputnik_Export_Orders())->add_json_log_entry($data);// add log entry to DB
 
             $response = $this->process_on_yespo($data, 'bulk');
+            if($response === 0) (new Esputnik_Export_Users())->error_export_users('555');
             if($response) $response = json_decode($response, true);
 
             if(isset($response["asyncSessionId"])){
                 (new Esputnik_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
 
                 return $this->get_bulk_response($response["asyncSessionId"]);
+            } else if(isset($response["status"]) && intval($response["status"]) === 401){
+                (new Esputnik_Export_Users())->error_export_users($response["status"]);
             }
         }
     }
@@ -120,7 +123,7 @@ class Esputnik_Contact
                         if (isset($response["mapping"]) && is_array($response["mapping"])) {
                             $response["sessionId"] = $sessionId;
                             return $response;
-                        }
+                        } else return false;
                     } else {
                         sleep(10);
                     }

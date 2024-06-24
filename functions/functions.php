@@ -21,6 +21,37 @@ function y_get_settings() {
     return apply_filters( 'y_get_settings', get_option( Y_TEXTDOMAIN . '-settings' ) );
 }
 
+/**
+ * show error api key notice
+ */
+function error_api_key_admin_notice() {
+    if ( get_option( 'yespo_options' ) !== false ) {
+        $options = get_option('yespo_options', array());
+        if (isset($options['yespo_api_key'])) $yespo_api_key = $options['yespo_api_key'];
+        else $yespo_api_key = '';
+    }
+    if(!empty($yespo_api_key)){
+        $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($yespo_api_key);
+        (new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
+    }
+    if(!empty($yespo_api_key) && $result === 401){
+        ?>
+        <div class="notice notice-error is-dismissible">
+            <p><?php echo __("Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.", Y_TEXTDOMAIN); ?></p>
+        </div>
+        <?php
+    }
+    if($result === 0){
+        ?>
+        <div class="notice notice-error is-dismissible">
+            <p><?php echo __('Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss.', Y_TEXTDOMAIN)?></p>
+        </div>
+        <?php
+    }
+}
+add_action( 'admin_notices', 'error_api_key_admin_notice' );
+
+
 /*** Get profile username on Yespo ***/
 function get_account_profile_name(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'get_account_yespo_name' ) {
@@ -56,11 +87,14 @@ function check_api_authorization(){
         }
         if(isset($yespo_api_key)){
             $result = (new \Yespo\Integrations\Esputnik\Esputnik_Account())->send_keys($yespo_api_key);
+            (new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
             if ($result === 200) {
-                (new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
+                //(new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
                 echo json_encode(['auth' => 'success']);
+            } else if($result === 401 || $result === 0){
+                echo json_encode(['auth' => 'incorrect', 'code' => $result]);
             } else {
-                (new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
+                //(new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log($yespo_api_key, $result);
                 echo json_encode(0);
             }
         } else echo json_encode(0);
@@ -107,7 +141,7 @@ function yespo_save_settings() {
         } else {
             $response_data = array(
                 'status' => 'error',
-                'message' => '<div class="notice notice-error is-dismissible"><p>' . __("Invalid API key", Y_TEXTDOMAIN) . '</p></div>',
+                'message' => '<div class="errorAPiKey"><p>' . __("Invalid API key", Y_TEXTDOMAIN) . '</p></div>',
                 'total' => __("Completed unsuccessfully!", Y_TEXTDOMAIN),
             );
         }
@@ -204,7 +238,7 @@ function get_process_export_users_data_to_esputnik(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'get_process_export_users_data_to_esputnik' ) {
         $response = (new Yespo\Integrations\Esputnik\Esputnik_Export_Users())->get_process_users_exported();
         if( !empty($response)) {
-            echo json_encode(['total' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total(), 'exported' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number(), 'percent' => floor(($response->exported / $response->total) * 100), 'status' => $response->status, 'display' => $response->display]);
+            echo json_encode(['total' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total(), 'exported' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number(), 'percent' => floor(($response->exported / $response->total) * 100), 'status' => $response->status, 'code' => $response->code]);
         } else echo json_encode(0);
     }
     wp_die();
@@ -304,12 +338,12 @@ function export_order_data_to_esputnik(){
 add_action('wp_ajax_export_order_data_to_esputnik', 'export_order_data_to_esputnik');
 add_action('wp_ajax_nopriv_export_order_data_to_esputnik', 'export_order_data_to_esputnik');
 
-/*** Get process status of exporting users to Yespo ***/
+/*** Get process status of exporting orders to Yespo ***/
 function get_process_export_orders_data_to_esputnik(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'get_process_export_orders_data_to_esputnik' ) {
         $response = (new Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->get_process_orders_exported();
         if( !empty($response)) {
-            echo json_encode(['total' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total(), 'exported' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number(), 'percent' => floor(($response->exported / $response->total) * 100), 'status' => $response->status, 'display' => $response->display]);
+            echo json_encode(['total' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_export_total(), 'exported' => Yespo\Integrations\Esputnik\Esputnik_Export_Service::get_exported_number(), 'percent' => floor(($response->exported / $response->total) * 100), 'status' => $response->status, 'code' => $response->code]);
         } else echo json_encode(0);
     }
     wp_die();
@@ -465,13 +499,29 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
 function get_all_users($post)
 {
 
-    $email = 'test';
+    $email = 'testtesttest';
     //$email = 'test';
     if(!empty($email)){
 
-        $result = (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->create_single_contact_log($email);
+        $res = (new \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping())->order_woo_to_yes(wc_get_order(3295));
+        var_dump($res);
 
-        var_dump($result);
+        //if(preg_match('/\.$/', $email)) var_dump('dot at end');
+
+        //if(!preg_match('/^[a-zA-Z0-9.+_@-]+$/', $email)) var_dump('invalid characters');
+        //var_dump($res);
+/*
+        $new_array = explode("@", $email);
+        if(count($new_array) > 2 || strlen($new_array[0]) > 50) var_dump('invalid user email');
+        $domen = explode(".", $new_array[1]);
+        if(in_array('', $domen, true)) var_dump('empty element');
+        if(count($domen) < 2 || strlen(end($domen)) < 2) var_dump('invalid domen');
+
+        var_dump($email);
+*/
+        //$result = (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->create_single_contact_log($email);
+
+        //var_dump($result);
         /*
         $user = get_user_by('email', $email);
 
@@ -596,4 +646,5 @@ function get_all_users($post)
     //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
     //var_dump($res);
 }
-//add_action('save_post', 'get_all_users' , 10 , 1);
+add_action('save_post', 'get_all_users' , 10 , 1);
+

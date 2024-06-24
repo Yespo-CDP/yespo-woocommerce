@@ -116,15 +116,16 @@ class Esputnik_Order_Mapping
             'externalCustomerId' => !empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email()) && self::get_user_id($order->get_billing_email())? self::get_user_id($order->get_billing_email()) : '',
             'totalCost' => $order->total,
             'status' => self::get_order_status($order->status) ? self::get_order_status($order->status) : self::INITIALIZED,
-            //'email' => $order->get_billing_email(),
-            'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid',
+            'email' => self::get_email($order),
+            //'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid',
             'date' => ($order && !is_bool($order) && method_exists($order, 'get_date_created') && ($date_created = $order->get_date_created())) ? $date_created->format('Y-m-d\TH:i:s.uP') : null,
             'currency' => $order->currency,
             'firstName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_first_name') && !empty($order->get_billing_first_name())) ? $order->get_billing_first_name() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_first_name') && !empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),
             'lastName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_last_name') && !empty($order->get_billing_last_name())) ? $order->get_billing_last_name() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_last_name') && !empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),
             'deliveryAddress' => self::get_delivery_address($order, 'shipping') ? self::get_delivery_address($order, 'shipping') : ( self::get_delivery_address($order, 'billing') ? self::get_delivery_address($order, 'billing') : ''),
             //'phone' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
-            'phone' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
+            //'phone' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
+            'phone' => self::get_phone_number($order),
             'shipping' => ($order->shipping_total) ? $order->shipping_total : '',
             'discount' => ($order->discount) ? $order->discount : '',
             'taxes' => !empty($order->total_tax) ? $order->total_tax : ((!empty($order->discount_tax)) ? $order->discount_tax : ((!empty($order->cart_tax)) ? $order->cart_tax : ((!empty($order->shipping_tax)) ? $order->shipping_tax : ''))),
@@ -233,5 +234,47 @@ class Esputnik_Order_Mapping
 
     private static function get_user_id($email){
         return (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->get_user_id_by_email($email);
+    }
+
+    /* phone */
+    private static function get_phone_number($order){
+        $phone = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : '');
+        if(!empty($phone)){
+            $validated_phone = self::phone_validation(trim($phone));
+            if($validated_phone) return $validated_phone;
+        }
+        return '';
+    }
+
+    private static function phone_validation($phone){
+        $digits = preg_replace('/\D/', '', $phone);
+
+        $phone_length = strlen($digits);
+        if ($phone_length > 4 && $phone_length < 16) {
+            return $digits;
+        }
+
+        return false;
+    }
+
+    /* email */
+    private static function get_email($order){
+        $email = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid';
+        if(!empty($email)){
+            $validated_email = self::email_validation(trim($email));
+            if($validated_email) return $validated_email;
+        }
+        return '';
+    }
+
+    private static function email_validation($email){
+        if(preg_match('/\.$/', $email) || strlen($email) > 50) return '';
+        if(!preg_match('/^[a-zA-Z0-9.+_@-]+$/', $email)) return '';
+        $new_array = explode("@", $email);
+        if(count($new_array) > 2) return '';
+        $domen = explode(".", $new_array[1]);
+        if(count($domen) < 2 || strlen(end($domen)) < 2 || in_array('', $domen, true)) return '';
+
+        return $email;
     }
 }

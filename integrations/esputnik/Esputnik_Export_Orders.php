@@ -10,7 +10,7 @@ class Esputnik_Export_Orders
     private $period_selection_since = 300;
     private $period_selection_up = 30;
     private $number_for_export = 500;
-    //private $number_for_export = 50;
+    //private $number_for_export = 5;
     private $table_name;
     private $table_yespo_queue_orders;
     private $table_posts;
@@ -82,7 +82,7 @@ class Esputnik_Export_Orders
             $this->update_table_data($status->id, $exported, $current_status);
         } else {
             $status = $this->get_order_export_status();
-            if(!empty($status) && $status->status === 'completed' && $status->display === null){
+            if(!empty($status) && $status->status === 'completed' && $status->code === null){
                 $this->update_table_data($status->id, intval($status->total), $status->status);
             }
         }
@@ -110,6 +110,7 @@ class Esputnik_Export_Orders
             $exported = intval($status->exported);
             $current_status = $status->status;
             $live_exported = 0;
+            $code = $status->code;
 
             if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
 
@@ -127,10 +128,15 @@ class Esputnik_Export_Orders
                 //Esputnik_Metrika::count_finish_exported();
             } else $exported += $live_exported;
 
-            $this->update_table_data($status->id, $exported, $current_status);
+            $is_error = $this->check_orders_for_error();
+            if($is_error){
+                $current_status = 'error';
+                $code = $is_error;
+            }
+            $this->update_table_data($status->id, $exported, $current_status, $code);
         } else {
             $status = $this->get_order_export_status();
-            if(!empty($status) && $status->status === 'completed' && $status->display === null){
+            if(!empty($status) && $status->status === 'completed' && $status->code === null){
                 $this->update_table_data($status->id, intval($status->total), $status->status);
             }
         }
@@ -139,7 +145,7 @@ class Esputnik_Export_Orders
 
     public function get_final_orders_exported(){
         $status = $this->get_order_export_status();
-        return $this->update_table_data($status->id, intval($status->total), $status->status, true);
+        return $this->update_table_data($status->id, intval($status->total), $status->status, '200');
     }
 
     public function export_orders_to_esputnik(){
@@ -160,7 +166,7 @@ class Esputnik_Export_Orders
     public function stop_export_orders(){
         $status = $this->get_order_export_status_processed('active');
         if(!empty($status) && $status->status == 'active'){
-            $this->update_table_data($status->id, intval($status->exported), 'stopped', true);
+            $this->update_table_data($status->id, intval($status->exported), 'stopped', '200');
             return $status;
         }
     }
@@ -173,7 +179,7 @@ class Esputnik_Export_Orders
     public function resume_export_orders(){
         $status = $this->get_order_export_status_processed('stopped');
         if(!empty($status) && $status->status == 'stopped'){
-            $this->update_table_data($status->id, intval($status->exported), 'active', true);
+            $this->update_table_data($status->id, intval($status->exported), 'active', '200');
             return $status;
         }
     }
@@ -185,6 +191,20 @@ class Esputnik_Export_Orders
                 'orders'
             )
         );
+    }
+
+    public function error_export_orders($code){
+        $status = $this->get_order_export_status_processed('active');
+        if(!empty($status) && $status->status == 'active'){
+            $this->update_table_data($status->id, intval($status->exported), 'error', $code);
+            return $status;
+        }
+    }
+
+    public function check_orders_for_error(){
+        $status = $this->get_order_export_status_processed('error');
+        if($status) return $status->code;
+        return false;
     }
 
     public function get_order_export_status_processed($action){
@@ -220,10 +240,10 @@ class Esputnik_Export_Orders
         );
     }
 
-    private function update_table_data($id, $exported, $status, $display = null){
+    private function update_table_data($id, $exported, $status, $code = null){
         return $this->wpdb->update(
             $this->table_name,
-            array('exported' => $exported, 'status' => $status, 'display' => $display),
+            array('exported' => $exported, 'status' => $status, 'code' => $code),
             array('id' => $id),
             array('%d', '%s', '%s'),
             array('%d')

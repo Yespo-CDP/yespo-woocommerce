@@ -32,6 +32,7 @@ class Esputnik_Account
             }
 
             $result = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            //$result = 0;//test blocking server
             curl_close($curl);
 
             return $result;

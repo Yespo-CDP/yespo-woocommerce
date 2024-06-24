@@ -5,9 +5,10 @@ namespace Yespo\Integrations\Esputnik;
 class Esputnik_Export_Users
 {
     const CUSTOMER = 'customer';
+    //const CUSTOMER = 'customertest';
     const SUBSCRIBER = 'subscriber';
     private $number_for_export = 500;
-    //private $number_for_export = 50;
+    //private $number_for_export = 5;
     private $table_name;
     private $table_yespo_queue;
     private $table_yespo_queue_items;
@@ -73,7 +74,7 @@ class Esputnik_Export_Users
             $this->update_table_data($status->id, $exported, $current_status);
         } else {
             $status = $this->get_user_export_status();
-            if(!empty($status) && $status->status === 'completed' && $status->display === null){
+            if(!empty($status) && $status->status === 'completed' && $status->code === null){
                 $this->update_table_data($status->id, intval($status->total), $status->status);
             }
         }
@@ -108,7 +109,7 @@ class Esputnik_Export_Users
 
                 if(is_array($response["mapping"]) && count($response["mapping"]) > 0){
 
-                    if (count($response["mapping"]) === 2 && is_string($response["mapping"]['dedupeValue']) && is_int($response["mapping"]['contactId'])) {
+                    if (count($response["mapping"]) === 2 && array_key_exists('dedupeValue', $response["mapping"]) && is_string($response["mapping"]['dedupeValue']) && array_key_exists('contactId', $response["mapping"]) && is_int($response["mapping"]['contactId'])) {
                         $this->esputnikContact->add_esputnik_id_to_userprofile((get_user_by('email', $response["mapping"]['dedupeValue']))->ID, $response["mapping"]['contactId']);
                         $this->update_entry_queue_items($response["sessionId"],$response["mapping"]['dedupeValue'], $response["mapping"]['contactId']);
                         $live_exported += 1;
@@ -134,7 +135,7 @@ class Esputnik_Export_Users
 
         } else {
             $status = $this->get_user_export_status();
-            if(!empty($status) && $status->status === 'completed' && $status->display === null){
+            if(!empty($status) && $status->status === 'completed' && $status->code === null){
                 $this->update_table_data($status->id, intval($status->total), $status->status);
             }
         }
@@ -142,7 +143,7 @@ class Esputnik_Export_Users
 
     public function get_final_users_exported(){
         $status = $this->get_user_export_status();
-        return $this->update_table_data($status->id, intval($status->total), $status->status, true);
+        return $this->update_table_data($status->id, intval($status->total), $status->status, '200');
     }
 
     public function get_process_users_exported(){
@@ -152,7 +153,7 @@ class Esputnik_Export_Users
     public function stop_export_users(){
         $status = $this->get_user_export_status_processed('active');
         if(!empty($status) && $status->status == 'active'){
-            $this->update_table_data($status->id, intval($status->exported), 'stopped', true);
+            $this->update_table_data($status->id, intval($status->exported), 'stopped', '200');
             return $status;
         }
     }
@@ -164,9 +165,22 @@ class Esputnik_Export_Users
     public function resume_export_users(){
         $status = $this->get_user_export_status_processed('stopped');
         if(!empty($status) && $status->status == 'stopped'){
-            $this->update_table_data($status->id, intval($status->exported), 'active', true);
+            $this->update_table_data($status->id, intval($status->exported), 'active', '200');
             return $status;
         }
+    }
+
+    public function error_export_users($code){
+        $status = $this->get_user_export_status_processed('active');
+        if(!empty($status) && $status->status == 'active'){
+            $this->update_table_data($status->id, intval($status->exported), 'error', $code);
+            return $status;
+        }
+    }
+    public function check_user_for_error(){
+        $status = $this->get_user_export_status_processed('error');
+        if($status) return true;
+        return false;
     }
 
     public function update_after_activation(){
@@ -295,10 +309,10 @@ class Esputnik_Export_Users
         return $count == 0;
     }
 
-    private function update_table_data($id, $exported, $status, $display = null){
+    private function update_table_data($id, $exported, $status, $code = null){
         return $this->wpdb->update(
             $this->table_name,
-            array('exported' => $exported, 'status' => $status, 'display' => $display),
+            array('exported' => $exported, 'status' => $status, 'code' => $code),
             array('id' => $id),
             array('%d', '%s', '%s'),
             array('%d')

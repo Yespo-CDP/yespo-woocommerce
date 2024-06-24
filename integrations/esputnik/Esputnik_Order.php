@@ -55,6 +55,10 @@ class Esputnik_Order
                     }
                 }
                 return $orderCounter;
+            } else if($response === 401){
+                (new Esputnik_Export_Orders())->error_export_orders('401');
+            } else if($response === 0){
+                (new Esputnik_Export_Orders())->error_export_orders('555');
             }
         }
         return false;

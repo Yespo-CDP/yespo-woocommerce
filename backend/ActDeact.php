@@ -303,7 +303,7 @@ class ActDeact extends Base {
                 total varchar(255) NOT NULL,
                 exported varchar(255) NOT NULL,
                 status varchar(255) NOT NULL,
-                display varchar(255) default NULL,
+                code varchar(255) default NULL,
                 additional varchar(255) NOT NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate_export;";

@@ -146,8 +146,13 @@ if ( get_option( 'yespo_options' ) !== false ){
         padding:0px;
     }
 
+/*
     .yespo-settings-page .settingsSection .sectionBody .formBlock .inputApiLine{
         display:flex;
+    }
+ */
+    .yespo-settings-page .settingsSection .sectionBody .formBlock .errorAPiKey p{
+        color: red;
     }
     .yespo-settings-page .settingsSection .processTitles{
         display: flex;
@@ -188,15 +193,17 @@ if ( get_option( 'yespo_options' ) !== false ){
         margin: auto 3px;
     }
 
+    .yespo-settings-page .settingsSection .flexRow{
+        display:flex;
+    }
     .yespo-settings-page .settingsSection #exportProgressBarStopped {
         background-color:#9b9b9b;
     }
     .yespo-settings-page .settingsSection .synhronizationStarted{
         color:#5989EA;
         font-size: 18px;
-        font-weight: 700;
-        text-align: center;
-        margin-top: 20px;
+        margin-top: 8px;
+        margin-left: 20px;
     }
     .yespo-settings-page .settingsSection #stop-send-data{
         font-size: 16px;
@@ -352,6 +359,8 @@ if ( get_option( 'yespo_options' ) !== false ){
             this.h4 = '<?php echo __('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', Y_TEXTDOMAIN)?>';
             this.resume = '<?php echo __( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', Y_TEXTDOMAIN ); ?>';
             this.error = '<?php echo __('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', Y_TEXTDOMAIN)?>';
+            this.error401 = '<?php echo __('Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', Y_TEXTDOMAIN)?>';
+            this.error555 = '<?php echo __('Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss.', Y_TEXTDOMAIN)?>';
             this.success = '<?php echo __( 'Data is successfully synchronized', Y_TEXTDOMAIN ); ?>';
             this.synhStarted = '<?php echo __( 'Data synchronization has started', Y_TEXTDOMAIN ); ?>';
             //this.tableArea = document.querySelector('#importFeedUrls');
@@ -383,42 +392,6 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             //this.showApiKeyForm();
 
-
-            // Call functions to create and replace content with the user panels
-            /*
-            this.appendUserPanel(
-                '.firstSection',
-                'progressContainer',
-                'exportProgressBar',
-                this.h1,
-                '33%',
-                '',
-                ''
-            );
-
-            this.appendUserPanel(
-                '.secondSection',
-                'progressContainerStopped',
-                'exportProgressBarStopped',
-                this.h1,
-                '39%',
-                '',
-                'stopped'
-            );
-
-            this.appendUserPanel(
-                '.thirdSection',
-                'progressContainerStopped',
-                'exportProgressBarStopped',
-                this.h1,
-                '41%',
-                'percentRed',
-                'error'
-            );
-
-            this. addSuccessMessage();
-             */
-
         }
 
         // get top account name
@@ -438,8 +411,11 @@ if ( get_option( 'yespo_options' ) !== false ){
                 response = JSON.parse(response);
                 if(response.auth && response.auth === 'success'){
                     this.getNumberDataExport();
-                }
-                else {
+                } else if(response.auth && response.auth === 'incorrect') {
+                    let code = 401;
+                    if(parseInt(response.code) === 0) code = 555;
+                    this.showErrorPage('', code);
+                } else {
                     this.showApiKeyForm();
                     this.startExportEventListener();
                 }
@@ -475,8 +451,12 @@ if ( get_option( 'yespo_options' ) !== false ){
             return this.createElement("p", options, text);
         }
 
-        createFieldGroup() {
-            return this.createElement("div", { className: "field-group" });
+        createFieldGroup(additionClass = '') {
+            const classes = ["field-group"];
+            if (additionClass) {
+                classes.push(additionClass);
+            }
+            return this.createElement("div", { className: classes.join(' ') });
         }
 
         createInputField() {
@@ -518,17 +498,28 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             let contactSupport = '';
             if(contactIconSrc && contactText) {
-                contactSupport = this.createElement("a", { id: "contact-support", className: "button btn-light" },
+                contactSupport = this.createElement("a", { id: "contact-support", className: "button btn-light", href: "https://yespo.io/support", target: "_blank" },
                     this.createElement("img", { src: contactIconSrc, alt: "contact-icon", className: "contact-icon" }),
                     this.createElement("span", {}, contactText)
                 );
             }
 
-            const messageButton = this.createElement("div", { className: mesButton }, contactSupport, resumeButton);
+            let messageButton = this.createElement("div", { className: mesButton }, contactSupport);
+            if(resumeIconSrc && resumeText) messageButton = this.createElement("div", { className: mesButton }, contactSupport, resumeButton)
+
             return this.createElement("div", { className: nonce }, messageIcon, messageText, messageButton);
         }
 
-        appendUserPanel(sectionClass, progressContainer, exportProgressBar, progressText, progressPercent, percentClass, stopped) {
+        appendUserPanel(
+            sectionClass,
+            progressContainer,
+            exportProgressBar,
+            progressText,
+            progressPercent,
+            percentClass,
+            stopped,
+            code = null
+        ){
             const settingsSection = '.settingsSection';
             const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodyAuth' });
             const formBlock = this.createElement('div', { className: 'formBlock' });
@@ -542,15 +533,12 @@ if ( get_option( 'yespo_options' ) !== false ){
             const fieldGroup1 = this.createFieldGroup();
             const processTitles = this.createProcessTitles(progressText, progressPercent, percentClass);
             const progressBar = this.createProgressBar(progressContainer, exportProgressBar, progressPercent);
-            const mesSynhStarted = this.createElement("div", { className: 'synhronizationStarted' });
-            progressBar.appendChild(mesSynhStarted);
-
+            //progressBar.appendChild(mesSynhStarted);
 
             fieldGroup1.appendChild(processTitles);
             fieldGroup1.appendChild(progressBar);
 
             const fieldGroup2 = this.createFieldGroup();
-
             let sectionContent = '';
 
             if (stopped === 'stopped') {
@@ -566,22 +554,37 @@ if ( get_option( 'yespo_options' ) !== false ){
 
                 );
             } else if (stopped === 'error') {
+
+                let messageText = this.error;
+                let resumeIcon = this.pluginUrl + 'assets/images/union.svg';
+                let resumeButton = this.resumeButton;
+                if(code === 401 || code === 555) {
+                    if(code === 401) messageText = this.error401;
+                    else messageText = this.error555;
+                    resumeIcon = '';
+                    resumeButton = '';
+                }
+
                 sectionContent = this.createMessageNonceError(
                     'messageNonceError',
                     'messageIconError',
                     'messageTextError',
                     'messageButtonError',
                     this.pluginUrl + 'assets/images/erroricon.svg',
-                    this.error,
-                    this.pluginUrl + 'assets/images/union.svg',
-                    this.resumeButton,
+                    messageText,
+                    resumeIcon,
+                    resumeButton,
                     this.pluginUrl + 'assets/images/subtract.svg',
                     this.contactSupportButton
                 );
             } else {
+                fieldGroup2.classList.add('flexRow');
                 sectionContent = this.createElement('input', { type: 'submit', id: 'stop-send-data', className: 'button btn-light', value: this.pauseButton });
             }
+            const mesSynhStarted = this.createElement("div", { className: 'synhronizationStarted' });
             fieldGroup2.appendChild(sectionContent);
+            fieldGroup2.appendChild(mesSynhStarted);
+
 
             form.append(h4, fieldGroup1, fieldGroup2);
             formBlock.appendChild(form);
@@ -875,6 +878,20 @@ if ( get_option( 'yespo_options' ) !== false ){
 
         }
 
+        //ERROR PAGE
+        showErrorPage(percent, code) {
+            this.appendUserPanel(
+                '.userPanel',
+                'progressContainerStopped',
+                'exportProgressBarStopped',
+                this.h1,
+                percent,
+                'percentRed',
+                'error',
+                parseInt(code)
+            );
+        }
+
 
         /**
          * start export
@@ -979,7 +996,12 @@ if ( get_option( 'yespo_options' ) !== false ){
                             if(way === 'users') this.processExportUsers();
                             if(way === 'orders') this.processExportOrders();
                         }, 5000);
-                    } else if(response.display === null){
+                    } else if(response.status === 'error'){
+                        console.log(response.status);
+                        console.log(response.code);
+                        if(document.querySelector('.processPercent')) response.percent = document.querySelector('.processPercent').innerText;
+                        this.showErrorPage(response.percent, response.code);
+                    } else if(response.code === null){
                         console.log('inside response null');
                         //if(way === 'users') this.userFinalExportChunk();
                         //if(way === 'orders') this.orderFinalExportChunk();

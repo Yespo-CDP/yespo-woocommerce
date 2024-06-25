@@ -41,7 +41,7 @@ function error_api_key_admin_notice() {
         </div>
         <?php
     }
-    if($result === 0){
+    if(isset($result) && $result === 0){
         ?>
         <div class="notice notice-error is-dismissible">
             <p><?php echo __('Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss.', Y_TEXTDOMAIN)?></p>
@@ -499,12 +499,12 @@ add_action('wp_ajax_nopriv_get_feed_urls', 'get_feed_urls_function');
 function get_all_users($post)
 {
 
-    $email = 'vadym.gmurya+501vadym.gmurya+501vadym.gmurya+501@asper.pro';
+//    $email = 'vadym.gmurya+501vadym.gmurya+501vadym.gmurya+501@asper.pro';
     //$email = 'vadym.gmurya+9@asper.pro';
-    if(!empty($email)){
+//    if(!empty($email)){
 
-        $res = (new \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping())->order_woo_to_yes(wc_get_order(3295));
-        var_dump($res);
+        //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Order_Mapping())->order_woo_to_yes(wc_get_order(3295));
+        //var_dump($res);
 
         //if(preg_match('/\.$/', $email)) var_dump('dot at end');
 
@@ -532,7 +532,7 @@ function get_all_users($post)
             var_dump($result);
         }
         */
-    }
+//    }
 
     //(new \Yespo\Integrations\Esputnik\Esputnik_Account())->add_entry_auth_log('apiapi', '200');
     /*
@@ -646,5 +646,4 @@ function get_all_users($post)
     //$res = (new \Yespo\Integrations\Esputnik\Esputnik_Contact())->remove_user_after_erase();
     //var_dump($res);
 }
-add_action('save_post', 'get_all_users' , 10 , 1);
-
+//add_action('save_post', 'get_all_users' , 10 , 1);

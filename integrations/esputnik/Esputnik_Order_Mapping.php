@@ -9,6 +9,7 @@ class Esputnik_Order_Mapping
     const CANCELLED = 'CANCELLED';
     const DELIVERED = 'DELIVERED';
     const NO_CATEGORY = 'no category';
+    const ORDER_META_KEY = 'sent_order_to_yespo';
 
     public static function order_woo_to_yes($order){
         $orderArray = self::order_transformation_to_array($order);
@@ -38,6 +39,9 @@ class Esputnik_Order_Mapping
         $data['orders'][0]['items'] = self::get_orders_items($order);
         if($orderArray['additionalInfo']) $data['orders'][0]['additionalInfo']['comment'] = $orderArray['additionalInfo'];
 
+        if(empty($data['orders'][0]['email']) && empty($data['orders'][0]['phone'])){
+            return false;
+        }
         return $data;
     }
 
@@ -77,7 +81,12 @@ class Esputnik_Order_Mapping
         if($orders && count($orders) > 0){
             $i = 0;
             foreach($orders as $order){
-                $data['orders'][] = self::order_bulk_woo_to_yes(wc_get_order($order->id));
+                $item = self::order_bulk_woo_to_yes(wc_get_order($order->id));
+                if(empty($item['phone']) && empty($item['email'])){
+                    update_post_meta($order->id, self::ORDER_META_KEY, 'true');
+                } else {
+                    $data['orders'][] = self::order_bulk_woo_to_yes(wc_get_order($order->id));
+                }
             }
         }
         return $data;
@@ -259,7 +268,7 @@ class Esputnik_Order_Mapping
 
     /* email */
     private static function get_email($order){
-        $email = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid';
+        $email = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : '';
         if(!empty($email)){
             $validated_email = self::email_validation(trim($email));
             if($validated_email) return $validated_email;

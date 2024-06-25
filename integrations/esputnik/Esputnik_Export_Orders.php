@@ -73,7 +73,7 @@ class Esputnik_Export_Orders
                 }
             }
 
-            if($total <= $exported + $live_exported){
+            if(($total <= $exported + $live_exported) || $this->get_export_orders_count() < 1){
                 $current_status = 'completed';
                 $exported = $total;
                 Esputnik_Metrika::count_finish_exported();
@@ -98,6 +98,11 @@ class Esputnik_Export_Orders
                 if ($item) {
                     (new Esputnik_Order())->create_order_on_yespo($item, 'update');
                 }
+            }
+        } else {
+            $status = $this->get_order_export_status();
+            if(!empty($status) && ($status->status === 'completed' || $this->get_export_orders_count() < 1) && $status->code === null){
+                $this->update_table_data($status->id, intval($status->total), 'completed');
             }
         }
 
@@ -136,7 +141,7 @@ class Esputnik_Export_Orders
             $this->update_table_data($status->id, $exported, $current_status, $code);
         } else {
             $status = $this->get_order_export_status();
-            if(!empty($status) && $status->status === 'completed' && $status->code === null){
+            if(!empty($status) && ($status->status === 'completed' || $this->get_export_orders_count() < 1) && $status->code === null){
                 $this->update_table_data($status->id, intval($status->total), $status->status);
             }
         }

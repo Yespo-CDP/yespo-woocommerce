@@ -18,17 +18,24 @@ class Esputnik_Order
             return __( 'Empty user authorization data', Y_TEXTDOMAIN );
         }
 
-        //if($operation === 'delete') $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::map_clean_user_data_order($order));
-        //else $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order));
-        $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order), 'orders');
-        if ($response > 199 && $response < 300) {
-            if ($order && is_a($order, 'WC_Order') && $order->get_id()){
-                update_post_meta( $order->get_id(), self::ORDER_META_KEY, 'true' );
-                (new Esputnik_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
-                (new Esputnik_Logging_Data())->create_single_contact_log($order->get_billing_email()); //add entry contact log file
+        $data = Esputnik_Order_Mapping::order_woo_to_yes($order);
+
+        if($data){
+            //if($operation === 'delete') $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::map_clean_user_data_order($order));
+            //else $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order));
+            $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $data, 'orders');
+            if ($response > 199 && $response < 300) {
+                if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
+                    update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
+                    (new Esputnik_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
+                    (new Esputnik_Logging_Data())->create_single_contact_log($order->get_billing_email()); //add entry contact log file
+                }
             }
+        } else{
+            update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
         }
         return true;
+
     }
 
     public function create_bulk_orders_on_yespo($orders, $operation = 'update'){

@@ -36,7 +36,7 @@ msgid "API Key"
 msgstr "Klucz API"
 
 #: backend/views/settings.php:33
-msgid "The API key to connect account can be received by the"
+msgid "The API key to connect the account can be received by the"
 msgstr "Klucz API do połączenia konta można uzyskać poprzez"
 
 #: backend/views/settings.php:33

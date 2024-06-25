@@ -201,7 +201,7 @@ if ( get_option( 'yespo_options' ) !== false ){
     }
     .yespo-settings-page .settingsSection .synhronizationStarted{
         color:#5989EA;
-        font-size: 18px;
+        font-size: 13px;
         margin-top: 8px;
         margin-left: 20px;
     }
@@ -372,7 +372,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             this.nonceApiKeyForm = '<?php echo wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false ); ?>';
             this.apiKeyValue = '<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>';
-            this.apiKeyText = '<?php echo __( 'The API key to connect account can be received by the', Y_TEXTDOMAIN ); ?> ';
+            this.apiKeyText = '<?php echo __( 'The API key to connect the account can be received by the', Y_TEXTDOMAIN ); ?> ';
             this.yespoLink = 'https://my.yespo.io/settings-ui/#/api-keys-list';
             this.yespoLinkText = '<?php echo __( 'link', Y_TEXTDOMAIN ); ?>';
             this.wpNonce = '<?php wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' ); ?>';

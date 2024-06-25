@@ -122,7 +122,7 @@ class Esputnik_Export_Users
                             $live_exported += 1;
                         }
                     }
-                    if($total <= $exported + $live_exported){
+                    if(($total <= $exported + $live_exported) || $this->get_users_export_count() < 1){
                         $current_status = 'completed';
                         $exported = $total;
                         //Esputnik_Metrika::count_finish_exported();

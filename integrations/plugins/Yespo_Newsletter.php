@@ -2,11 +2,11 @@
 
 namespace Yespo\Integrations\Plugins;
 
-class Newsletter
+class Yespo_Newsletter
 {
 /*
 
-    private $table = 'newsletter';
+    private $table = 'Yespo_Newsletter';
 
     public function sendUserToYespo(){
         $emails = Plugin_Dealing_Trait::getUniqeEmails($this->table);
@@ -15,7 +15,7 @@ class Newsletter
             foreach ($emails as $email){
                 return $email;
 
-                //(new Yespo\Integrations\Esputnik\Esputnik_Contact())->create_plugin_subscribed_on_yespo(
+                //(new Yespo\Integrations\Esputnik\Yespo_Contact())->create_plugin_subscribed_on_yespo(
                 //    $this->getUserMap(
                 //        Plugin_Dealing_Trait::getUserByEmail($this->table, $email)
                 //    )

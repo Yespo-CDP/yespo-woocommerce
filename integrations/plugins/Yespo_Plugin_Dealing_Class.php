@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Plugins;
 
-class Plugin_Dealing_Class
+class Yespo_Plugin_Dealing_Class
 {
     protected static $wpdb;
     protected static $users = 'users';

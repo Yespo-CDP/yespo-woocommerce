@@ -49,12 +49,12 @@ class Example extends Base {
 	public function add_custom_field() {
 		\register_rest_field(
 			'demo',
-			Y_TEXTDOMAIN . '_text',
+            YESPO_TEXTDOMAIN . '_text',
 			array(
 				'get_callback'    => array( $this, 'get_text_field' ),
 				'update_callback' => array( $this, 'update_text_field' ),
 				'schema'          => array(
-					'description' => \__( 'Text field demo of Post type', Y_TEXTDOMAIN ),
+					'description' => \__( 'Text field demo of Post type', YESPO_TEXTDOMAIN ),
 					'type'        => 'string',
 				),
 			)
@@ -117,7 +117,7 @@ class Example extends Base {
 	public function get_text_field( array $post_obj ) {
 		$post_id = $post_obj['id'];
 
-		return \strval( \get_post_meta( $post_id, Y_TEXTDOMAIN . '_text', true ) );
+		return \strval( \get_post_meta( $post_id, YESPO_TEXTDOMAIN . '_text', true ) );
 	}
 
 	/**
@@ -135,7 +135,7 @@ class Example extends Base {
 		if ( false === $post_id ) {
 			return new \WP_Error(
 				'rest_post_views_failed',
-				\__( 'Failed to update post views.', Y_TEXTDOMAIN ),
+				\__( 'Failed to update post views.', YESPO_TEXTDOMAIN ),
 				array( 'status' => 500 )
 			);
 		}

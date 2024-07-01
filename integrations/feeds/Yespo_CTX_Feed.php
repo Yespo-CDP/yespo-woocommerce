@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Feeds;
 
-class CTX_Feed
+class Yespo_CTX_Feed
 {
     private $plugin_name = "webappick-product-feed-for-woocommerce/woo-feed.php";
     private $option_part_name = "wf_feed";

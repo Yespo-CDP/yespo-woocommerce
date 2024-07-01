@@ -73,13 +73,13 @@ class Enqueue extends Base {
 		$styles     = array();
 
 		if ( !\is_null( $admin_page ) && 'toplevel_page_yespo' === $admin_page->id ) {
-			$styles[0] = new Style( Y_TEXTDOMAIN . '-settings-style', \plugins_url( 'assets/build/plugin-settings.css', Y_PLUGIN_ABSOLUTE ) );
-			$styles[0]->forLocation( Asset::BACKEND )->withVersion( Y_VERSION );
+			$styles[0] = new Style( YESPO_TEXTDOMAIN . '-settings-style', \plugins_url( 'assets/build/plugin-settings.css', YESPO_PLUGIN_ABSOLUTE ) );
+			$styles[0]->forLocation( Asset::BACKEND )->withVersion( YESPO_VERSION );
 			$styles[0]->withDependencies( 'dashicons' );
 		}
 
-		$styles[1] = new Style( Y_TEXTDOMAIN . '-admin-style', \plugins_url( 'assets/build/plugin-admin.css', Y_PLUGIN_ABSOLUTE ) );
-		$styles[1]->forLocation( Asset::BACKEND )->withVersion( Y_VERSION );
+		$styles[1] = new Style( YESPO_TEXTDOMAIN . '-admin-style', \plugins_url( 'assets/build/plugin-admin.css', YESPO_PLUGIN_ABSOLUTE ) );
+		$styles[1]->forLocation( Asset::BACKEND )->withVersion( YESPO_VERSION );
 		$styles[1]->withDependencies( 'dashicons' );
 
 		return $styles;
@@ -96,8 +96,8 @@ class Enqueue extends Base {
 		$scripts    = array();
 
 		if ( !\is_null( $admin_page ) && 'toplevel_page_yespo' === $admin_page->id ) {
-			$scripts[0] = new Script( Y_TEXTDOMAIN . '-settings-script', \plugins_url( 'assets/build/plugin-settings.js', Y_PLUGIN_ABSOLUTE ) );
-			$scripts[0]->forLocation( Asset::BACKEND )->withVersion( Y_VERSION );
+			$scripts[0] = new Script( YESPO_TEXTDOMAIN . '-settings-script', \plugins_url( 'assets/build/plugin-settings.js', YESPO_PLUGIN_ABSOLUTE ) );
+			$scripts[0]->forLocation( Asset::BACKEND )->withVersion( YESPO_VERSION );
 			$scripts[0]->withDependencies( 'jquery-ui-tabs' );
 			$scripts[0]->canEnqueue(
 				function() {
@@ -106,8 +106,8 @@ class Enqueue extends Base {
 			);
 		}
 
-		$scripts[1] = new Script( Y_TEXTDOMAIN . '-settings-admin', \plugins_url( 'assets/build/plugin-admin.js', Y_PLUGIN_ABSOLUTE ) );
-		$scripts[1]->forLocation( Asset::BACKEND )->withVersion( Y_VERSION );
+		$scripts[1] = new Script( YESPO_TEXTDOMAIN . '-settings-admin', \plugins_url( 'assets/build/plugin-admin.js', YESPO_PLUGIN_ABSOLUTE ) );
+		$scripts[1]->forLocation( Asset::BACKEND )->withVersion( YESPO_VERSION );
 		$scripts[1]->dependencies();
 
 		return $scripts;

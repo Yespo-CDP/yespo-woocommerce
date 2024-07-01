@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Esputnik_Metrika
+class Yespo_Metrika
 {
     const ACTIVITY_ESPUTNIK_URL = "https://esputnik.com/user-activity/public/v1/activity";
     const ACTIVITY_REQUEST = "POST";
@@ -11,7 +11,7 @@ class Esputnik_Metrika
     public static function count_activations(){
         $args["userId"] = 2343423;
         $data = self::get_data($args);
-        //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
+        //Yespo_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
 /*
         $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
         $data_to_append = ' plugin activated ' . json_encode($data);
@@ -25,20 +25,20 @@ class Esputnik_Metrika
     public static function count_start_connections(){
         $args["userId"] = 2343423;
         $data = self::get_data($args);
-        //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
+        //Yespo_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
 
     }
     public static function count_finish_connections(){
         $args["userId"] = 2343423;
         $data = self::get_data($args);
-        //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
+        //Yespo_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
 
     }
     public static function count_page_views(){}
     public static function count_start_exported(){
         $args["userId"] = 2343423;
         $data = self::get_data($args);
-        //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
+        //Yespo_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
 /*
                 $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
                 $data_to_append = ' export started ' . json_encode($data);
@@ -52,7 +52,7 @@ class Esputnik_Metrika
     public static function count_finish_exported(){
         $args["userId"] = 2343423;
         $data = self::get_data($args);
-        //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
+        //Yespo_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
 /*
                 $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
                 $data_to_append = ' export finished ' . json_encode($data);
@@ -66,7 +66,7 @@ class Esputnik_Metrika
     public static function count_deactivations(){
         $args["userId"] = 2343423;
         $data = self::get_data($args);
-        //Esputnik_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
+        //Yespo_Curl_Request::curl_request(self::ACTIVITY_ESPUTNIK_URL, self::ACTIVITY_REQUEST, $data);
 
     }
     public static function count_removes(){}
@@ -74,8 +74,8 @@ class Esputnik_Metrika
     private static function get_data($args = null){
         $data = [];
 
-        if(Y_NAME !== null) $data["pluginName"] = Y_NAME;
-        if(Y_VERSION !== null) $data["pluginVersion"] = Y_VERSION;
+        if(YESPO_NAME !== null) $data["pluginName"] = YESPO_NAME;
+        if(YESPO_VERSION !== null) $data["pluginVersion"] = YESPO_VERSION;
 
         if(isset($args) && is_array($args)){
             if(array_key_exists("customerId", $args) && !empty($args["customerId"])) $data["customerId"] = $args["customerId"];

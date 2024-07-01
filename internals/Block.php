@@ -38,7 +38,7 @@ class Block extends Base {
 	 */
 	public function register_block() {
 		// Register the block by passing the location of block.json to register_block_type.
-		$json = \Y_PLUGIN_ROOT . 'assets/block.json';
+		$json = \YESPO_PLUGIN_ROOT . 'assets/block.json';
 
 		\register_block_type( $json );
 	}

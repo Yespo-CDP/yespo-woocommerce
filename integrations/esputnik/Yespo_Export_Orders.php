@@ -4,7 +4,7 @@ namespace Yespo\Integrations\Esputnik;
 
 use WP_Query;
 
-class Esputnik_Export_Orders
+class Yespo_Export_Orders
 {
     private $period_selection = 300;
     private $period_selection_since = 300;
@@ -25,7 +25,7 @@ class Esputnik_Export_Orders
 
     public function __construct(){
         global $wpdb;
-        $this->meta_key = (new Esputnik_Order())->get_meta_key();
+        $this->meta_key = (new Yespo_Order())->get_meta_key();
         $this->wpdb = $wpdb;
         $this->table_posts = $this->wpdb->prefix . 'wc_orders';
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
@@ -76,7 +76,7 @@ class Esputnik_Export_Orders
             if(($total <= $exported + $live_exported) || $this->get_export_orders_count() < 1){
                 $current_status = 'completed';
                 $exported = $total;
-                Esputnik_Metrika::count_finish_exported();
+                Yespo_Metrika::count_finish_exported();
             } else $exported += $live_exported;
 
             $this->update_table_data($status->id, $exported, $current_status);
@@ -96,7 +96,7 @@ class Esputnik_Export_Orders
             foreach ($orders as $order) {
                 $item = wc_get_order($order);
                 if ($item) {
-                    (new Esputnik_Order())->create_order_on_yespo($item, 'update');
+                    (new Yespo_Order())->create_order_on_yespo($item, 'update');
                 }
             }
         } else {
@@ -120,7 +120,7 @@ class Esputnik_Export_Orders
             if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
 
 
-            $export_res = (new Esputnik_Order())->create_bulk_orders_on_yespo(Esputnik_Order_Mapping::create_bulk_order_export_array($orders), 'update');
+            $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
 
             if($export_res) {
                 $live_exported = $export_res;
@@ -130,7 +130,7 @@ class Esputnik_Export_Orders
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
                 $exported = $total;
-                //Esputnik_Metrika::count_finish_exported();
+                //Yespo_Metrika::count_finish_exported();
             } else $exported += $live_exported;
 
             $is_error = $this->check_orders_for_error();
@@ -158,7 +158,7 @@ class Esputnik_Export_Orders
         //if(count($orders) < 1) $orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order));
         $orders = $this->get_orders_export_esputnik();
         if(count($orders) > 0 && isset($orders[0])){
-            return (new Esputnik_Order())->create_order_on_yespo(
+            return (new Yespo_Order())->create_order_on_yespo(
                 wc_get_order($orders[0])
             );
         }

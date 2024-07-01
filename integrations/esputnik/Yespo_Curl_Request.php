@@ -5,7 +5,7 @@ namespace Yespo\Integrations\Esputnik;
 
 use Exception;
 
-class Esputnik_Curl_Request
+class Yespo_Curl_Request
 {
     public static function curl_request(
         $url,

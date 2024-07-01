@@ -14,7 +14,7 @@ namespace Yespo\Integrations\Widgets;
 /**
  * Create custom widget class extending WPH_Widget
  */
-class My_Recent_Posts_Widget extends \WPH_Widget {
+class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 
 	/**
 	 * Initialize the widget
@@ -23,8 +23,8 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 	 */
 	public function __construct() { // phpcs:ignore
 		$args = array(
-			'label'       => \__( 'My Recent Posts Example', Y_TEXTDOMAIN ),
-			'description' => \__( 'My Recent Posts Widget Description', Y_TEXTDOMAIN ),
+			'label'       => \__( 'My Recent Posts Example', YESPO_TEXTDOMAIN ),
+			'description' => \__( 'My Recent Posts Widget Description', YESPO_TEXTDOMAIN ),
 			'slug'        => 'recent-posts',
 			// 'options' => array( 'cache' => true )
 		);
@@ -33,9 +33,9 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 			// Title field
 			array(
 				// Field name/label
-				'name'     => \__( 'Title', Y_TEXTDOMAIN ),
+				'name'     => \__( 'Title', YESPO_TEXTDOMAIN ),
 				// Field description
-				'desc'     => \__( 'Enter the widget title.', Y_TEXTDOMAIN ),
+				'desc'     => \__( 'Enter the widget title.', YESPO_TEXTDOMAIN ),
 				// Field id
 				'id'       => 'title',
 				// Field type ( text, checkbox, textarea, select, select-group, taxonomy, taxonomyterm, pages, hidden )
@@ -43,7 +43,7 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 				// Class, rows, cols
 				'class'    => 'widefat',
 				// Default value
-				'std'      => \__( 'Recent Posts', Y_TEXTDOMAIN ),
+				'std'      => \__( 'Recent Posts', YESPO_TEXTDOMAIN ),
 				/**
 				Set the field validation type/s
 				'alpha_dash'
@@ -74,16 +74,16 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Taxonomy Field
 			array(
-				'name'  => \__( 'Taxonomy', Y_TEXTDOMAIN ),
-				'desc'  => \__( 'Set the taxonomy.', Y_TEXTDOMAIN ),
+				'name'  => \__( 'Taxonomy', YESPO_TEXTDOMAIN ),
+				'desc'  => \__( 'Set the taxonomy.', YESPO_TEXTDOMAIN ),
 				'id'    => 'taxonomy',
 				'type'  => 'taxonomy',
 				'class' => 'widefat',
 			),
 			// Taxonomy Field
 			array(
-				'name'     => \__( 'Taxonomy terms', Y_TEXTDOMAIN ),
-				'desc'     => \__( 'Set the taxonomy terms.', Y_TEXTDOMAIN ),
+				'name'     => \__( 'Taxonomy terms', YESPO_TEXTDOMAIN ),
+				'desc'     => \__( 'Set the taxonomy terms.', YESPO_TEXTDOMAIN ),
 				'id'       => 'taxonomyterm',
 				'type'     => 'taxonomyterm',
 				'taxonomy' => 'category',
@@ -91,16 +91,16 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Pages Field
 			array(
-				'name'  => \__( 'Pages', Y_TEXTDOMAIN ),
-				'desc'  => \__( 'Set the page.', Y_TEXTDOMAIN ),
+				'name'  => \__( 'Pages', YESPO_TEXTDOMAIN ),
+				'desc'  => \__( 'Set the page.', YESPO_TEXTDOMAIN ),
 				'id'    => 'pages',
 				'type'  => 'pages',
 				'class' => 'widefat',
 			),
 			// Post type Field
 			array(
-				'name'     => \__( 'Post type', Y_TEXTDOMAIN ),
-				'desc'     => \__( 'Set the post type.', Y_TEXTDOMAIN ),
+				'name'     => \__( 'Post type', YESPO_TEXTDOMAIN ),
+				'desc'     => \__( 'Set the post type.', YESPO_TEXTDOMAIN ),
 				'id'       => 'posttype',
 				'type'     => 'posttype',
 				'posttype' => 'post',
@@ -108,22 +108,22 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Amount Field
 			array(
-				'name'     => \__( 'Amount', Y_TEXTDOMAIN ),
-				'desc'     => \__( 'Select how many posts to show.', Y_TEXTDOMAIN ),
+				'name'     => \__( 'Amount', YESPO_TEXTDOMAIN ),
+				'desc'     => \__( 'Select how many posts to show.', YESPO_TEXTDOMAIN ),
 				'id'       => 'amount',
 				'type'     => 'select',
 				// Selectbox fields
 				'fields'   => array(
 					array(
-						'name'  => \__( '1 Post', Y_TEXTDOMAIN ),
+						'name'  => \__( '1 Post', YESPO_TEXTDOMAIN ),
 						'value' => '1',
 					),
 					array(
-						'name'  => \__( '2 Posts', Y_TEXTDOMAIN ),
+						'name'  => \__( '2 Posts', YESPO_TEXTDOMAIN ),
 						'value' => '2',
 					),
 					array(
-						'name'  => \__( '3 Posts', Y_TEXTDOMAIN ),
+						'name'  => \__( '3 Posts', YESPO_TEXTDOMAIN ),
 						'value' => '3',
 					),
 
@@ -134,8 +134,8 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Output type checkbox
 			array(
-				'name'   => \__( 'Output as list', Y_TEXTDOMAIN ),
-				'desc'   => \__( 'Wraps posts with the <li> tag.', Y_TEXTDOMAIN ),
+				'name'   => \__( 'Output as list', YESPO_TEXTDOMAIN ),
+				'desc'   => \__( 'Wraps posts with the <li> tag.', YESPO_TEXTDOMAIN ),
 				'id'     => 'list',
 				'type'   => 'checkbox',
 				// Checked by default:
@@ -190,7 +190,7 @@ class My_Recent_Posts_Widget extends \WPH_Widget {
 		\add_action(
 		'widgets_init',
 		static function() {
-			\register_widget( 'Yespo\Integrations\Widgets\My_Recent_Posts_Widget' );
+			\register_widget( 'Yespo\Integrations\Widgets\Yespo_Recent_Posts_Widget' );
 		}
 		);
 	}

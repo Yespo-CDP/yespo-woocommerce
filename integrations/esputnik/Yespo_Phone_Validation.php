@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Esputnik_Phone_Validation
+class Yespo_Phone_Validation
 {
     public static function start_validation(string $phone, string $country_code){
         $validation = new self();
@@ -20,7 +20,7 @@ class Esputnik_Phone_Validation
 
     private function normalize_number(string $phoneNumber, string $countryCode, int $expectedLength)
     {
-        $phoneNumber = preg_replace('/\D/', '', $phoneNumber);
+        $phoneNumber = preg_replace('/\D/', '', sanitize_text_field($phoneNumber));
         $phoneNumberLength = strlen($phoneNumber);
         $countryCodeLength = strlen($countryCode) - 1;
         $missingDigits = $expectedLength - $phoneNumberLength;

@@ -88,8 +88,12 @@ msgid "Invalid API key. Please delete the plugin and start the configuration fro
 msgstr "Nieprawidłowy klucz API. Proszę usunąć wtyczkę i rozpocząć konfigurację od nowa, używając prawidłowego klucza API. Dane nie zostaną utracone."
 
 #: backend/views/settings.php:362
-msgid "Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss."
-msgstr "Aktywność wychodząca na serwerze jest zablokowana. Skontaktuj się ze swoim dostawcą, aby rozwiązać ten problem. Synchronizacja danych może zostać wznowiona po tym bez utraty danych."
+msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved. Reload the page to see the updated synchronization process state."
+msgstr "Aktywność wychodząca na serwerze jest zablokowana. Proszę skontaktować się z dostawcą, aby rozwiązać ten problem. Synchronizacja danych zostanie automatycznie wznowiona bez utraty danych po rozwiązaniu problemu. Odśwież stronę, aby zobaczyć zaktualizowany stan procesu synchronizacji."
+
+#: functions/functions.php:48
+msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
+msgstr "Aktywność wychodząca na serwerze jest zablokowana. Proszę skontaktować się z dostawcą, aby rozwiązać ten problem. Synchronizacja danych zostanie automatycznie wznowiona bez utraty danych po rozwiązaniu problemu."
 
 #: backend/views/settings.php:86
 msgid "Contact Support"

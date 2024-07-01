@@ -33,7 +33,7 @@ class Settings_Page extends Base {
         \add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
 
         $realpath        = (string) \realpath( __DIR__ );
-        $plugin_basename = \plugin_basename( \plugin_dir_path( $realpath ) . Y_TEXTDOMAIN . '.php' );
+        $plugin_basename = \plugin_basename( \plugin_dir_path( $realpath ) . YESPO_TEXTDOMAIN . '.php' );
         \add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );
     }
 
@@ -52,19 +52,19 @@ class Settings_Page extends Base {
          * - Change 'manage_options' to the capability you see fit
          *   For reference: http://codex.wordpress.org/Roles_and_Capabilities
 
-        add_options_page( __( 'Page Title', Y_TEXTDOMAIN ), Y_NAME, 'manage_options', Y_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ) );
+        add_options_page( __( 'Page Title', YESPO_TEXTDOMAIN ), YESPO_NAME, 'manage_options', YESPO_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ) );
          *
          */
         /*
          * Add a settings page for this plugin to the main menu
          *
          */
-        \add_menu_page( \__( 'Yespo Settings', Y_TEXTDOMAIN ), 'Yespo', 'manage_options', Y_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
+        \add_menu_page( \__( 'Yespo Settings', YESPO_TEXTDOMAIN ), 'Yespo', 'manage_options', YESPO_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
 /*
         add_submenu_page(
-            Y_TEXTDOMAIN,
-            __('Settings', Y_TEXTDOMAIN),
-            __('Settings', Y_TEXTDOMAIN),
+            YESPO_TEXTDOMAIN,
+            __('Settings', YESPO_TEXTDOMAIN),
+            __('Settings', YESPO_TEXTDOMAIN),
             'manage_options',
             'yespo_settings',
             array($this, 'display_plugin_settings_page')
@@ -75,7 +75,7 @@ class Settings_Page extends Base {
             global $submenu_file;
             global $current_screen;
 
-            if ($current_screen->base === 'toplevel_page_' . Y_TEXTDOMAIN) {
+            if ($current_screen->base === 'toplevel_page_' . YESPO_TEXTDOMAIN) {
                 $submenu_file = 'yespo_settings';
             }
 
@@ -86,8 +86,8 @@ class Settings_Page extends Base {
         add_action('admin_menu', function() {
             global $submenu;
 
-            if (isset($submenu[Y_TEXTDOMAIN])) {
-                unset($submenu[Y_TEXTDOMAIN][0]);
+            if (isset($submenu[YESPO_TEXTDOMAIN])) {
+                unset($submenu[YESPO_TEXTDOMAIN][0]);
             }
         }, 999);
 */
@@ -100,12 +100,12 @@ class Settings_Page extends Base {
      * @return void
      */
     public function display_plugin_admin_page() {
-        //include_once Y_PLUGIN_ROOT . 'backend/views/admin.php';
-        include_once Y_PLUGIN_ROOT . 'backend/views/settings.php';
+        //include_once YESPO_PLUGIN_ROOT . 'backend/views/admin.php';
+        include_once YESPO_PLUGIN_ROOT . 'backend/views/settings.php';
     }
 
     public function display_plugin_settings_page() {
-        include_once Y_PLUGIN_ROOT . 'backend/views/settings.php';
+        include_once YESPO_PLUGIN_ROOT . 'backend/views/settings.php';
     }
 
     /**
@@ -118,8 +118,8 @@ class Settings_Page extends Base {
     public function add_action_links( array $links ) {
         return \array_merge(
             array(
-                //'settings' => '<a href="' . \admin_url( 'admin.php?page=' . Y_TEXTDOMAIN . '_settings' ) . '">' . \__( 'Settings', Y_TEXTDOMAIN ) . '</a>',
-                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . Y_TEXTDOMAIN ) . '">' . \__( 'Settings', Y_TEXTDOMAIN ) . '</a>',
+                //'settings' => '<a href="' . \admin_url( 'admin.php?page=' . YESPO_TEXTDOMAIN . '_settings' ) . '">' . \__( 'Settings', YESPO_TEXTDOMAIN ) . '</a>',
+                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . YESPO_TEXTDOMAIN ) . '">' . \__( 'Settings', YESPO_TEXTDOMAIN ) . '</a>',
             ),
             $links
         );

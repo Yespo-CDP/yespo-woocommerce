@@ -4,15 +4,15 @@ namespace Yespo\Integrations\Esputnik;
 
 use Exception;
 
-class Esputnik_Account
+class Yespo_Account
 {
-    const REMOTE_ESPUTNIK_URL = "https://esputnik.com/api/v1/account/info";
+    const YESPO_REMOTE_ESPUTNIK_URL = "https://esputnik.com/api/v1/account/info";
 
     public function send_keys($api_key) {
         try {
             $curl = curl_init();
             curl_setopt_array($curl, [
-                CURLOPT_URL => self::REMOTE_ESPUTNIK_URL,
+                CURLOPT_URL => self::YESPO_REMOTE_ESPUTNIK_URL,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -43,7 +43,7 @@ class Esputnik_Account
     }
 
     public function get_profile_name(){
-        return Esputnik_Curl_Request::curl_request(self::REMOTE_ESPUTNIK_URL, 'GET', get_option('yespo_options'));
+        return Yespo_Curl_Request::curl_request(self::YESPO_REMOTE_ESPUTNIK_URL, 'GET', get_option('yespo_options'));
     }
 
     public function add_entry_auth_log($api_key, $response){
@@ -51,8 +51,8 @@ class Esputnik_Account
         $table_yespo_auth = $wpdb->prefix . 'yespo_auth_log';
 
         $data = [
-            'api_key' => $api_key,
-            'response' => $response,
+            'api_key' => sanitize_text_field($api_key),
+            'response' => sanitize_text_field($response),
             'time' => date('Y-m-d H:i:s', time())
         ];
 

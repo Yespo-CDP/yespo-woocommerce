@@ -1,7 +1,7 @@
 <?php
 
 namespace Yespo\Integrations\Feeds;
-class Product_Feed_PRO_WC
+class Yespo_Product_Feed_PRO_WC
 {
     private $plugin_name = "woo-product-feed-pro/woocommerce-sea.php";
     private $option_name = "cron_projects";

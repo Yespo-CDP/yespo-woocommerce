@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Esputnik_Order
+class Yespo_Order
 {
     const REMOTE_ORDER_YESPO_URL = 'https://esputnik.com/api/v1/orders';
     const CUSTOM_ORDER_REQUEST = 'POST';
@@ -15,20 +15,20 @@ class Esputnik_Order
     public function create_order_on_yespo($order, $operation = 'update'){
 
         if (empty($this->authData)) {
-            return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+            return __( 'Empty user authorization data', YESPO_TEXTDOMAIN );
         }
 
-        $data = Esputnik_Order_Mapping::order_woo_to_yes($order);
+        $data = Yespo_Order_Mapping::order_woo_to_yes($order);
 
         if($data){
-            //if($operation === 'delete') $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::map_clean_user_data_order($order));
-            //else $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Esputnik_Order_Mapping::order_woo_to_yes($order));
-            $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $data, 'orders');
+            //if($operation === 'delete') $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Yespo_Order_Mapping::map_clean_user_data_order($order));
+            //else $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Yespo_Order_Mapping::order_woo_to_yes($order));
+            $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $data, 'orders');
             if ($response > 199 && $response < 300) {
                 if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
                     update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
-                    (new Esputnik_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
-                    (new Esputnik_Logging_Data())->create_single_contact_log($order->get_billing_email()); //add entry contact log file
+                    (new Yespo_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
+                    (new Yespo_Logging_Data())->create_single_contact_log($order->get_billing_email()); //add entry contact log file
                 }
             }
         } else{
@@ -41,15 +41,15 @@ class Esputnik_Order
     public function create_bulk_orders_on_yespo($orders, $operation = 'update'){
 
         if (empty($this->authData)) {
-            return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+            return __( 'Empty user authorization data', YESPO_TEXTDOMAIN );
         }
 
-        (new Esputnik_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
+        (new Yespo_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
 
         if($orders['orders'] > 0) {
-            $response = Esputnik_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders, 'orders');
+            $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders, 'orders');
 
-            (new Esputnik_Export_Orders())->add_entry_queue_items();
+            (new Yespo_Export_Orders())->add_entry_queue_items();
 
             if ($response > 199 && $response < 300) {
                 $orderCounter = 0;
@@ -57,35 +57,26 @@ class Esputnik_Order
                     $order = wc_get_order($item['externalOrderId']);
                     if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
                         update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
-                        (new Esputnik_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
+                        (new Yespo_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
                         $orderCounter++;
                     }
                 }
                 return $orderCounter;
             } else if($response === 401){
-                (new Esputnik_Export_Orders())->error_export_orders('401');
+                (new Yespo_Export_Orders())->error_export_orders('401');
             } else if($response === 0){
-                (new Esputnik_Export_Orders())->error_export_orders('555');
+                (new Yespo_Export_Orders())->error_export_orders('555');
             }
         }
         return false;
     }
 
-    public function clean_users_data_from_orders_yespo($email){
-        $orders = $this->find_orders_by_user_email($email);
-        if(count($orders) > 0){
-            foreach($orders as $order_id){
-                $this->create_order_on_yespo(wc_get_order($order_id), 'delete');
-                (new Esputnik_Logging_Data())->create_entry_order($order_id, 'delete'); //add entry to logfile
-            }
-        }
-    }
     private function find_orders_by_user_email($email){
         $customer_orders = wc_get_orders( array(
             'limit'    => -1,
             'orderby'  => 'date',
             'order'    => 'DESC',
-            'customer' => $email,
+            'customer' => sanitize_email($email),
         ) );
         $orders = [];
         foreach( $customer_orders as $order ) {

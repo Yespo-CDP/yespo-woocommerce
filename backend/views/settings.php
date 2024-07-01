@@ -6,21 +6,20 @@ if ( get_option( 'yespo_options' ) !== false ){
 }
 ?>
 <div class="yespo-settings-page">
-    <!--div id="yespo-notices"></div-->
     <section class="topPanel">
         <div class="contentPart panelBox">
-            <img src="<?php echo Y_PLUGIN_URL;?>assets/images/yespologosmall.svg" width="33" height="33" alt="<?php echo Y_NAME;?>" title="<?php echo Y_NAME;?>">
+            <img src="<?php echo YESPO_PLUGIN_URL;?>assets/images/yespologosmall.svg" width="33" height="33" alt="<?php echo esc_attr(YESPO_NAME); ?>" title="<?php echo esc_attr(YESPO_NAME); ?>">
             <div class="panelUser">
                 <?php
-                if(isset($yespo_username)) echo $yespo_username;
+                if(isset($yespo_username)) echo esc_html($yespo_username);;
                 ?>
             </div>
         </div>
     </section>
     <section class="userPanel">
         <div class="contentPart">
-            <h1><?php echo __('Data synchronization',Y_TEXTDOMAIN) ?></h1>
-            <p><?php echo __('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools',Y_TEXTDOMAIN) ?></p>
+            <h1><?php echo esc_html__('Data synchronization', YESPO_TEXTDOMAIN); ?></h1>
+            <p><?php echo esc_html__('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools',YESPO_TEXTDOMAIN) ?></p>
             <div class="settingsSection">
             </div>
         </div>
@@ -146,11 +145,11 @@ if ( get_option( 'yespo_options' ) !== false ){
         padding:0px;
     }
 
-/*
-    .yespo-settings-page .settingsSection .sectionBody .formBlock .inputApiLine{
-        display:flex;
-    }
- */
+    /*
+        .yespo-settings-page .settingsSection .sectionBody .formBlock .inputApiLine{
+            display:flex;
+        }
+     */
     .yespo-settings-page .settingsSection .sectionBody .formBlock .errorAPiKey p{
         color: red;
     }
@@ -353,28 +352,27 @@ if ( get_option( 'yespo_options' ) !== false ){
 
     class YespoExportData {
         constructor() {
-            this.h1 = '<?php echo __('Synchronization progress', Y_TEXTDOMAIN)?>';
-            //this.h1 = '<?php echo __('Data synchronization',Y_TEXTDOMAIN) ?>';
-            this.outSideText = '<?php echo __('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', Y_TEXTDOMAIN)?>';
-            this.h4 = '<?php echo __('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', Y_TEXTDOMAIN)?>';
-            this.resume = '<?php echo __( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', Y_TEXTDOMAIN ); ?>';
-            this.error = '<?php echo __('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', Y_TEXTDOMAIN)?>';
-            this.error401 = '<?php echo __('Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', Y_TEXTDOMAIN)?>';
-            this.error555 = '<?php echo __('Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss.', Y_TEXTDOMAIN)?>';
-            this.success = '<?php echo __( 'Data is successfully synchronized', Y_TEXTDOMAIN ); ?>';
-            this.synhStarted = '<?php echo __( 'Data synchronization has started', Y_TEXTDOMAIN ); ?>';
-            //this.tableArea = document.querySelector('#importFeedUrls');
-            this.pluginUrl = '<?php echo Y_PLUGIN_URL?>';
-            this.pauseButton = '<?php echo __('Pause', Y_TEXTDOMAIN)?>';
-            this.resumeButton = '<?php echo __('Resume', Y_TEXTDOMAIN)?>';
-            this.contactSupportButton = '<?php echo __('Contact Support', Y_TEXTDOMAIN)?>';
+            this.h1 = '<?php echo esc_html__('Synchronization progress', YESPO_TEXTDOMAIN)?>';
+            //this.h1 = '<?php echo esc_html__('Data synchronization',YESPO_TEXTDOMAIN) ?>';
+            this.outSideText = '<?php echo esc_html__('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', YESPO_TEXTDOMAIN)?>';
+            this.h4 = '<?php echo esc_html__('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', YESPO_TEXTDOMAIN)?>';
+            this.resume = '<?php echo esc_html__( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', YESPO_TEXTDOMAIN ); ?>';
+            this.error = '<?php echo esc_html__('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', YESPO_TEXTDOMAIN)?>';
+            this.error401 = '<?php echo esc_html__('Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', YESPO_TEXTDOMAIN)?>';
+            this.error555 = '<?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved. Reload the page to see the updated synchronization process state.', YESPO_TEXTDOMAIN)?>';
+            this.success = '<?php echo esc_html__( 'Data is successfully synchronized', YESPO_TEXTDOMAIN ); ?>';
+            this.synhStarted = '<?php echo esc_html__( 'Data synchronization has started', YESPO_TEXTDOMAIN ); ?>';
+            this.pluginUrl = '<?php echo YESPO_PLUGIN_URL?>';
+            this.pauseButton = '<?php echo esc_html__('Pause', YESPO_TEXTDOMAIN)?>';
+            this.resumeButton = '<?php echo esc_html__('Resume', YESPO_TEXTDOMAIN)?>';
+            this.contactSupportButton = '<?php echo esc_html__('Contact Support', YESPO_TEXTDOMAIN)?>';
             this.ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
             this.nonceApiKeyForm = '<?php echo wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false ); ?>';
             this.apiKeyValue = '<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>';
-            this.apiKeyText = '<?php echo __( 'The API key to connect the account can be received by the', Y_TEXTDOMAIN ); ?> ';
+            this.apiKeyText = '<?php echo __( 'The API key to connect the account can be received by the', YESPO_TEXTDOMAIN ); ?> ';
             this.yespoLink = 'https://my.yespo.io/settings-ui/#/api-keys-list';
-            this.yespoLinkText = '<?php echo __( 'link', Y_TEXTDOMAIN ); ?>';
+            this.yespoLinkText = '<?php echo __( 'link', YESPO_TEXTDOMAIN ); ?>';
             this.wpNonce = '<?php wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' ); ?>';
 
             this.eventSource = null;
@@ -384,36 +382,32 @@ if ( get_option( 'yespo_options' ) !== false ){
             this.usersExportStatus = false;
             this.orders = null;
 
-            //this.eventListeners();
-            //if(document.querySelector('#checkYespoAuthorization')) this.checkSynchronization(document.querySelector('#checkYespoAuthorization'));
-
             this.getAccountYespoName();
             this.checkAuthorization()
 
             //this.showApiKeyForm();
-
         }
 
         // get top account name
         getAccountYespoName(){
-            this.getRequest('get_account_yespo_name',  (response) => {
+            this.getRequest('yespo_get_account_yespo_name',  (response) => {
                 response = JSON.parse(response);
                 if(document.querySelector('.panelUser') && response.username !== undefined) document.querySelector('.panelUser').innerHTML=response.username;
-                //console.log(response.username);
             });
         }
 
         /**
-        * check authomatic authorization
-        **/
+         * check authomatic authorization
+         **/
         checkAuthorization(){
-            this.getRequest('check_api_authorization_yespo',  (response) => {
+            this.getRequest('yespo_check_api_authorization_yespo',  (response) => {
                 response = JSON.parse(response);
-                if(response.auth && response.auth === 'success'){
+                //console.log(response);
+                if(response.success && response.data.auth && response.data.auth === 'success'){
                     this.getNumberDataExport();
-                } else if(response.auth && response.auth === 'incorrect') {
+                } else if(response.data.auth && response.data.auth === 'incorrect') {
                     let code = 401;
-                    if(parseInt(response.code) === 0) code = 555;
+                    if(parseInt(response.data.code) === 0) code = 555;
                     this.showErrorPage('', code);
                 } else {
                     this.showApiKeyForm();
@@ -597,7 +591,7 @@ if ( get_option( 'yespo_options' ) !== false ){
                 //mainContainer.appendChild(userPanel);
                 mainContainer.appendChild(sectionBody);
             } else {
-                console.error(`Parent element with class "${settingsSection}" not found.`);
+                //console.error(`Parent element with class "${settingsSection}" not found.`);
             }
         }
 
@@ -632,7 +626,7 @@ if ( get_option( 'yespo_options' ) !== false ){
                 messageContainer.innerHTML = '';
                 messageContainer.appendChild(sectionBody);
             } else {
-                console.error('Parent element with class "sectionBodySuccess" not found.');
+                //console.error('Parent element with class "sectionBodySuccess" not found.');
             }
         }
 
@@ -645,7 +639,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             let formId = 'checkYespoAuthorization';
 
             const form = this.createForm(formId, 'post', '');
-            const h4 = this.createHeading(4, '<?php echo __( 'API Key', Y_TEXTDOMAIN ); ?>');
+            const h4 = this.createHeading(4, '<?php echo __( 'API Key', YESPO_TEXTDOMAIN ); ?>');
 
             const fieldGroup0 = this.createFieldGroup();
             const inputApiLine = this.createElement("div", { className: 'inputApiLine' });
@@ -669,7 +663,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             const fieldGroup2 = this.createFieldGroup();
 
-            const submitButton = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo __( 'Synchronize', Y_TEXTDOMAIN ); ?>' });
+            const submitButton = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo __( 'Synchronize', YESPO_TEXTDOMAIN ); ?>' });
             fieldGroup2.appendChild(submitButton);
 
             form.append(h4, fieldGroup0, fieldGroup1, nonceField, fieldGroup2);
@@ -697,7 +691,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             var xhr = new XMLHttpRequest();
             xhr.open('POST', this.ajaxUrl, true);
             var formData = new FormData(form);
-            formData.append('action', 'check_api_key_esputnik');
+            formData.append('action', 'yespo_check_api_key_esputnik');
             //spinner.style.display = 'block';
             document.querySelector('.sendYespoAuthData').innerHTML = '';
             xhr.send(formData);
@@ -706,44 +700,55 @@ if ( get_option( 'yespo_options' ) !== false ){
                     //spinner.style.display = 'none';
                     if (xhr.status === 200) {
                         var response = JSON.parse(xhr.responseText);
-                        console.log(response.status);
+                        //console.log(response.status);
                         try {
                             if(response.status === 'success') {
                                 //step 2. Start export
-                                console.log('step2');
+                                //console.log('step2');
                                 if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                                 this.getNumberDataExport();
                                 //document.getElementById('authorization-response1').innerHTML = response.message;
                                 //if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = true;
+                            } else if(response.status && response.status === 'incorrect') {
+                                let code = 401;
+                                if(parseInt(response.code) === 0) code = 555;
+                                this.showErrorPage('', code);
                             } else {
                                 //console.log(response.message);
                                 document.querySelector('.sendYespoAuthData').innerHTML = response.message;
                                 if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = false;
                             }
                         } catch (error) {
-                            console.error('Ошибка при парсинге JSON:', error);
+                            //console.error('Error:', error);
                         }
-                    } else {
-                        console.error('Произошла ошибка при отправке данных на сервер');
                     }
                 }
             };
         }
 
+        transformationTotalResponse(response){
+            let result = JSON.parse(response);
+            if(result && result.export){
+                return result.export;
+            }
+            return 0;
+        }
+
         getNumberDataExport(){
             Promise.all([
-                this.getRequest('get_users_total_export', (response) => {
+                this.getRequest('yespo_get_users_total_export', (response) => {
                     this.users = JSON.parse(response);
+                    //this.users = this.transformationTotalResponse(response);
                 }),
-                this.getRequest('get_orders_total_export', (response) => {
+                this.getRequest('yespo_get_orders_total_export', (response) => {
                     this.orders = JSON.parse(response);
+                    //this.orders = this.transformationTotalResponse(response);
                 })
             ]).then(() => {
                 this.route(this.users, this.orders);
-                console.log('display stop block');
+                //console.log('display stop block');
                 this.stopExportEventListener();
             });
-
         }
 
         getRequest(action, callback) {
@@ -754,7 +759,6 @@ if ( get_option( 'yespo_options' ) !== false ){
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         let response = xhr.responseText;
                         if (response) {
-                            console.log(response);
                             callback(response);
                         }
                         resolve();
@@ -786,7 +790,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             this.showExportProgress(this.percentTransfered);
             this.updateProgress(this.percentTransfered, 'export');
 
-            console.log('export started inside method');
+            //console.log('export started inside method');
         }
 
         showExportProgress(percent){
@@ -814,12 +818,10 @@ if ( get_option( 'yespo_options' ) !== false ){
         //STOP EXPORT
         stopExportData(){
             Promise.all([
-                this.getRequest('stop_export_data_to_yespo', (response) => {
+                this.getRequest('yespo_stop_export_data_to_yespo', (response) => {
                     this.percentTransfered = parseInt(response);
                 })
             ]).then(() => {
-                //console.log('got result');
-                //console.log(this.percentTransfered);
                 this.showResumeExportProgress(this.percentTransfered);
                 this.resumeExportEventListener();
             });
@@ -849,11 +851,11 @@ if ( get_option( 'yespo_options' ) !== false ){
         }
 
         resumeExportEventListener(){
-            console.log('resume one');
+            //console.log('resume one');
             if(document.querySelector('#resumeExportData')) {
-                console.log('resume two');
+                //console.log('resume two');
                 document.querySelector('#resumeExportData').addEventListener('submit', (event) => {
-                    console.log('resume three');
+                    //console.log('resume three');
                     event.preventDefault();
                     document.querySelector('#resume-send-data').disabled = true;
                     this.resumeExportData();
@@ -863,16 +865,16 @@ if ( get_option( 'yespo_options' ) !== false ){
 
         resumeExportData(){
             Promise.all([
-                this.getRequest('resume_export_data_to_yespo', (response) => {
-                    console.log('send to yespo');
+                this.getRequest('yespo_resume_export_data', (response) => {
+                    //console.log('send to yespo');
                     this.percentTransfered = parseInt(response);
                 })
             ]).then(() => {
-                console.log('resume scenario');
+                //console.log('resume scenario');
                 //this.startExportData();
                 this.stopExportEventListener();
                 this.getNumberDataExport();
-                console.log('start progress bar');
+                //console.log('start progress bar');
                 this.processExportUsers();
             });
 
@@ -899,13 +901,10 @@ if ( get_option( 'yespo_options' ) !== false ){
         startExportUsers() {
             if(this.users.export > 0) {
                 this.startExport(
-                    'export_user_data_to_esputnik',
+                    'yespo_export_user_data_to_esputnik',
                     'users'
                 );
-            } /*else if(parseInt(this.orders.export) > 0){
-                //this.orderExportMessage.style.display="block";
-                this.startExportOrders();
-            }*/
+            }
         }
 
         startExport(action, service){
@@ -914,7 +913,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 
         startExportOrders() {
             this.startExport(
-                'export_order_data_to_esputnik',
+                'yespo_export_order_data_to_esputnik',
                 'orders'
             );
         }
@@ -947,10 +946,10 @@ if ( get_option( 'yespo_options' ) !== false ){
 
         processExportUsers() {
             this.checkExportStatus(
-                'get_process_export_users_data_to_esputnik',
+                'yespo_get_process_export_users_data_to_esputnik',
                 'users',
                 '#total-users-export',
-                'export_user_data_to_esputnik',
+                'yespo_export_user_data_to_esputnik',
                 '#progressContainerUsers',
                 '#exported-users'
             );
@@ -958,7 +957,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 
         processExportOrders() {
             this.checkExportStatus(
-                'get_process_export_orders_data_to_esputnik',
+                'yespo_get_process_export_orders_data_to_esputnik',
                 'orders',
                 '#total-orders-export',
                 'export_orders_data_to_esputnik',
@@ -968,47 +967,43 @@ if ( get_option( 'yespo_options' ) !== false ){
         }
 
         checkExportStatus(action, way, totalUnits, totalExport, progressUnits, exportedUnits) {
-            console.log('started checkExportStatus');
+            //console.log('started checkExportStatus');
             this.getProcessData(action, (response) => {
                 response = JSON.parse(response);
-                console.log('got response');
-                //if (response && parseInt(response.display) !== 1){
-                    //if (response.exported !== null && document.querySelector(exportedUnits) && response.exported >= 0) {
-                    if (response.exported !== null && response.exported >= 0) {
-                        console.log('before update progress');
+                //console.log('got response');
+                if (response.exported !== null && response.exported >= 0) {
+                    //console.log('before update progress');
 
+                    this.updateProgress(Math.floor( (response.exported / response.total) * 100), 'export');
 
-                        this.updateProgress(Math.floor( (response.exported / response.total) * 100), 'export');
-
-                        console.log(Math.floor( (response.exported / response.total) * 100), way);
-                        //document.querySelector(totalUnits).innerHTML = response.total - response.exported;
-                        //document.querySelector(exportedUnits).innerHTML = response.exported;
-                    }
-                    console.log(response.percent);
-                    if( response.percent === 100 && way === 'users' && response.status === 'completed'){
-                        console.log('inside to start export orders');
-                        this.startExportOrders();
-                    } else if(response.percent === 100 && way === 'orders' && response.status === 'completed') this.updateProgress(100);
-                    if (response.exported !== response.total && response.status === 'active') {
-                        this.exportStatus = true;
-                        //this.exportUsersButton.disabled = true;
-                        setTimeout(() => {
-                            if(way === 'users') this.processExportUsers();
-                            if(way === 'orders') this.processExportOrders();
-                        }, 5000);
-                    } else if(response.status === 'error'){
-                        console.log(response.status);
-                        console.log(response.code);
-                        if(document.querySelector('.processPercent')) response.percent = document.querySelector('.processPercent').innerText;
-                        this.showErrorPage(response.percent, response.code);
-                    } else if(response.code === null){
-                        console.log('inside response null');
-                        //if(way === 'users') this.userFinalExportChunk();
-                        //if(way === 'orders') this.orderFinalExportChunk();
-                    } else {
-                        this.usersExportStatus = false;
-                    }
-                //}
+                    //console.log(Math.floor( (response.exported / response.total) * 100), way);
+                    //document.querySelector(totalUnits).innerHTML = response.total - response.exported;
+                    //document.querySelector(exportedUnits).innerHTML = response.exported;
+                }
+                //console.log(response.percent);
+                if( response.percent === 100 && way === 'users' && response.status === 'completed'){
+                    //console.log('inside to start export orders');
+                    this.startExportOrders();
+                } else if(response.percent === 100 && way === 'orders' && response.status === 'completed') this.updateProgress(100);
+                if (response.exported !== response.total && response.status === 'active') {
+                    this.exportStatus = true;
+                    //this.exportUsersButton.disabled = true;
+                    setTimeout(() => {
+                        if(way === 'users') this.processExportUsers();
+                        if(way === 'orders') this.processExportOrders();
+                    }, 5000);
+                } else if(response.status === 'error'){
+                    //console.log(response.status);
+                    //console.log(response.code);
+                    if(document.querySelector('.processPercent')) response.percent = document.querySelector('.processPercent').innerText;
+                    this.showErrorPage(response.percent, response.code);
+                } else if(response.code === null){
+                    //console.log('inside response null');
+                    //if(way === 'users') this.userFinalExportChunk();
+                    //if(way === 'orders') this.orderFinalExportChunk();
+                } else {
+                    this.usersExportStatus = false;
+                }
             });
         }
 

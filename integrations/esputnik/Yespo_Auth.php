@@ -4,7 +4,7 @@ namespace Yespo\Integrations\Esputnik;
 
 use Exception;
 
-class Esputnik_Auth
+class Yespo_Auth
 {
     private const URL_ADDRESS_TOKEN = 'https://uaa.esputnik.com/uaa/oauth/token';
     private const TYPE_REQUEST = 'POST';
@@ -19,7 +19,7 @@ class Esputnik_Auth
     }
     private function request_access_token(){
         $params = [
-            'client_id'     => YOUR_CLIENT_ID,
+            'client_id'     => YESPO_CLIENT_ID,
             //'client_secret' => $this->getOption( self::APP_SECRET_FIELD ),
             //'redirect_uri'  => $this->callbackUrl,
             //'code'          => get_query_var( self::AUTH_RESPONSE_TYPE ),

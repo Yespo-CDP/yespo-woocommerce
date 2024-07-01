@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Esputnik_Export_Users
+class Yespo_Export_Users
 {
     const CUSTOMER = 'customer';
     //const CUSTOMER = 'customertest';
@@ -18,9 +18,9 @@ class Esputnik_Export_Users
 
     public function __construct(){
         global $wpdb;
-        $this->esputnikContact = new Esputnik_Contact();
+        $this->esputnikContact = new Yespo_Contact();
         $this->meta_key = $this->esputnikContact->get_meta_key();
-        //$this->meta_key = (new Esputnik_Contact())->get_meta_key();
+        //$this->meta_key = (new Yespo_Contact())->get_meta_key();
         $this->wpdb = $wpdb;
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
         $this->table_yespo_queue = $this->wpdb->prefix . 'yespo_queue';
@@ -67,7 +67,7 @@ class Esputnik_Export_Users
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
                 $exported = $total;
-                Esputnik_Metrika::count_finish_exported();
+                Yespo_Metrika::count_finish_exported();
 
             } else $exported += $live_exported;
 
@@ -125,7 +125,7 @@ class Esputnik_Export_Users
                     if(($total <= $exported + $live_exported) || $this->get_users_export_count() < 1){
                         $current_status = 'completed';
                         $exported = $total;
-                        //Esputnik_Metrika::count_finish_exported();
+                        //Yespo_Metrika::count_finish_exported();
                     } else $exported += $live_exported;
 
                     $this->update_table_data($status->id, $exported, $current_status);
@@ -197,7 +197,7 @@ class Esputnik_Export_Users
     }
 
     public function get_users_bulk_export(){
-        return Esputnik_Contact_Mapping::create_bulk_export_array(
+        return Yespo_Contact_Mapping::create_bulk_export_array(
             $this->get_users_object($this->get_bulk_users_export_args())
         );
     }
@@ -222,7 +222,7 @@ class Esputnik_Export_Users
     public function export_users_to_esputnik(){
         $users = $this->get_users_object($this->get_users_export_args());
         if(count($users) > 0 && isset($users[0])){
-            return (new Esputnik_Contact())-> create_on_yespo(
+            return (new Yespo_Contact())-> create_on_yespo(
                 (get_user_by('id', $users[0]))->user_email,
                 $users[0]
             );
@@ -250,7 +250,7 @@ class Esputnik_Export_Users
      **/
     public function add_entry_yespo_queue($session_id){
         $data = [
-            'session_id' => $session_id,
+            'session_id' => sanitize_text_field($session_id),
             'export_status' => 'IMPORTING',
             'local_status' => ''
         ];
@@ -258,8 +258,8 @@ class Esputnik_Export_Users
     }
     public function update_entry_yespo_queue($session_id, $export_status = '', $local_status = '') {
         $data = [];
-        if(!empty($export_status)) $data['export_status'] = $export_status;
-        if(!empty($local_status)) $data['local_status'] = $local_status;
+        if(!empty($export_status)) $data['export_status'] = sanitize_text_field($export_status);
+        if(!empty($local_status)) $data['local_status'] = sanitize_text_field($local_status);
         $where = ['session_id' => $session_id];
 
         return $this->wpdb->update($this->table_yespo_queue, $data, $where);
@@ -282,15 +282,15 @@ class Esputnik_Export_Users
     public function add_entry_queue_items($user_id){
         $data = [
             'session_id' =>'',
-            'contact_id' => $user_id,
+            'contact_id' => sanitize_text_field($user_id),
             'yespo_id' =>''
         ];
         return $this->wpdb->insert($this->table_yespo_queue_items, $data);
     }
     public function update_entry_queue_items($session_id, $user_id, $yespo_id = null) {
         $data = [
-            'session_id' => $session_id,
-            'yespo_id' => $yespo_id
+            'session_id' => sanitize_text_field($session_id),
+            'yespo_id' => sanitize_text_field($yespo_id)
         ];
         $where = ['contact_id' => $user_id];
 

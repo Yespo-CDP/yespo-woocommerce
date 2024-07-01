@@ -13,7 +13,7 @@
 namespace Yespo\Backend;
 
 use Yespo\Engine\Base;
-use Yespo\Integrations\Esputnik\Esputnik_Metrika;
+use Yespo\Integrations\Esputnik\Yespo_Metrika;
 
 /**
  * Activate and deactive method of the plugin and relates.
@@ -87,7 +87,7 @@ class ActDeact extends Base {
 		}
 
 		self::single_activate();
-        Esputnik_Metrika::count_activations();
+        Yespo_Metrika::count_activations();
 	}
 
 	/**
@@ -118,7 +118,7 @@ class ActDeact extends Base {
 		}
 
 		self::single_deactivate();
-        Esputnik_Metrika::count_deactivations();
+        Yespo_Metrika::count_deactivations();
         //self::yespo_crone_deactivate();
 	}
 
@@ -217,12 +217,12 @@ class ActDeact extends Base {
 
 		$version = \strval( \get_option( 'yespo-version' ) );
 
-		if ( !\version_compare( Y_VERSION, $version, '>' ) ) {
+		if ( !\version_compare( YESPO_VERSION, $version, '>' ) ) {
 			return;
 		}
 
-		\update_option( 'yespo-version', Y_VERSION );
-		\delete_option( Y_TEXTDOMAIN . '_fake-meta' );
+		\update_option( 'yespo-version', YESPO_VERSION );
+		\delete_option( YESPO_TEXTDOMAIN . '_fake-meta' );
 	}
 
 	/**
@@ -237,8 +237,8 @@ class ActDeact extends Base {
         self::create_databases(self::$wpdb);
 		self::add_capabilities();
 		self::upgrade_procedure();
-        (new \Yespo\Integrations\Esputnik\Esputnik_Export_Users())->update_after_activation();
-        (new \Yespo\Integrations\Esputnik\Esputnik_Export_Orders())->update_after_activation();
+        (new \Yespo\Integrations\Esputnik\Yespo_Export_Users())->update_after_activation();
+        (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->update_after_activation();
 
 		// Clear the permalinks
 		\flush_rewrite_rules();

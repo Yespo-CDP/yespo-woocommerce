@@ -37,7 +37,7 @@ class Body_Class extends Base {
 	 * @return array
 	 */
 	public static function add_y_class( array $classes ) {
-		$classes[] = Y_TEXTDOMAIN;
+		$classes[] = YESPO_TEXTDOMAIN;
 
 		return $classes;
 	}

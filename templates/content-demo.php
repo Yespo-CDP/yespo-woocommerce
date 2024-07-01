@@ -1,6 +1,6 @@
 <!-- @TODO: Provide other markup for your page here. -->
 <div>
 	<?php
-		esc_html_e( 'Insert here your custom HTML', Y_TEXTDOMAIN );
+		esc_html_e( 'Insert here your custom HTML', YESPO_TEXTDOMAIN );
 	?>
 </div>

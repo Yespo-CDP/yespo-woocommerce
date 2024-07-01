@@ -4,7 +4,7 @@ namespace Yespo\Integrations\Esputnik;
 
 use Exception;
 
-class Esputnik_Logging_Data
+class Yespo_Logging_Data
 {
     private $wpdb;
     private $table_name;
@@ -36,7 +36,7 @@ class Esputnik_Logging_Data
         if(!empty($email)){
             $user = get_user_by('email', $email);
             if($user && $user->ID){
-                $yespo_contact_id = (new Esputnik_Contact())->get_yespo_user_id($user->ID);
+                $yespo_contact_id = (new Yespo_Contact())->get_yespo_user_id($user->ID);
                 if(!empty($yespo_contact_id)) return $this->create_log_entry_user($user->ID, $yespo_contact_id, 'update');
             }
         }
@@ -68,9 +68,9 @@ class Esputnik_Logging_Data
         $this->wpdb->query(
             $this->wpdb->prepare(
                 "UPDATE $this->table_name SET yespo = %d WHERE action = %s AND user_id = %s",
-                $response,
-                $action,
-                $user_id
+                sanitize_text_field($response),
+                sanitize_text_field($action),
+                sanitize_text_field($user_id)
             )
         );
     }
@@ -79,9 +79,9 @@ class Esputnik_Logging_Data
     private function create_log_entry_order(string $order_id, string $action, $status){
         if(!$this->check_presence_in_database($order_id, $action, 'completed')) {
             $data = [
-                'order_id' => $order_id,
-                'action' => $action,
-                'status' => $status,
+                'order_id' => sanitize_text_field($order_id),
+                'action' => sanitize_text_field($action),
+                'status' => sanitize_text_field($status),
                 'created_at' => current_time('mysql', 1)
             ];
 
@@ -101,9 +101,9 @@ class Esputnik_Logging_Data
     private function check_presence_in_database(string $order_id, string $action, string $status){
         $query = $this->wpdb->prepare(
             "SELECT COUNT(*) FROM $this->table_name_order WHERE order_id = %s AND action = %s AND status = %s",
-            $order_id,
-            $action,
-            $status
+            sanitize_text_field($order_id),
+            sanitize_text_field($action),
+            sanitize_text_field($status)
         );
        return $this->wpdb->get_var($query);
     }

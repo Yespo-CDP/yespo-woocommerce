@@ -67,8 +67,8 @@ class Enqueue extends Base {
 	 */
 	public function enqueue_styles() {
 		$styles = array();
-		$styles[0] = new Style( Y_TEXTDOMAIN . '-plugin-styles', \plugins_url( 'assets/build/plugin-public.css', Y_PLUGIN_ABSOLUTE ) );
-		$styles[0]->forLocation( Asset::FRONTEND )->useAsyncFilter()->withVersion( Y_VERSION );
+		$styles[0] = new Style( YESPO_TEXTDOMAIN . '-plugin-styles', \plugins_url( 'assets/build/plugin-public.css', YESPO_PLUGIN_ABSOLUTE ) );
+		$styles[0]->forLocation( Asset::FRONTEND )->useAsyncFilter()->withVersion( YESPO_VERSION );
 		$styles[0]->dependencies();
 
 		return $styles;
@@ -83,13 +83,13 @@ class Enqueue extends Base {
 	 */
 	public static function enqueue_scripts() {
 		$scripts = array();
-		$scripts[0] = new Script( Y_TEXTDOMAIN . '-plugin-script', \plugins_url( 'assets/build/plugin-public.js', Y_PLUGIN_ABSOLUTE ) );
-		$scripts[0]->forLocation( Asset::FRONTEND )->useAsyncFilter()->withVersion( Y_VERSION );
+		$scripts[0] = new Script( YESPO_TEXTDOMAIN . '-plugin-script', \plugins_url( 'assets/build/plugin-public.js', YESPO_PLUGIN_ABSOLUTE ) );
+		$scripts[0]->forLocation( Asset::FRONTEND )->useAsyncFilter()->withVersion( YESPO_VERSION );
 		$scripts[0]->dependencies();
 		$scripts[0]->withLocalize(
 			'exampleDemo',
 			array(
-				'alert'   => \__( 'Error!', Y_TEXTDOMAIN ),
+				'alert'   => \__( 'Error!', YESPO_TEXTDOMAIN ),
 				'nonce'   => \wp_create_nonce( 'demo_example' ),
 				'wp_rest' => \wp_create_nonce( 'wp_rest' ),
 			)

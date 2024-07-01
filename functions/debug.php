@@ -9,7 +9,7 @@
  * @link      https://yespo.io/
  */
 
-//$y_debug = new WPBP_Debug( __( 'Yespo', Y_TEXTDOMAIN ) ); 24022024
+//$y_debug = new WPBP_Debug( __( 'Yespo', YESPO_TEXTDOMAIN ) ); 24022024
 
 /**
  * Log text inside the debugging plugins.

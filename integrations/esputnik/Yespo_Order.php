@@ -21,8 +21,6 @@ class Yespo_Order
         $data = Yespo_Order_Mapping::order_woo_to_yes($order);
 
         if($data){
-            //if($operation === 'delete') $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Yespo_Order_Mapping::map_clean_user_data_order($order));
-            //else $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, Yespo_Order_Mapping::order_woo_to_yes($order));
             $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $data, 'orders');
             if ($response > 199 && $response < 300) {
                 if ($order && is_a($order, 'WC_Order') && $order->get_id()) {

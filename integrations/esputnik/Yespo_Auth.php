@@ -20,9 +20,6 @@ class Yespo_Auth
     private function request_access_token(){
         $params = [
             'client_id'     => YESPO_CLIENT_ID,
-            //'client_secret' => $this->getOption( self::APP_SECRET_FIELD ),
-            //'redirect_uri'  => $this->callbackUrl,
-            //'code'          => get_query_var( self::AUTH_RESPONSE_TYPE ),
         ];
     }
 

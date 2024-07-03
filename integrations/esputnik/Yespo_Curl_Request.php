@@ -37,7 +37,6 @@ class Yespo_Curl_Request
             $err = curl_error($curl);
 
             $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            //$http_code = 0; //test blocking server
             if($custom_request === 'DELETE' || $type_response === 'orders' || $http_code === 0) $response = $http_code;
             curl_close($curl);
 

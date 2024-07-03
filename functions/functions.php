@@ -116,7 +116,6 @@ function yespo_save_settings_via_form_function() {
     }
 
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'yespo_check_api_key_esputnik' ) {
-        //Yespo_Metrika::count_start_connections();
         $options = [];
         $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
         $accountClass = new \Yespo\Integrations\Esputnik\Yespo_Account();
@@ -137,7 +136,6 @@ function yespo_save_settings_via_form_function() {
                 'total' => esc_html__("Completed successfully!", YESPO_TEXTDOMAIN),
                 'username' => isset($organisationName) ? $organisationName : ''
             );
-            //Yespo_Metrika::count_finish_connections();
         } else if($result === 0){
             $response_data = array(
                 'status' => 'incorrect',
@@ -214,7 +212,6 @@ add_action('wp_ajax_nopriv_yespo_get_users_total_export', 'yespo_get_all_users_t
 /*** Export users to Yespo ***/
 function yespo_export_user_data_to_esputnik_function(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'yespo_export_user_data_to_esputnik' ) {
-        //Yespo_Metrika::count_start_exported();
         if(isset($_REQUEST['service'])){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Users)->add_users_export_task();
             wp_send_json($response);
@@ -237,16 +234,6 @@ function yespo_get_process_export_users_function(){
 }
 add_action('wp_ajax_yespo_get_process_export_users_data_to_esputnik', 'yespo_get_process_export_users_function');
 add_action('wp_ajax_nopriv_yespo_get_process_export_users_data_to_esputnik', 'yespo_get_process_export_users_function');
-
-/*** Get final status of exporting users to Yespo ***/
-function yespo_get_final_export_users_function(){
-    if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'final_export_users_data_to_esputnik' ) {
-        (new Yespo\Integrations\Esputnik\Yespo_Export_Users())->get_final_users_exported();
-    }
-    wp_die();
-}
-//add_action('wp_ajax_final_export_users_data_to_esputnik', 'yespo_get_final_export_users_function');
-//add_action('wp_ajax_nopriv_final_export_users_data_to_esputnik', 'yespo_get_final_export_users_function');
 
 /** remove woocommerce user **/
 function yespo_delete_woocommerce_user_function( $user_id ) {
@@ -336,7 +323,6 @@ add_action('wp_ajax_nopriv_yespo_get_orders_total_export', 'yespo_get_all_orders
 /*** Export orders to Yespo ***/
 function yespo_export_order_data_function(){
     if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'yespo_export_order_data_to_esputnik' ) {
-        //Yespo_Metrika::count_start_exported();
         if(isset($_REQUEST['service'])){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Orders)->add_orders_export_task();
             wp_send_json($response);
@@ -365,16 +351,6 @@ function yespo_get_process_export_orders_data_function(){
 }
 add_action('wp_ajax_yespo_get_process_export_orders_data_to_esputnik', 'yespo_get_process_export_orders_data_function');
 add_action('wp_ajax_nopriv_yespo_get_process_export_orders_data_to_esputnik', 'yespo_get_process_export_orders_data_function');
-
-/*** Get final status of exporting users to Yespo ***/
-function yespo_get_final_export_orders_data_function(){
-    if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'yespo_final_export_orders_data_to_esputnik' ) {
-        (new Yespo\Integrations\Esputnik\Yespo_Export_Orders())->get_final_orders_exported();
-    }
-    wp_die();
-}
-//add_action('wp_ajax_yespo_final_export_orders_data_to_esputnik', 'yespo_get_final_export_orders_data_function');
-//add_action('wp_ajax_nopriv_yespo_final_export_orders_data_to_esputnik', 'yespo_get_final_export_orders_data_function');
 
 /***
  * STOP EXPORT DATA

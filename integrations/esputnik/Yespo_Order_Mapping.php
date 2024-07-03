@@ -16,8 +16,6 @@ class Yespo_Order_Mapping
     public static function order_woo_to_yes($order){
         $orderArray = self::order_transformation_to_array($order);
         if (isset($orderArray['phone']) && !empty($orderArray['phone'])) {
-            //if(!empty($orderArray['country_id'])) $phoneNumber = Yespo_Phone_Validation::start_validation($orderArray['phone'], $orderArray['country_id']);
-            //else $phoneNumber = preg_replace("/[^0-9]/", "", $orderArray['phone']);
             $phoneNumber = $orderArray['phone'];
         } else $phoneNumber = '';
 
@@ -36,7 +34,6 @@ class Yespo_Order_Mapping
         $data['orders'][0]['discount'] = $orderArray['discount'];
         $data['orders'][0]['taxes'] = $orderArray['taxes'];
         $data['orders'][0]['source'] = $orderArray['source'];
-        //$data['orders']['deliveryMethod'] = $orderArray['deliveryMethod'];
         $data['orders'][0]['paymentMethod'] = $orderArray['paymentMethod'];
         $data['orders'][0]['items'] = self::get_orders_items($order);
         if($orderArray['additionalInfo']) $data['orders'][0]['additionalInfo']['comment'] = $orderArray['additionalInfo'];
@@ -51,8 +48,6 @@ class Yespo_Order_Mapping
     public static function order_bulk_woo_to_yes($order){
         $orderArray = self::order_transformation_to_array($order);
         if (isset($orderArray['phone']) && !empty($orderArray['phone'])) {
-            //if(!empty($orderArray['country_id'])) $phoneNumber = Yespo_Phone_Validation::start_validation($orderArray['phone'], $orderArray['country_id']);
-            //else $phoneNumber = preg_replace("/[^0-9]/", "", $orderArray['phone']);
             $phoneNumber = $orderArray['phone'];
         } else $phoneNumber = '';
 
@@ -71,7 +66,6 @@ class Yespo_Order_Mapping
         $data['discount'] = $orderArray['discount'];
         $data['taxes'] = $orderArray['taxes'];
         $data['source'] = $orderArray['source'];
-        //$data['orders']['deliveryMethod'] = $orderArray['deliveryMethod'];
         $data['paymentMethod'] = $orderArray['paymentMethod'];
         $data['items'] = self::get_orders_items($order);
         if($orderArray['additionalInfo']) $data['additionalInfo']['comment'] = $orderArray['additionalInfo'];
@@ -81,14 +75,8 @@ class Yespo_Order_Mapping
     public static function create_bulk_order_export_array($orders){
         $data = [];
         if($orders && count($orders) > 0){
-            $i = 0;
             foreach($orders as $order){
-                $item = self::order_bulk_woo_to_yes(wc_get_order($order->id));
-                if(empty($item['phone']) && empty($item['email'])){
-                    update_post_meta($order->id, self::ORDER_META_KEY, 'true');
-                } else {
-                    $data['orders'][] = self::order_bulk_woo_to_yes(wc_get_order($order->id));
-                }
+                $data['orders'][] = self::order_bulk_woo_to_yes(wc_get_order($order->id));
             }
         }
         return $data;
@@ -122,27 +110,20 @@ class Yespo_Order_Mapping
     private static function order_transformation_to_array($order){
         return [
             'externalOrderId' => sanitize_text_field($order->id),
-            //'externalCustomerId' => $order->customer_id ?? $order->get_billing_email(),
-            //'externalCustomerId' => !empty($order->customer_id) ? $order->customer_id : (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email()) ? $order->get_billing_email() : 'deleted@site.invalid'),
-            //'externalCustomerId' => !empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email()) && self::get_user_id($order->get_billing_email())? self::get_user_id(self::get_user_main_email($order->get_billing_email())) : '',
             'externalCustomerId' => !empty($order) && !is_bool($order)? $order->get_user_id() : '',
             'totalCost' => sanitize_text_field($order->total),
             'status' => self::get_order_status($order->status) ? self::get_order_status($order->status) : self::INITIALIZED,
-            'email' => self::get_email($order),
-            //'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : 'deleted@site.invalid',
+            'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : '',
             'date' => ($order && !is_bool($order) && method_exists($order, 'get_date_created') && ($date_created = $order->get_date_created())) ? $date_created->format('Y-m-d\TH:i:s.uP') : null,
             'currency' => sanitize_text_field($order->currency),
             'firstName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_first_name') && !empty($order->get_billing_first_name())) ? sanitize_text_field($order->get_billing_first_name()) : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_first_name') && !empty($order->get_shipping_first_name()) ? sanitize_text_field($order->get_shipping_first_name()) : ''),
             'lastName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_last_name') && !empty($order->get_billing_last_name())) ? sanitize_text_field($order->get_billing_last_name()) : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_last_name') && !empty($order->get_shipping_last_name()) ? sanitize_text_field($order->get_shipping_last_name()) : ''),
             'deliveryAddress' => self::get_delivery_address($order, 'shipping') ? sanitize_text_field(self::get_delivery_address($order, 'shipping')) : ( self::get_delivery_address($order, 'billing') ? sanitize_text_field(self::get_delivery_address($order, 'billing')) : ''),
-            //'phone' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
-            //'phone' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : ''),
             'phone' => self::get_phone_number($order),
             'shipping' => ($order->shipping_total) ? $order->shipping_total : '',
             'discount' => ($order->discount) ? $order->discount : '',
             'taxes' => !empty($order->total_tax) ? $order->total_tax : ((!empty($order->discount_tax)) ? $order->discount_tax : ((!empty($order->cart_tax)) ? $order->cart_tax : ((!empty($order->shipping_tax)) ? $order->shipping_tax : ''))),
             'source' => ($order->created_via) ? $order->created_via : '',
-            //'deliveryMethod' => $order['method_title'],
             'paymentMethod' => ($order->payment_method) ? $order->payment_method : '',
             'country_id' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_country') && !empty($order->get_billing_country())) ? $order->get_billing_country() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_country') && !empty($order->get_shipping_country()) ? $order->get_shipping_country() : ''),
             'additionalInfo' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_customer_note') && !empty($order->get_customer_note()))? $order->get_customer_note():''

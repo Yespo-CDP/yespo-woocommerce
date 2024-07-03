@@ -5,10 +5,8 @@ namespace Yespo\Integrations\Esputnik;
 class Yespo_Export_Users
 {
     const CUSTOMER = 'customer';
-    //const CUSTOMER = 'customertest';
     const SUBSCRIBER = 'subscriber';
     private $number_for_export = 500;
-    //private $number_for_export = 5;
     private $table_name;
     private $table_yespo_queue;
     private $table_yespo_queue_items;
@@ -20,7 +18,6 @@ class Yespo_Export_Users
         global $wpdb;
         $this->esputnikContact = new Yespo_Contact();
         $this->meta_key = $this->esputnikContact->get_meta_key();
-        //$this->meta_key = (new Yespo_Contact())->get_meta_key();
         $this->wpdb = $wpdb;
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
         $this->table_yespo_queue = $this->wpdb->prefix . 'yespo_queue';
@@ -125,7 +122,6 @@ class Yespo_Export_Users
                     if(($total <= $exported + $live_exported) || $this->get_users_export_count() < 1){
                         $current_status = 'completed';
                         $exported = $total;
-                        //Yespo_Metrika::count_finish_exported();
                     } else $exported += $live_exported;
 
                     $this->update_table_data($status->id, $exported, $current_status);
@@ -234,17 +230,11 @@ class Yespo_Export_Users
     }
     public function get_users_export_count(){
         return count($this->get_users_object($this->get_users_export_args()));
-        //return 10000;
     }
     public function get_users_object($args){
         return get_users($args);
     }
-    //method for testing functionality
-    /*
-    public function get_users_for_export(){
-        return $this->get_users_object($this->get_users_export_args());
-    }
-    */
+
     /**
      * entry to yespo queue
      **/

@@ -44,7 +44,6 @@ class Yespo_Contact
             if ($user) return $this->create_on_yespo($email, $user->ID);
             else return $this->process_on_yespo(Yespo_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
         }
-        //return $this->process_on_yespo(Yespo_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
     }
 
     public function create_guest_user_admin_on_yespo($post){
@@ -132,22 +131,6 @@ class Yespo_Contact
         }
         return false;
     }
-    /*
-    public function get_bulk_response($sessionId){
-        //$sessionId = 'e76ec64c-4243-4124-a9e7-b50a2a7a6c90';
-        if(isset($sessionId) && !empty($sessionId) ){
-            $response = json_decode(Yespo_Curl_Request::curl_request(self::GET_EXPORT_BULK_ESPUTNIK_URL . $sessionId, self::CUSTOM_REQUEST_GET, $this->authData));
-            if($response) $response = json_decode($response, true);
-
-            if($response && $response["status"] === "FINISHED"){
-                if (isset($response["mapping"]) && is_array($response["mapping"])) {
-                    return $response["mapping"];
-                }
-            }
-            return false;
-        }
-    }
-    */
 
     public function remove_user_phone_on_yespo($email){
         if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
@@ -162,12 +145,6 @@ class Yespo_Contact
     }
 
     public function delete_from_yespo($user_id, $relocate = false){
-        //$yespo_id = $this->get_user_metafield_id($user_id);
-        /*
-        if (!empty($this->authData) && !empty($yespo_id)) {
-            return $this->process_on_yespo(null, 'delete', null, $yespo_id);
-        }
-        */
         if (!empty($this->authData) && !empty($user_id)) {
             return $this->process_on_yespo(null, 'delete', null, $user_id, $relocate);
         }
@@ -195,8 +172,6 @@ class Yespo_Contact
             if ($relocate) $erase = '&erase=false';
             else $erase = '&erase=true';
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . $erase;
-            //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
-            //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
 
             $response = Yespo_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
             (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
@@ -215,7 +190,6 @@ class Yespo_Contact
                 if ($operation !== 'delete') {
                     if ($wc_id !== null) {
                         $this->add_esputnik_id_to_userprofile($wc_id, $responseArray['id']);
-                        //$log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : 'update');
                         $log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : (($operation === 'subscription') ? 'subscription' : 'update'));
                         (new Yespo_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], $log_operation); //add entry to logfile
                         return true;

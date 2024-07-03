@@ -10,7 +10,6 @@ class Yespo_Export_Orders
     private $period_selection_since = 300;
     private $period_selection_up = 30;
     private $number_for_export = 500;
-    //private $number_for_export = 5;
     private $table_name;
     private $table_yespo_queue_orders;
     private $table_posts;
@@ -130,7 +129,6 @@ class Yespo_Export_Orders
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
                 $exported = $total;
-                //Yespo_Metrika::count_finish_exported();
             } else $exported += $live_exported;
 
             $is_error = $this->check_orders_for_error();
@@ -154,8 +152,6 @@ class Yespo_Export_Orders
     }
 
     public function export_orders_to_esputnik(){
-        //$orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold));
-        //if(count($orders) < 1) $orders = $this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order));
         $orders = $this->get_orders_export_esputnik();
         if(count($orders) > 0 && isset($orders[0])){
             return (new Yespo_Order())->create_order_on_yespo(
@@ -256,19 +252,13 @@ class Yespo_Export_Orders
     }
 
     public function get_total_orders(){
-        //$orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order_placehold)));
-        //if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_args($this->shop_order)));
-        //return $orders;
         return count($this->get_orders_from_database());
     }
     public function get_export_orders_count(){
-        //$orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order_placehold)));
-        //if($orders < 1) $orders = count($this->get_orders_export_esputnik($this->get_orders_export_args($this->shop_order)));
-        //return $orders;
         return count($this->get_orders_from_database_without_metakey());
 
     }
-    //public function get_orders_export_esputnik($args){
+
     public function get_orders_export_esputnik(){
         $orders = $this->get_orders_from_database_without_metakey();
         $order_ids = [];
@@ -426,8 +416,6 @@ class Yespo_Export_Orders
             )
         );
     }
-
-
 
     //add json of exported orders
     public function add_json_log_entry($orders) {

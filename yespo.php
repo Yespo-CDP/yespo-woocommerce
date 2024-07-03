@@ -83,9 +83,6 @@ $requirements = new \Micropackage\Requirements\Requirements(
 		'php'            => YESPO_MIN_PHP_VERSION,
 		'php_extensions' => array( 'mbstring' ),
 		'wp'             => YESPO_WP_VERSION,
-		// 'plugins'            => array(
-		// array( 'file' => 'hello-dolly/hello.php', 'name' => 'Hello Dolly', 'version' => '1.5' )
-		// ),
 	)
 );
 
@@ -94,11 +91,6 @@ if ( ! $requirements->satisfied() ) {
 
 	return;
 }
-
-
-
-// Documentation to integrate GitHub, GitLab or BitBucket https://github.com/YahnisElsts/plugin-update-checker/blob/master/README.md
-//Puc_v4_Factory::buildUpdateChecker( 'https://github.com/user-name/repo-name/', __FILE__, 'unique-plugin-or-theme-slug' ); 24022024
 
 if ( ! wp_installing() ) {
 	register_activation_hook( YESPO_MAIN_PLUGIN_FOLDER . '/' . YESPO_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'activate' ) );

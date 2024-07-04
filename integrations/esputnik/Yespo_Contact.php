@@ -53,12 +53,6 @@ class Yespo_Contact
         }
     }
 
-    public function create_subscribed_user_on_yespo($email){
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Yespo_Contact_Mapping::subscribed_user_woo_to_yes($email), 'subscription', $email);
-        }
-    }
-
     public function update_on_yespo($user){
         if ($this->check_user_role($user)) {
             return $this->process_on_yespo(Yespo_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
@@ -93,7 +87,7 @@ class Yespo_Contact
     public function export_bulk_users($data){
         if(!empty($data)){
 
-            (new Yespo_Export_Orders())->add_json_log_entry($data);// add log entry to DB
+            //(new Yespo_Export_Orders())->add_json_log_entry($data);// add log entry to DB
 
             $response = $this->process_on_yespo($data, 'bulk');
             if($response === 0) (new Yespo_Export_Users())->error_export_users('555');
@@ -135,12 +129,6 @@ class Yespo_Contact
     public function remove_user_phone_on_yespo($email){
         if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
             return $this->process_on_yespo(Yespo_Contact_Mapping::clean_user_phone_data($email), 'clean');
-        }
-    }
-
-    public function remove_user_data_from_yespo($email){
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Yespo_Contact_Mapping::clean_user_personal_data($email), 'update');
         }
     }
 

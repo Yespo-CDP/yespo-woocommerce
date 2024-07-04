@@ -13,7 +13,6 @@
 namespace Yespo\Backend;
 
 use Yespo\Engine\Base;
-use Yespo\Integrations\Esputnik\Yespo_Metrika;
 
 /**
  * Activate and deactive method of the plugin and relates.
@@ -87,7 +86,6 @@ class ActDeact extends Base {
 		}
 
 		self::single_activate();
-        Yespo_Metrika::count_activations();
 	}
 
 	/**
@@ -118,7 +116,6 @@ class ActDeact extends Base {
 		}
 
 		self::single_deactivate();
-        Yespo_Metrika::count_deactivations();
         //self::yespo_crone_deactivate();
 	}
 
@@ -354,17 +351,17 @@ class ActDeact extends Base {
             $wpdb->query($wpdb->prepare($sqlQueueOrders));
         }
 
-        $table_yespo_orders_json = $wpdb->prefix . 'yespo_orders_json';
-        $charset_yespo_orders_json = $wpdb->get_charset_collate();
+        $table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json';
+        $charset_yespo_curl_json = $wpdb->get_charset_collate();
 
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_orders_json'") != $table_yespo_orders_json) {
-            $sqlOrdersJson = "CREATE TABLE $table_yespo_orders_json (
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_curl_json'") != $table_yespo_curl_json) {
+            $sqlOrdersJson = "CREATE TABLE $table_yespo_curl_json (
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 text longtext default NULL,
                 additional varchar(255) NOT NULL,
                 created_at datetime default NULL,
                 PRIMARY KEY  (id)
-            )$charset_yespo_orders_json;";
+            )$charset_yespo_curl_json;";
             $wpdb->query($wpdb->prepare($sqlOrdersJson));
         }
 

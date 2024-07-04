@@ -40,6 +40,8 @@ class Yespo_Curl_Request
             if($custom_request === 'DELETE' || $type_response === 'orders' || $http_code === 0) $response = $http_code;
             curl_close($curl);
 
+            if(!empty($user_data)) (new Yespo_Export_Orders())->add_json_log_entry($user_data);// add log entry to DB
+
             if ($err) return "cURL Error #:" . $err;
             else return $response;
         } catch (Exception $e) {

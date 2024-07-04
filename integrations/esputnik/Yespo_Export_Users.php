@@ -64,7 +64,6 @@ class Yespo_Export_Users
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
                 $exported = $total;
-                Yespo_Metrika::count_finish_exported();
 
             } else $exported += $live_exported;
 

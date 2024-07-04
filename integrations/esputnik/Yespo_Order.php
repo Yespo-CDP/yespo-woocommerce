@@ -42,7 +42,7 @@ class Yespo_Order
             return __( 'Empty user authorization data', YESPO_TEXTDOMAIN );
         }
 
-        (new Yespo_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
+        //(new Yespo_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
 
         if($orders['orders'] > 0) {
             $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders, 'orders');

@@ -9,8 +9,6 @@
  * @link      https://yespo.io/
  */
 
-use Yespo\Integrations\Esputnik\Yespo_Metrika;
-
 /**
  * Get the settings of the plugin in a filterable way
  *
@@ -240,25 +238,6 @@ function yespo_delete_woocommerce_user_function( $user_id ) {
     (new Yespo\Integrations\Esputnik\Yespo_Contact())->delete_from_yespo($user_id, true);
 }
 add_action( 'delete_user', 'yespo_delete_woocommerce_user_function');
-
-/** Send data to yespo from subscription form **/
-function yespo_wpcf7_before_send_mail_function( $contact_form ) {
-    $submission = WPCF7_Submission::get_instance();
-
-    if ( $submission && $submission->get_posted_data() ) {
-        $postedData = $submission->get_posted_data();
-
-        if ( isset( $postedData['your-email'] ) && ! empty( $postedData['your-email'] ) ) {
-            $email = sanitize_email( $postedData['your-email'] );
-
-            if ( is_email( $email ) ) {
-                $yespo_contact = new Yespo\Integrations\Esputnik\Yespo_Contact();
-                $yespo_contact->create_subscribed_user_on_yespo( $email );
-            }
-        }
-    }
-}
-add_action( 'wpcf7_before_send_mail', 'yespo_wpcf7_before_send_mail_function' );
 
 /*** Remove personal data from Yespo after erase personal data ***/
 function yespo_clean_user_data_after_data_erased_function( $erased ){

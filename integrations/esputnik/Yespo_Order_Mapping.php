@@ -82,31 +82,6 @@ class Yespo_Order_Mapping
         return $data;
     }
 
-    public static function map_clean_user_data_order($order){
-        $orderArray = self::order_transformation_to_array($order);
-
-        $data['orders'][0]['status'] = 'IN_PROGRESS';
-        $data['orders'][0]['externalOrderId'] = $orderArray['externalOrderId'];
-        $data['orders'][0]['externalCustomerId'] = $orderArray['externalCustomerId'];
-        $data['orders'][0]['totalCost'] = $orderArray['totalCost'];
-        $data['orders'][0]['date'] = $orderArray['date'];
-        $data['orders'][0]['currency'] = $orderArray['currency'];
-        $data['orders'][0]['email'] = 'deleted@site.invalid';
-        $data['orders'][0]['firstName'] = ' ';
-        $data['orders'][0]['lastName'] = ' ';
-        $data['orders'][0]['deliveryAddress'] = ' ';
-        $data['orders'][0]['phone'] = ' ';
-        $data['orders'][0]['shipping'] = ' ';
-        $data['orders'][0]['discount'] = ' ';
-        $data['orders'][0]['taxes'] = ' ';
-        $data['orders'][0]['source'] = ' ';
-        $data['orders']['deliveryMethod'] = ' ';
-        $data['orders'][0]['paymentMethod'] = ' ';
-        $data['orders'][0]['items'] = self::get_orders_items($order);
-
-        return $data;
-    }
-
     private static function order_transformation_to_array($order){
         return [
             'externalOrderId' => sanitize_text_field($order->id),

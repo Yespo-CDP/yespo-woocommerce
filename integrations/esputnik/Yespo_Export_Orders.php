@@ -20,7 +20,7 @@ class Yespo_Export_Orders
     private $shop_order = 'shop_order';
     private $shop_order_placehold = 'shop_order_placehold';
 
-    private $table_yespo_orders_json;
+    private $table_yespo_curl_json;
 
     public function __construct(){
         global $wpdb;
@@ -32,7 +32,7 @@ class Yespo_Export_Orders
         $this->time_limit = current_time('timestamp') - $this->period_selection;
         $this->gmt = time() - $this->period_selection;
 
-        $this->table_yespo_orders_json = $wpdb->prefix . 'yespo_orders_json';
+        $this->table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json';
     }
 
     public function add_orders_export_task(){
@@ -75,7 +75,6 @@ class Yespo_Export_Orders
             if(($total <= $exported + $live_exported) || $this->get_export_orders_count() < 1){
                 $current_status = 'completed';
                 $exported = $total;
-                Yespo_Metrika::count_finish_exported();
             } else $exported += $live_exported;
 
             $this->update_table_data($status->id, $exported, $current_status);
@@ -425,7 +424,7 @@ class Yespo_Export_Orders
                 'text' => $json,
                 'created_at' => current_time('mysql')
             ];
-            $this->wpdb->insert($this->table_yespo_orders_json, $data);
+            $this->wpdb->insert($this->table_yespo_curl_json, $data);
         }
     }
 

@@ -157,7 +157,7 @@ add_action('wp_ajax_nopriv_yespo_check_api_key_esputnik', 'yespo_save_settings_v
 
 /** update user profile on Yespo service **/
 function yespo_update_user_profile_function($user_id, $old_user_data) {
-    if (!is_admin()) {
+    if (isset($_REQUEST['wc-ajax']) && $_REQUEST['wc-ajax'] === 'checkout') {
         return;
     }
 

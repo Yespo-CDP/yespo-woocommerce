@@ -225,10 +225,33 @@ class Yespo_Export_Users
     }
 
     public function get_users_total_count(){
-        return count($this->get_users_object($this->get_users_total_args()));
+        $capabilities_meta_key = $this->wpdb->prefix . 'capabilities';
+        return $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s",
+                $capabilities_meta_key,
+                '%"customer"%'
+            )
+        );
     }
     public function get_users_export_count(){
-        return count($this->get_users_object($this->get_users_export_args()));
+        $capabilities_meta_key = $this->wpdb->prefix . 'capabilities';
+
+        return $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->wpdb->usermeta} um
+                WHERE um.meta_key = %s
+                AND um.meta_value LIKE %s
+                AND NOT EXISTS (
+                    SELECT 1 FROM {$this->wpdb->usermeta} um2
+                    WHERE um2.user_id = um.user_id
+                    AND um2.meta_key = %s
+                )",
+                $capabilities_meta_key,
+                '%\"customer\"%',
+                $this->esputnikContact->get_meta_key()
+            )
+        );
     }
     public function get_users_object($args){
         return get_users($args);

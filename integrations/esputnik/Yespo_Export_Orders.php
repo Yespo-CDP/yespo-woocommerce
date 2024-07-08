@@ -251,11 +251,31 @@ class Yespo_Export_Orders
     }
 
     public function get_total_orders(){
-        return count($this->get_orders_from_database());
+        return $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table_posts} 
+                 WHERE type = %s 
+                 AND status != %s",
+                'shop_order',
+                'wc-checkout-draft'
+            )
+        );
     }
     public function get_export_orders_count(){
-        return count($this->get_orders_from_database_without_metakey());
-
+        return $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT COUNT(*) FROM $this->table_posts
+                WHERE type = %s
+                AND status != %s
+                AND ID NOT IN (
+                    SELECT post_id FROM {$this->wpdb->prefix}postmeta
+                    WHERE meta_key = %s AND meta_value = 'true'
+                )",
+                'shop_order',
+                'wc-checkout-draft',
+                $this->meta_key
+            )
+        );
     }
 
     public function get_orders_export_esputnik(){

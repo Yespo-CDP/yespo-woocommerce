@@ -9,7 +9,7 @@ class Yespo_Export_Orders
     private $period_selection = 300;
     private $period_selection_since = 300;
     private $period_selection_up = 30;
-    private $number_for_export = 500;
+    private $number_for_export = 1000;
     private $table_name;
     private $table_yespo_queue_orders;
     private $table_posts;

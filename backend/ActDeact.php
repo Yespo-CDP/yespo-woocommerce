@@ -266,7 +266,6 @@ class ActDeact extends Base {
                 contact_id varchar(255) NOT NULL,
                 action varchar(255) NOT NULL,
                 yespo INT NULL,
-                additional varchar(255) NOT NULL,
                 log_date datetime NOT NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate;";
@@ -282,7 +281,6 @@ class ActDeact extends Base {
                 order_id varchar(255) NOT NULL,
                 action varchar(255) NOT NULL,
                 status varchar(255) NOT NULL,
-                additional varchar(255) NOT NULL,
                 created_at datetime NOT NULL,
                 updated_at datetime default NULL,
                 PRIMARY KEY  (id)
@@ -301,7 +299,6 @@ class ActDeact extends Base {
                 exported varchar(255) NOT NULL,
                 status varchar(255) NOT NULL,
                 code varchar(255) default NULL,
-                additional varchar(255) NOT NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate_export;";
 
@@ -316,7 +313,6 @@ class ActDeact extends Base {
                 session_id varchar(255) NOT NULL,
                 export_status varchar(255) default NULL,
                 local_status varchar(255) default NULL,
-                additional varchar(255) NOT NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate_export;";
 
@@ -331,7 +327,6 @@ class ActDeact extends Base {
                 session_id varchar(255) default NULL,
                 contact_id varchar(255) NOT NULL,
                 yespo_id varchar(255) default NULL,
-                additional varchar(255) NOT NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate_export;";
 
@@ -344,7 +339,6 @@ class ActDeact extends Base {
             $sqlQueueOrders = "CREATE TABLE $table_yespo_queue_orders (
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 yespo_status varchar(255) NOT NULL,
-                additional varchar(255) NOT NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate_export;";
 
@@ -358,7 +352,6 @@ class ActDeact extends Base {
             $sqlOrdersJson = "CREATE TABLE $table_yespo_curl_json (
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 text longtext default NULL,
-                additional varchar(255) NOT NULL,
                 created_at datetime default NULL,
                 PRIMARY KEY  (id)
             )$charset_yespo_curl_json;";
@@ -373,7 +366,6 @@ class ActDeact extends Base {
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 api_key varchar(255) default NULL,
                 response varchar(255) default NULL,
-                additional varchar(255) NOT NULL,
                 time datetime default NULL,
                 PRIMARY KEY  (id)
             )$charset_yespo_auth;";

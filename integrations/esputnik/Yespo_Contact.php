@@ -59,6 +59,12 @@ class Yespo_Contact
         }
     }
 
+    public function update_woo_profile_yespo($request, $user){
+        if ($this->check_user_role($user)) {
+            return $this->process_on_yespo(Yespo_Contact_Mapping::update_woo_to_yes($request, $user->ID), 'update', $user->ID);
+        }
+    }
+
     public function update_woo_registered_user(){
         $users = $this->get_latest_created_users();
         if($users && is_array($users) && count($users) > 0){

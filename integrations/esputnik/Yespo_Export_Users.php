@@ -6,7 +6,7 @@ class Yespo_Export_Users
 {
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
-    private $number_for_export = 500;
+    private $number_for_export = 2000;
     private $table_name;
     private $table_yespo_queue;
     private $table_yespo_queue_items;

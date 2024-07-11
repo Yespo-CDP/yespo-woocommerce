@@ -165,11 +165,19 @@ function yespo_update_user_profile_function($user_id, $old_user_data) {
         return;
     }
 
-    if(!empty($user_id)) {
-        $user = get_user_by('id', $user_id);
-        if(empty($user->billing_phone) && empty($user->shipping_phone)) (new \Yespo\Integrations\Esputnik\Yespo_Contact())->remove_user_phone_on_yespo(sanitize_email($user->data->user_email));
-        if(isset($user->data->user_email)) return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_on_yespo($user);
+    if(isset($_REQUEST) && isset($_REQUEST['woocommerce-edit-address-nonce'])){
+        if(!empty($user_id)) {
+            $user = get_user_by('id', $user_id);
+            return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_woo_profile_yespo($_REQUEST, $user);
+        }
+    } else {
+        if(!empty($user_id)) {
+            $user = get_user_by('id', $user_id);
+            if(empty($user->billing_phone) && empty($user->shipping_phone)) (new \Yespo\Integrations\Esputnik\Yespo_Contact())->remove_user_phone_on_yespo(sanitize_email($user->data->user_email));
+            if(isset($user->data->user_email)) return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_on_yespo($user, $request);
+        }
     }
+
 }
 add_action('profile_update', 'yespo_update_user_profile_function', 10, 2);
 

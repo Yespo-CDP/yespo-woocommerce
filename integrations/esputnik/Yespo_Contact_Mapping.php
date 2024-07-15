@@ -75,7 +75,7 @@ class Yespo_Contact_Mapping
         $data = [];
         $contact = new Yespo_Export_Users();
         if($users && count($users) > 0){
-            $data['dedupeOn'] = 'email';
+            $data['dedupeOn'] = 'externalCustomerId';
             foreach($users as $user){
                 $data['contacts'][] = self::data_woo_to_yes(
                     self::user_transformation_to_array(get_user_by('id', $user))

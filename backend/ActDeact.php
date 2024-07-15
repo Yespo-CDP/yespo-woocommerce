@@ -380,6 +380,7 @@ class ActDeact extends Base {
 
             $timestamp = wp_next_scheduled ('yespo_export_data_cron');
             wp_unschedule_event ($timestamp, 'yespo_export_data_cron');
+
         });
     }
 

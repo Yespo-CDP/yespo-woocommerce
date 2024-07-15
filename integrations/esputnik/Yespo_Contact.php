@@ -37,22 +37,6 @@ class Yespo_Contact
         }
     }
 
-    public function create_guest_user_on_yespo($order){
-        $email = $order->get_billing_email();
-        $user = get_user_by('email', $email);
-        if ($this->check_user_role($user) || !email_exists($email)) {
-            if ($user) return $this->create_on_yespo($email, $user->ID);
-            else return $this->process_on_yespo(Yespo_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
-        }
-    }
-
-    public function create_guest_user_admin_on_yespo($post){
-        $email = $post['_billing_email'] ?? $post['_shipping_email'];
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Yespo_Contact_Mapping::guest_user_admin_woo_to_yes($post), 'guest', $email);
-        }
-    }
-
     public function update_on_yespo($user){
         if ($this->check_user_role($user)) {
             return $this->process_on_yespo(Yespo_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
@@ -102,7 +86,7 @@ class Yespo_Contact
             if(isset($response["asyncSessionId"])){
                 (new Yespo_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
 
-                return $this->get_bulk_response($response["asyncSessionId"]);
+                return $response["asyncSessionId"];
             } else if(isset($response["status"]) && intval($response["status"]) === 401){
                 (new Yespo_Export_Users())->error_export_users($response["status"]);
             }
@@ -259,4 +243,27 @@ class Yespo_Contact
             )
         );
     }
+
+
+
+    public function export_active_bulk_users($data){
+        if(!empty($data)){
+
+            //(new Yespo_Export_Orders())->add_json_log_entry($data);// add log entry to DB
+
+            $response = $this->process_on_yespo($data, 'bulk');
+            if($response === 0) (new Yespo_Export_Users())->error_export_users('555');
+            if($response) $response = json_decode($response, true);
+
+            if(isset($response["asyncSessionId"])){
+                (new Yespo_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
+
+                return $response["asyncSessionId"];
+            } else if(isset($response["status"]) && intval($response["status"]) === 401){
+                (new Yespo_Export_Users())->error_export_users($response["status"]);
+            }
+        }
+    }
+
+
 }

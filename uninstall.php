@@ -87,10 +87,12 @@ function y_uninstall() { // phpcs:ignore
 
     $wpdb->query(
         $wpdb->prepare(
-            "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (
-                SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
-            )",
-            'sent_order_to_yespo'
+            "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN (%s, %s, %s) AND post_id IN (
+            SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
+        )",
+            'sent_order_to_yespo',
+            'order_time',
+            'customer_removed'
         )
     );
 

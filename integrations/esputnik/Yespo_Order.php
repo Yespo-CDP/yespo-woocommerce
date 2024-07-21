@@ -2,6 +2,8 @@
 
 namespace Yespo\Integrations\Esputnik;
 
+use WP_Query;
+
 class Yespo_Order
 {
     const REMOTE_ORDER_YESPO_URL = 'https://esputnik.com/api/v1/orders';
@@ -86,6 +88,70 @@ class Yespo_Order
     public function get_meta_key(){
         return self::ORDER_META_KEY;
     }
+
+    public function add_time_label($order_id){
+        $order = wc_get_order($order_id);
+        $status = $order->get_status();
+
+        if (strpos($status, 'draft') === false) {
+            $order_time = $order->get_meta('order_time');
+
+            if (empty($order_time)) {
+                $current_time = gmdate('Y-m-d H:i:s', current_time('timestamp', true));
+                $order->update_meta_data('order_time', $current_time);
+                $order->save();
+            }
+        }
+    }
+
+    public function add_label_deleted_customer($email){
+        if(!empty($email)) {
+            $orders = $this->get_orders_by_email($email);
+
+            if ($orders) {
+                foreach ($orders as $order) {
+                    $order->update_meta_data('customer_removed', 'deleted');
+                    $order->save();
+                }
+            }
+        }
+    }
+
+    public function get_orders_by_email($email){
+        $query = new WP_Query($this->args_get_orders_by_email($email));
+
+        if ($query->have_posts()) {
+            $orders = array();
+            while ($query->have_posts()) {
+                $query->the_post();
+                $order_id = get_the_ID();
+                $orders[] = wc_get_order($order_id);
+            }
+            wp_reset_postdata();
+            return $orders;
+        } else {
+            return null;
+        }
+    }
+    private function args_get_orders_by_email($email){
+        $post_types = ['shop_order', 'shop_order_placehold'];
+
+        $existing_post_types = array_filter($post_types, function($type) {
+            return post_type_exists($type);
+        });
+        return [
+            'post_type' => $existing_post_types,
+            'post_status' => 'any',
+            'meta_query' => array(
+                array(
+                    'key' => '_billing_email',
+                    'value' => $email,
+                    'compare' => '='
+                )
+            )
+        ];
+    }
+
     private function mark_exported_orders($order_id){
         if (empty(get_user_meta($order_id, self::ORDER_META_KEY, true))) update_user_meta($order_id, self::ORDER_META_KEY, 'true');
         else add_user_meta($order_id, self::ORDER_META_KEY, 'true', false);

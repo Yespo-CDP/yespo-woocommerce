@@ -2,6 +2,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
+use DateTime;
 use WP_User_Query;
 
 class Yespo_Order_Mapping
@@ -89,7 +90,7 @@ class Yespo_Order_Mapping
             'totalCost' => sanitize_text_field($order->total),
             'status' => self::get_order_status($order->status) ? self::get_order_status($order->status) : self::INITIALIZED,
             'email' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : '',
-            'date' => ($order && !is_bool($order) && method_exists($order, 'get_date_created') && ($date_created = $order->get_date_created())) ? $date_created->format('Y-m-d\TH:i:s.uP') : null,
+            'date' => ($order && !is_bool($order) && $order->get_meta('order_time'))? self::get_time_order_created($order->get_meta('order_time')) : (($order && !is_bool($order) && method_exists($order, 'get_date_created') && ($date_created = $order->get_date_created())) ? $date_created->format('Y-m-d\TH:i:s.uP') : null),
             'currency' => sanitize_text_field($order->currency),
             'firstName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_first_name') && !empty($order->get_billing_first_name())) ? sanitize_text_field($order->get_billing_first_name()) : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_first_name') && !empty($order->get_shipping_first_name()) ? sanitize_text_field($order->get_shipping_first_name()) : ''),
             'lastName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_last_name') && !empty($order->get_billing_last_name())) ? sanitize_text_field($order->get_billing_last_name()) : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_last_name') && !empty($order->get_shipping_last_name()) ? sanitize_text_field($order->get_shipping_last_name()) : ''),
@@ -271,5 +272,14 @@ class Yespo_Order_Mapping
         if (count($emails) > 0 && $new_mail != $emails[0]) $new_mail = $emails[0];
 
         return $new_mail;
+    }
+
+    private static function get_time_order_created($order_time_created){
+        if ($order_time_created) {
+            $order_time = new DateTime($order_time_created);
+            $formatted_order_time = $order_time->format('Y-m-d\TH:i:s.uP');
+
+            return $formatted_order_time;
+        }
     }
 }

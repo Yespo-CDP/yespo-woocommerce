@@ -7,7 +7,7 @@ class Yespo_Export_Users
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
     private $number_for_export = 2000;
-    private $export_time = 6;
+    private $export_time = 3.5;
     private $table_name;
     private $table_yespo_queue;
     private $table_yespo_queue_items;
@@ -58,8 +58,10 @@ class Yespo_Export_Users
             $exported = intval($status->exported);
             $current_status = $status->status;
             $live_exported = 0;
+            $export_quantity = 0;
 
             do {
+                $export_quantity++;
                 $usersForExport = $this->get_users_object($this->get_bulk_users_export_args());
                 if($usersForExport && count($usersForExport) > 0) {
                     $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport));
@@ -72,7 +74,7 @@ class Yespo_Export_Users
                 }
                 $live_exported += count($usersForExport);
 
-            } while ( (microtime(true) - $startTime) <= $this->export_time );
+            } while ( (microtime(true) - $startTime) <= $this->export_time && $export_quantity < 3);
 
             if(($total <= $exported + $live_exported) || $this->get_users_export_count() < 1){
                 $current_status = 'completed';

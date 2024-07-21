@@ -243,6 +243,10 @@ add_action('wp_ajax_nopriv_yespo_get_process_export_users_data_to_esputnik', 'ye
 
 /** remove woocommerce user **/
 function yespo_delete_woocommerce_user_function( $user_id ) {
+    $user = get_userdata($user_id);
+    if($user && $user->user_email){
+        (new Yespo\Integrations\Esputnik\Yespo_Order())->add_label_deleted_customer($user->user_email);
+    }
     (new Yespo\Integrations\Esputnik\Yespo_Contact())->delete_from_yespo($user_id, true);
 }
 add_action( 'delete_user', 'yespo_delete_woocommerce_user_function');
@@ -338,6 +342,17 @@ function yespo_get_process_export_orders_data_function(){
 }
 add_action('wp_ajax_yespo_get_process_export_orders_data_to_esputnik', 'yespo_get_process_export_orders_data_function');
 add_action('wp_ajax_nopriv_yespo_get_process_export_orders_data_to_esputnik', 'yespo_get_process_export_orders_data_function');
+
+/*** set label of creation time to order ***/
+function yespo_add_order_time($order_id) {
+    if (!$order_id) {
+        return;
+    }
+
+    (new Yespo\Integrations\Esputnik\Yespo_Order())->add_time_label($order_id);
+}
+
+add_action('woocommerce_thankyou', 'yespo_add_order_time', 10, 1);
 
 /***
  * STOP EXPORT DATA

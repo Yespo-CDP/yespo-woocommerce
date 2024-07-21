@@ -10,7 +10,7 @@ class Yespo_Export_Orders
     private $period_selection_since = 300;
     private $period_selection_up = 30;
     private $number_for_export = 1000;
-    private $export_time = 6;
+    private $export_time = 3.5;
     private $table_name;
     private $table_yespo_queue_orders;
     private $table_posts;
@@ -94,7 +94,7 @@ class Yespo_Export_Orders
         if(count($orders) > 0 ){
             foreach ($orders as $order) {
                 $item = wc_get_order($order);
-                if ($item) {
+                if( $item && empty($item->get_meta('customer_removed')) ){
                     (new Yespo_Order())->create_order_on_yespo($item, 'update');
                 }
             }
@@ -116,10 +116,12 @@ class Yespo_Export_Orders
             $current_status = $status->status;
             $live_exported = 0;
             $code = $status->code;
+            $export_quantity = 0;
 
             if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
 
             do {
+                $export_quantity++;
                 $orders = $this->get_bulk_export_orders();
                 $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
                 $live_exported += count($orders);
@@ -127,7 +129,7 @@ class Yespo_Export_Orders
                     $this->update_entry_queue_items('FINISHED');
                 }
 
-            } while ( (microtime(true) - $startTime) <= $this->export_time );
+            } while ( (microtime(true) - $startTime) <= $this->export_time && $export_quantity < 3);
 
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';

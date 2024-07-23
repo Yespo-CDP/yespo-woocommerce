@@ -22,6 +22,7 @@ class Yespo_Export_Orders
     private $shop_order_placehold = 'shop_order_placehold';
 
     private $table_yespo_curl_json;
+    private $table_yespo_removed;
 
     public function __construct(){
         global $wpdb;
@@ -34,6 +35,7 @@ class Yespo_Export_Orders
         $this->gmt = time() - $this->period_selection;
 
         $this->table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json';
+        $this->table_yespo_removed = $this->wpdb->prefix . 'yespo_removed_users';
     }
 
     public function add_orders_export_task(){
@@ -94,8 +96,10 @@ class Yespo_Export_Orders
         if(count($orders) > 0 ){
             foreach ($orders as $order) {
                 $item = wc_get_order($order);
-                if( $item && empty($item->get_meta('customer_removed')) ){
-                    (new Yespo_Order())->create_order_on_yespo($item, 'update');
+                if (!empty($item) && !is_bool($item) && method_exists($item, 'get_billing_email') && !empty($item->get_billing_email())) {
+                    if (!$this->is_email_in_removed_users($item->get_billing_email())) {
+                        (new Yespo_Order())->create_order_on_yespo($item, 'update');
+                    }
                 }
             }
         } else {
@@ -440,6 +444,16 @@ class Yespo_Export_Orders
                 date('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
         );
+    }
+
+    public function is_email_in_removed_users($email) {
+        $query = $this->wpdb->prepare(
+            "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s",
+            $email
+        );
+        $count = $this->wpdb->get_var($query);
+
+        return $count > 0;
     }
 
     //add json of exported orders

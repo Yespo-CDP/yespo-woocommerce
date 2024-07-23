@@ -21,6 +21,7 @@ class Yespo_Contact
     const USER_META_KEY = 'yespo_contact_id';
     private $authData;
     private $wpdb;
+    private $table_yespo_removed;
 
     public function __construct(){
         global $wpdb;
@@ -28,6 +29,7 @@ class Yespo_Contact
         $this->authData = get_option('yespo_options');
         $this->table_log_users = $this->wpdb->prefix . 'yespo_contact_log';
         $this->table_users = $this->wpdb->prefix . 'users';
+        $this->table_yespo_removed = $this->wpdb->prefix . 'yespo_removed_users';
     }
 
     public function create_on_yespo($email, $wc_id){
@@ -240,6 +242,22 @@ class Yespo_Contact
             $this->wpdb->prepare(
                 "SELECT ID FROM $this->table_users WHERE user_registered > %s",
                 date('Y-m-d H:i:s', time() - $this->period_selection)
+            )
+        );
+    }
+
+    public function add_entry_removed_user($email){
+        $time = current_time('mysql');
+
+        $this->wpdb->insert(
+            $this->table_yespo_removed,
+            array(
+                'email' => $email,
+                'time' => $time,
+            ),
+            array(
+                '%s',
+                '%s',
             )
         );
     }

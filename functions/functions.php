@@ -245,7 +245,7 @@ add_action('wp_ajax_nopriv_yespo_get_process_export_users_data_to_esputnik', 'ye
 function yespo_delete_woocommerce_user_function( $user_id ) {
     $user = get_userdata($user_id);
     if($user && $user->user_email){
-        (new Yespo\Integrations\Esputnik\Yespo_Order())->add_label_deleted_customer($user->user_email);
+        (new Yespo\Integrations\Esputnik\Yespo_Contact())->add_entry_removed_user($user->user_email);
     }
     (new Yespo\Integrations\Esputnik\Yespo_Contact())->delete_from_yespo($user_id, true);
 }

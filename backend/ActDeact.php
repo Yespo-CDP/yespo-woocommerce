@@ -372,6 +372,19 @@ class ActDeact extends Base {
             $wpdb->query($wpdb->prepare($sqlYespoAuth));
         }
 
+        $table_yespo_removed = $wpdb->prefix . 'yespo_removed_users';
+        $charset_yespo_removed = $wpdb->get_charset_collate();
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_yespo_removed'") != $table_yespo_removed) {
+            $sqlYespoRemoved = "CREATE TABLE $table_yespo_removed (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                email varchar(255) default NULL,
+                time datetime default NULL,
+                PRIMARY KEY  (id)
+            )$charset_yespo_removed;";
+            $wpdb->query($wpdb->prepare($sqlYespoRemoved));
+        }
+
     }
 
     public static function yespo_crone_deactivate(){

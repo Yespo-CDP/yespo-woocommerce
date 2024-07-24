@@ -68,6 +68,7 @@ function y_uninstall() { // phpcs:ignore
     $table_yespo_queue_orders = $wpdb->prefix . 'yespo_queue_orders';
     $table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json'; //logging jsons to yespo
     $table_yespo_auth_log = $wpdb->prefix . 'yespo_auth_log'; //auth logging
+    $table_yespo_removed = $wpdb->prefix . 'yespo_removed_users';
 
     $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
     $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
@@ -77,6 +78,7 @@ function y_uninstall() { // phpcs:ignore
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_orders" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_curl_json" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_auth_log" );
+    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_removed" );
 
     $wpdb->query(
         $wpdb->prepare(
@@ -87,10 +89,12 @@ function y_uninstall() { // phpcs:ignore
 
     $wpdb->query(
         $wpdb->prepare(
-            "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (
-                SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
-            )",
-            'sent_order_to_yespo'
+            "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN (%s, %s, %s) AND post_id IN (
+            SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
+        )",
+            'sent_order_to_yespo',
+            'order_time',
+            'customer_removed'
         )
     );
 

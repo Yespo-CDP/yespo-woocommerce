@@ -9,7 +9,8 @@ class Yespo_Export_Orders
     private $period_selection = 300;
     private $period_selection_since = 300;
     private $period_selection_up = 30;
-    private $number_for_export = 500;
+    private $number_for_export = 1000;
+    private $export_time = 3.5;
     private $table_name;
     private $table_yespo_queue_orders;
     private $table_posts;
@@ -21,6 +22,7 @@ class Yespo_Export_Orders
     private $shop_order_placehold = 'shop_order_placehold';
 
     private $table_yespo_curl_json;
+    private $table_yespo_removed;
 
     public function __construct(){
         global $wpdb;
@@ -33,6 +35,7 @@ class Yespo_Export_Orders
         $this->gmt = time() - $this->period_selection;
 
         $this->table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json';
+        $this->table_yespo_removed = $this->wpdb->prefix . 'yespo_removed_users';
     }
 
     public function add_orders_export_task(){
@@ -93,8 +96,10 @@ class Yespo_Export_Orders
         if(count($orders) > 0 ){
             foreach ($orders as $order) {
                 $item = wc_get_order($order);
-                if ($item) {
-                    (new Yespo_Order())->create_order_on_yespo($item, 'update');
+                if (!empty($item) && !is_bool($item) && method_exists($item, 'get_billing_email') && !empty($item->get_billing_email())) {
+                    if (!$this->is_email_in_removed_users($item->get_billing_email())) {
+                        (new Yespo_Order())->create_order_on_yespo($item, 'update');
+                    }
                 }
             }
         } else {
@@ -107,23 +112,28 @@ class Yespo_Export_Orders
     }
     public function start_bulk_export_orders(){
         $status = $this->get_order_export_status_processed('active');
-        $orders = $this->get_bulk_export_orders();
+        //$orders = $this->get_bulk_export_orders();
         if(!empty($status) && $status->status == 'active' && !$this->check_queue_items_for_session()){
+            $startTime = microtime(true);
             $total = intval($status->total);
             $exported = intval($status->exported);
             $current_status = $status->status;
             $live_exported = 0;
             $code = $status->code;
+            $export_quantity = 0;
 
             if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
 
+            do {
+                $export_quantity++;
+                $orders = $this->get_bulk_export_orders();
+                $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
+                $live_exported += count($orders);
+                if($export_res) {
+                    $this->update_entry_queue_items('FINISHED');
+                }
 
-            $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
-
-            if($export_res) {
-                $live_exported = $export_res;
-                $this->update_entry_queue_items('FINISHED');
-            }
+            } while ( (microtime(true) - $startTime) <= $this->export_time && $export_quantity < 3);
 
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
@@ -434,6 +444,16 @@ class Yespo_Export_Orders
                 date('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
         );
+    }
+
+    public function is_email_in_removed_users($email) {
+        $query = $this->wpdb->prepare(
+            "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s",
+            $email
+        );
+        $count = $this->wpdb->get_var($query);
+
+        return $count > 0;
     }
 
     //add json of exported orders

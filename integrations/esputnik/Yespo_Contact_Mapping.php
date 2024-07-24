@@ -8,6 +8,10 @@ class Yespo_Contact_Mapping
         return self::data_woo_to_yes(self::user_transformation_to_array($user_data));
     }
 
+    public static function update_woo_to_yes($request, $user_id){
+        return self::data_woo_to_yes(self::update_user_transformation_to_array($request, $user_id));
+    }
+
     public static function guest_user_woo_to_yes($order){
         return self::data_woo_to_yes(self::order_transformation_to_array($order));
     }
@@ -71,7 +75,7 @@ class Yespo_Contact_Mapping
         $data = [];
         $contact = new Yespo_Export_Users();
         if($users && count($users) > 0){
-            $data['dedupeOn'] = 'email';
+            $data['dedupeOn'] = 'externalCustomerId';
             foreach($users as $user){
                 $data['contacts'][] = self::data_woo_to_yes(
                     self::user_transformation_to_array(get_user_by('id', $user))
@@ -145,6 +149,23 @@ class Yespo_Contact_Mapping
             'phone' => !empty($user->billing_phone) ? sanitize_text_field($user->billing_phone) : (!empty($user->shipping_phone) ? sanitize_text_field($user->shipping_phone) : ''),
             'postcode' => !empty($user->billing_postcode) ? sanitize_text_field($user->billing_postcode) : (!empty($user->shipping_postcode) ? sanitize_text_field($user->shipping_postcode) : ''),
             'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ( get_bloginfo('language') ? get_bloginfo('language') : '')
+        ];
+    }
+
+    private static function update_user_transformation_to_array($request, $user_id){
+        return [
+            'email' => sanitize_email($request['billing_email']),
+            'ID' => absint($user_id),
+            'first_name' => isset($request['billing_first_name']) ? sanitize_text_field($request['billing_first_name']) : '',
+            'last_name' => isset($request['billing_last_name']) ? sanitize_text_field($request['billing_last_name']) : '',
+            'state' => isset($request['billing_state']) ? sanitize_text_field($request['billing_state']) : '',
+            'country_id' => isset($request['billing_country']) ? sanitize_text_field($request['billing_country']) : '',
+            'city' => isset($request['billing_city']) ? sanitize_text_field($request['billing_city']) : '',
+            'address_1' => isset($request['billing_address_1']) ? sanitize_text_field($request['billing_address_1']) : '',
+            'address_2' => isset($request['billing_address_2']) ? sanitize_text_field($request['billing_address_2']) : '',
+            'phone' => isset($request['billing_phone']) ? sanitize_text_field($request['billing_phone']) : '',
+            'postcode' => isset($request['billing_postcode']) ? sanitize_text_field($request['billing_postcode']) : '',
+            'languageCode' => ''
         ];
     }
 

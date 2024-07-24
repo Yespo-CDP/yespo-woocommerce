@@ -21,6 +21,7 @@ class Yespo_Contact
     const USER_META_KEY = 'yespo_contact_id';
     private $authData;
     private $wpdb;
+    private $table_yespo_removed;
 
     public function __construct(){
         global $wpdb;
@@ -28,6 +29,7 @@ class Yespo_Contact
         $this->authData = get_option('yespo_options');
         $this->table_log_users = $this->wpdb->prefix . 'yespo_contact_log';
         $this->table_users = $this->wpdb->prefix . 'users';
+        $this->table_yespo_removed = $this->wpdb->prefix . 'yespo_removed_users';
     }
 
     public function create_on_yespo($email, $wc_id){
@@ -37,25 +39,15 @@ class Yespo_Contact
         }
     }
 
-    public function create_guest_user_on_yespo($order){
-        $email = $order->get_billing_email();
-        $user = get_user_by('email', $email);
-        if ($this->check_user_role($user) || !email_exists($email)) {
-            if ($user) return $this->create_on_yespo($email, $user->ID);
-            else return $this->process_on_yespo(Yespo_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
-        }
-    }
-
-    public function create_guest_user_admin_on_yespo($post){
-        $email = $post['_billing_email'] ?? $post['_shipping_email'];
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Yespo_Contact_Mapping::guest_user_admin_woo_to_yes($post), 'guest', $email);
-        }
-    }
-
     public function update_on_yespo($user){
         if ($this->check_user_role($user)) {
             return $this->process_on_yespo(Yespo_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
+        }
+    }
+
+    public function update_woo_profile_yespo($request, $user){
+        if ($this->check_user_role($user)) {
+            return $this->process_on_yespo(Yespo_Contact_Mapping::update_woo_to_yes($request, $user->ID), 'update', $user->ID);
         }
     }
 
@@ -96,7 +88,7 @@ class Yespo_Contact
             if(isset($response["asyncSessionId"])){
                 (new Yespo_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
 
-                return $this->get_bulk_response($response["asyncSessionId"]);
+                return $response["asyncSessionId"];
             } else if(isset($response["status"]) && intval($response["status"]) === 401){
                 (new Yespo_Export_Users())->error_export_users($response["status"]);
             }
@@ -253,4 +245,43 @@ class Yespo_Contact
             )
         );
     }
+
+    public function add_entry_removed_user($email){
+        $time = current_time('mysql');
+
+        $this->wpdb->insert(
+            $this->table_yespo_removed,
+            array(
+                'email' => $email,
+                'time' => $time,
+            ),
+            array(
+                '%s',
+                '%s',
+            )
+        );
+    }
+
+
+
+    public function export_active_bulk_users($data){
+        if(!empty($data)){
+
+            //(new Yespo_Export_Orders())->add_json_log_entry($data);// add log entry to DB
+
+            $response = $this->process_on_yespo($data, 'bulk');
+            if($response === 0) (new Yespo_Export_Users())->error_export_users('555');
+            if($response) $response = json_decode($response, true);
+
+            if(isset($response["asyncSessionId"])){
+                (new Yespo_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
+
+                return $response["asyncSessionId"];
+            } else if(isset($response["status"]) && intval($response["status"]) === 401){
+                (new Yespo_Export_Users())->error_export_users($response["status"]);
+            }
+        }
+    }
+
+
 }

@@ -62,9 +62,11 @@ class Yespo_Export_Users
 
             do {
                 $export_quantity++;
+                $endTime = microtime(true);
                 $usersForExport = $this->get_users_object($this->get_bulk_users_export_args());
                 if($usersForExport && count($usersForExport) > 0) {
                     $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport));
+                    $endTime = microtime(true);
                     if ($response) {
                         foreach($usersForExport as $user) {
                             $this->esputnikContact->add_esputnik_id_to_userprofile($user, 'true');
@@ -74,7 +76,7 @@ class Yespo_Export_Users
                 }
                 $live_exported += count($usersForExport);
 
-            } while ( (microtime(true) - $startTime) <= $this->export_time && $export_quantity < 3);
+            } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3);
 
             if(($total <= $exported + $live_exported) || $this->get_users_export_count() < 1){
                 $current_status = 'completed';

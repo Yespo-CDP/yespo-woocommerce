@@ -128,12 +128,13 @@ class Yespo_Export_Orders
                 $export_quantity++;
                 $orders = $this->get_bulk_export_orders();
                 $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
+                $endTime = microtime(true);
                 $live_exported += count($orders);
                 if($export_res) {
                     $this->update_entry_queue_items('FINISHED');
                 }
 
-            } while ( (microtime(true) - $startTime) <= $this->export_time && $export_quantity < 3);
+            } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3);
 
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';

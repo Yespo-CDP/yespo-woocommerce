@@ -9,10 +9,15 @@ class Yespo_Order
     const REMOTE_ORDER_YESPO_URL = 'https://esputnik.com/api/v1/orders';
     const CUSTOM_ORDER_REQUEST = 'POST';
     private $authData;
+    private $table_name_order;
+    private $wpdb;
     const ORDER_META_KEY = 'sent_order_to_yespo';
 
     public function __construct(){
+        global $wpdb;
+        $this->wpdb = $wpdb;
         $this->authData = get_option('yespo_options');
+        $this->table_name_order = $this->wpdb->prefix . 'yespo_order_log';
     }
     public function create_order_on_yespo($order, $operation = 'update'){
 
@@ -53,15 +58,36 @@ class Yespo_Order
 
             if ($response > 199 && $response < 300) {
                 $orderCounter = 0;
+                $values = [];
+                $order_logs = [];
+
                 foreach ($orders['orders'] as $item) {
                     $order = wc_get_order($item['externalOrderId']);
                     if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
-                        update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
-                        (new Yespo_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
+                        $order_id = $order->get_id();
+                        $values[] = $this->wpdb->prepare("(%d, %s, %s)", $order_id, self::ORDER_META_KEY, 'true');
+                        $order_logs[] = $this->wpdb->prepare("(%d, %s, %d, %s)", $order_id, $operation, $response, date('Y-m-d H:i:s', time()) );
                         $orderCounter++;
                     }
                 }
+
+                if (!empty($values)) {
+                    $values_string = implode(", ", $values);
+                    $query = "INSERT INTO {$this->wpdb->postmeta} (post_id, meta_key, meta_value) VALUES $values_string 
+              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+
+                    $this->wpdb->query($query);
+                }
+
+                //add log entries
+                if (!empty($order_logs)) {
+                    $log_orders_string = implode(", ", $order_logs);
+                    $log_orders_query = "INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) VALUES $log_orders_string";
+                    $this->wpdb->query($log_orders_query);
+                }
+
                 return $orderCounter;
+
             } else if($response === 401){
                 (new Yespo_Export_Orders())->error_export_orders('401');
             } else if($response === 0){

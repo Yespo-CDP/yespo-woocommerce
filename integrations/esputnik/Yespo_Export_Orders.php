@@ -126,8 +126,10 @@ class Yespo_Export_Orders
 
             do {
                 $export_quantity++;
+
                 $orders = $this->get_bulk_export_orders();
                 $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
+
                 $endTime = microtime(true);
                 $live_exported += count($orders);
                 if($export_res) {

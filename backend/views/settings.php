@@ -956,7 +956,13 @@ if ( get_option( 'yespo_options' ) !== false ){
                             callback(response);
                         }
                         resolve();
+                    } else if (xhr.status === 500) {
+                        console.error('Internal Server Error:', xhr.responseText);
+                        document.querySelector('.sendYespoAuthData').innerHTML = 'Internal Server Error. Please try again later.';
+                        if (document.getElementById('sendYespoAuthData')) document.getElementById('sendYespoAuthData').disabled = false;
                     }
+
+
                 };
                 xhr.send();
             });

@@ -210,9 +210,25 @@ class Yespo_Contact
         return get_user_meta($user_id, self::USER_META_KEY, true);
     }
 
+
     public function add_esputnik_id_to_userprofile($user_id, $external_id){
         if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);
+    }
+
+    public function add_bulk_esputnik_id_to_userprofile($usersForExport, $meta_value){
+        $values = [];
+        foreach ($usersForExport as $user_id) {
+            $values[] = $this->wpdb->prepare("(%d, %s, %s)", $user_id, self::USER_META_KEY, $meta_value);
+        }
+
+        if (!empty($values)) {
+            $values_string = implode(", ", $values);
+            $query = "INSERT INTO {$this->wpdb->usermeta} (user_id, meta_key, meta_value) VALUES $values_string 
+              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+
+            $this->wpdb->query($query);
+        }
     }
 
     private function get_latest_users_activity(){

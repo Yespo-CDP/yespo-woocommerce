@@ -63,14 +63,15 @@ class Yespo_Export_Users
             do {
                 $export_quantity++;
                 $endTime = microtime(true);
-                $usersForExport = $this->get_users_object($this->get_bulk_users_export_args());
+
+                $usersForExport = $this->get_bulk_users_object();
+
                 if($usersForExport && count($usersForExport) > 0) {
                     $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport));
                     $endTime = microtime(true);
+
                     if ($response) {
-                        foreach($usersForExport as $user) {
-                            $this->esputnikContact->add_esputnik_id_to_userprofile($user, 'true');
-                        }
+                        $this->esputnikContact->add_bulk_esputnik_id_to_userprofile($usersForExport, 'true');
                         if(isset($response) && $this->check_queue_items_for_session($response)) $this->update_entry_yespo_queue($response, "FINISHED", "FINISHED");
                     }
                 }
@@ -212,6 +213,24 @@ class Yespo_Export_Users
     }
     public function get_users_object($args){
         return get_users($args);
+    }
+
+
+    public function get_bulk_users_object(){
+        $query = $this->wpdb->prepare("
+		SELECT u.ID 
+		FROM {$this->wpdb->users} u
+		INNER JOIN {$this->wpdb->usermeta} um ON u.ID = um.user_id
+		WHERE um.meta_key = '{$this->wpdb->prefix}capabilities'
+		  AND um.meta_value LIKE %s
+		  AND u.ID NOT IN (
+			SELECT user_id FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value != ''
+		  )
+		ORDER BY u.user_registered ASC
+		LIMIT %d
+	", '%' . $this->wpdb->esc_like(self::CUSTOMER) . '%', $this->meta_key, $this->number_for_export);
+
+        return $this->wpdb->get_col($query);
     }
 
     /**

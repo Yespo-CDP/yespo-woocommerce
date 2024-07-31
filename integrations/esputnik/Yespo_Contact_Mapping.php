@@ -74,15 +74,16 @@ class Yespo_Contact_Mapping
     public static function create_bulk_export_array($users){
         $data = [];
         $contact = new Yespo_Export_Users();
+
         if($users && count($users) > 0){
             $data['dedupeOn'] = 'externalCustomerId';
-            foreach($users as $user){
-                $data['contacts'][] = self::data_woo_to_yes(
-                    self::user_transformation_to_array(get_user_by('id', $user))
-                );
-                $contact->add_entry_queue_items(
-                    (get_userdata($user))->user_email
-                );
+
+            $user_objects = get_users(['include' => $users]);
+
+            foreach($user_objects as $user){
+                $user_array = self::user_transformation_to_array($user);
+                $data['contacts'][] = self::data_woo_to_yes($user_array);
+                $contact->add_entry_queue_items($user->user_email);
             }
         }
         return $data;

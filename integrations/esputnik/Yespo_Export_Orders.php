@@ -450,9 +450,13 @@ class Yespo_Export_Orders
     }
 
     public function is_email_in_removed_users($email) {
+        $current_timestamp = strtotime(current_time('mysql'));
+        $searched_time = date('Y-m-d H:i:s', $current_timestamp - 360);
+
         $query = $this->wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s",
-            $email
+            "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s AND time >= %s",
+            $email,
+            $searched_time
         );
         $count = $this->wpdb->get_var($query);
 

@@ -396,31 +396,6 @@ class Yespo_Export_Orders
     public function get_bulk_export_orders(){
         $period_start = date('Y-m-d H:i:s', time() - $this->period_selection);
 
-
-/*
-            return $this->wpdb->get_results(
-                $this->wpdb->prepare(
-                    "SELECT * FROM $this->table_posts
-                        WHERE type = %s
-                        AND status != %s
-                        AND ID NOT IN (
-                            SELECT post_id FROM {$this->wpdb->prefix}postmeta
-                            WHERE meta_key = %s AND meta_value = 'true'
-                        )
-                        AND date_created_gmt < %s
-                        AND ID > %d
-                        ORDER BY ID ASC
-                        LIMIT %d",
-                    'shop_order',
-                    'wc-checkout-draft',
-                    $this->meta_key,
-                    $period_start,
-                    $this->id_more_then,
-                    $this->number_for_export
-                ),
-                OBJECT
-            );
-        */
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
                 "SELECT id FROM $this->table_posts
@@ -443,29 +418,6 @@ class Yespo_Export_Orders
             ),
             OBJECT
         );
-
-/*
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM $this->table_posts
-            WHERE type = %s
-            AND status != %s
-            AND ID NOT IN (
-                SELECT post_id FROM {$this->wpdb->prefix}postmeta
-                WHERE meta_key = %s AND meta_value = 'true'
-            )
-            AND date_created_gmt < %s
-            ORDER BY ID ASC
-            LIMIT %d",
-                'shop_order',
-                'wc-checkout-draft',
-                $this->meta_key,
-                $period_start,
-                $this->number_for_export
-            ),
-            OBJECT
-        );
-*/
     }
 
     private function get_orders_from_database_without_metakey(){

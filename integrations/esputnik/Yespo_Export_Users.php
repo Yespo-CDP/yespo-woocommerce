@@ -14,6 +14,7 @@ class Yespo_Export_Users
     private $meta_key;
     private $wpdb;
     private $esputnikContact;
+    private $id_more_then;
 
     public function __construct(){
         global $wpdb;
@@ -23,6 +24,7 @@ class Yespo_Export_Users
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
         $this->table_yespo_queue = $this->wpdb->prefix . 'yespo_queue';
         $this->table_yespo_queue_items = $this->wpdb->prefix . 'yespo_queue_items';
+        $this->id_more_then = $this->get_exported_user_id();
     }
 
     public function add_users_export_task(){
@@ -76,6 +78,8 @@ class Yespo_Export_Users
                     }
                 }
                 $live_exported += count($usersForExport);
+
+                if(count($usersForExport) > 0 ) $this->set_exported_user_id(end($usersForExport));
 
             } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3);
 
@@ -217,6 +221,23 @@ class Yespo_Export_Users
 
 
     public function get_bulk_users_object(){
+
+        $query = $this->wpdb->prepare("
+            SELECT u.ID 
+            FROM {$this->wpdb->users} u
+            INNER JOIN {$this->wpdb->usermeta} um ON u.ID = um.user_id
+            WHERE um.meta_key = '{$this->wpdb->prefix}capabilities'
+              AND um.meta_value LIKE %s
+              AND u.ID > %d
+              AND u.ID NOT IN (
+                SELECT user_id FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value != ''
+              )
+            ORDER BY u.user_registered ASC
+            LIMIT %d
+        ", '%' . $this->wpdb->esc_like(self::CUSTOMER) . '%', $this->id_more_then, $this->meta_key, $this->number_for_export);
+
+        return $this->wpdb->get_col($query);
+        /*
         $query = $this->wpdb->prepare("
 		SELECT u.ID 
 		FROM {$this->wpdb->users} u
@@ -231,6 +252,7 @@ class Yespo_Export_Users
 	", '%' . $this->wpdb->esc_like(self::CUSTOMER) . '%', $this->meta_key, $this->number_for_export);
 
         return $this->wpdb->get_col($query);
+        */
     }
 
     /**
@@ -412,6 +434,25 @@ class Yespo_Export_Users
         $count = $this->wpdb->get_var($query);
         if ($count > 0) return true;
         else return false;
+    }
+
+    private function get_exported_user_id(){
+        if ( get_option( 'yespo_options' ) !== false ) {
+            $options = get_option('yespo_options', array());
+            $yespo_api_key = 0;
+            if (isset($options['highest_exported_user'])) $yespo_api_key = intval($options['highest_exported_user']);
+
+            return $yespo_api_key;
+        }
+        return 0;
+    }
+
+    private function set_exported_user_id($user){
+        if ( get_option( 'yespo_options' ) !== false ) {
+            $options = get_option('yespo_options', array());
+            $options['highest_exported_user'] = intval($user);
+            update_option('yespo_options', $options);
+        }
     }
 
 }

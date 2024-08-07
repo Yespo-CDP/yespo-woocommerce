@@ -23,6 +23,7 @@ class Yespo_Export_Orders
 
     private $table_yespo_curl_json;
     private $table_yespo_removed;
+    private $id_more_then;
 
     public function __construct(){
         global $wpdb;
@@ -36,6 +37,7 @@ class Yespo_Export_Orders
 
         $this->table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json';
         $this->table_yespo_removed = $this->wpdb->prefix . 'yespo_removed_users';
+        $this->id_more_then = $this->get_exported_order_id();
     }
 
     public function add_orders_export_task(){
@@ -128,6 +130,8 @@ class Yespo_Export_Orders
                 $export_quantity++;
 
                 $orders = $this->get_bulk_export_orders();
+                $last_element = end($orders);
+
                 $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
 
                 $endTime = microtime(true);
@@ -135,6 +139,10 @@ class Yespo_Export_Orders
                 if($export_res) {
                     $this->update_entry_queue_items('FINISHED');
                 }
+
+                if(count($orders) > 0 )$this->set_exported_order_id($last_element);
+
+
 
             } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3);
 
@@ -388,6 +396,55 @@ class Yespo_Export_Orders
     public function get_bulk_export_orders(){
         $period_start = date('Y-m-d H:i:s', time() - $this->period_selection);
 
+
+/*
+            return $this->wpdb->get_results(
+                $this->wpdb->prepare(
+                    "SELECT * FROM $this->table_posts
+                        WHERE type = %s
+                        AND status != %s
+                        AND ID NOT IN (
+                            SELECT post_id FROM {$this->wpdb->prefix}postmeta
+                            WHERE meta_key = %s AND meta_value = 'true'
+                        )
+                        AND date_created_gmt < %s
+                        AND ID > %d
+                        ORDER BY ID ASC
+                        LIMIT %d",
+                    'shop_order',
+                    'wc-checkout-draft',
+                    $this->meta_key,
+                    $period_start,
+                    $this->id_more_then,
+                    $this->number_for_export
+                ),
+                OBJECT
+            );
+        */
+        return $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT id FROM $this->table_posts
+                WHERE type = %s
+                AND status != %s
+                AND ID NOT IN (
+                    SELECT post_id FROM {$this->wpdb->prefix}postmeta
+                    WHERE meta_key = %s AND meta_value = 'true'
+                )
+                AND date_created_gmt < %s
+                AND ID > %d
+                ORDER BY ID ASC
+                LIMIT %d",
+                    'shop_order',
+                    'wc-checkout-draft',
+                    $this->meta_key,
+                    $period_start,
+                    $this->id_more_then,
+                    $this->number_for_export
+            ),
+            OBJECT
+        );
+
+/*
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
                 "SELECT * FROM $this->table_posts
@@ -408,6 +465,7 @@ class Yespo_Export_Orders
             ),
             OBJECT
         );
+*/
     }
 
     private function get_orders_from_database_without_metakey(){
@@ -472,6 +530,24 @@ class Yespo_Export_Orders
                 'created_at' => current_time('mysql')
             ];
             $this->wpdb->insert($this->table_yespo_curl_json, $data);
+        }
+    }
+
+    private function get_exported_order_id(){
+        if ( get_option( 'yespo_options' ) !== false ) {
+            $options = get_option('yespo_options', array());
+            $yespo_api_key = 0;
+            if (isset($options['highest_exported_order'])) $yespo_api_key = intval($options['highest_exported_order']);
+
+            return $yespo_api_key;
+        }
+        return 0;
+    }
+    private function set_exported_order_id($order){
+        if ( get_option( 'yespo_options' ) !== false ) {
+            $options = get_option('yespo_options', array());
+            $options['highest_exported_order'] = $order->id;
+            update_option('yespo_options', $options);
         }
     }
 

@@ -83,6 +83,8 @@ class Yespo_Contact
 
             $response = $this->process_on_yespo($data, 'bulk');
             if($response === 0) (new Yespo_Export_Users())->error_export_users('555');
+            else if($response == 400 || $response == 429 || $response == 500) return $response;
+
             if($response) $response = json_decode($response, true);
 
             if(isset($response["asyncSessionId"])){
@@ -176,6 +178,8 @@ class Yespo_Contact
                     }
                 }
                 return true;
+            } else if ($response == 400){
+
             }
         }
         return esc_html__( 'Other user authorization operation', YESPO_TEXTDOMAIN );

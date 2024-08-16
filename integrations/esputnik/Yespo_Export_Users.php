@@ -7,7 +7,7 @@ class Yespo_Export_Users
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
     private $number_for_export = 2000;
-    private $export_time = 3.5;
+    private $export_time = 7.5;
     private $table_name;
     private $table_yespo_queue;
     private $table_yespo_queue_items;
@@ -50,9 +50,11 @@ class Yespo_Export_Users
     public function start_active_bulk_export_users() {
         $status = $this->get_user_export_status_processed('active');
         $queue = $this->get_yespo_queue_statuses();
+        $error = Yespo_Errors::get_error_entry();
         if (
             !empty($status) &&
             $status->status == 'active' &&
+            $error == null &&
             $this->check_sessios_importing() !== true
         ){
             $startTime = microtime(true);
@@ -72,16 +74,21 @@ class Yespo_Export_Users
                     $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport));
                     $endTime = microtime(true);
 
-                    if ($response) {
+                    if ($response == 429 || $response == 500) {
+                        $this->update_entry_yespo_queue($response, "FINISHED", "FINISHED");
+                        Yespo_Errors::set_error_entry($response);
+                    } else if($response){
                         $this->esputnikContact->add_bulk_esputnik_id_to_userprofile($usersForExport, 'true');
+                        if($response == 400) Yespo_Errors::error_400($usersForExport, 'users');
                         if(isset($response) && $this->check_queue_items_for_session($response)) $this->update_entry_yespo_queue($response, "FINISHED", "FINISHED");
+                        $live_exported += count($usersForExport);
+                        if(count($usersForExport) > 0 ) $this->set_exported_user_id(end($usersForExport));
                     }
                 }
-                $live_exported += count($usersForExport);
 
-                if(count($usersForExport) > 0 ) $this->set_exported_user_id(end($usersForExport));
+                $error = Yespo_Errors::get_error_entry();
 
-            } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3);
+            } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3 && $error == null);
 
             if(($total <= $exported + $live_exported) || $this->get_users_export_count() < 1){
                 $current_status = 'completed';
@@ -237,22 +244,6 @@ class Yespo_Export_Users
         ", '%' . $this->wpdb->esc_like(self::CUSTOMER) . '%', $this->id_more_then, $this->meta_key, $this->number_for_export);
 
         return $this->wpdb->get_col($query);
-        /*
-        $query = $this->wpdb->prepare("
-		SELECT u.ID 
-		FROM {$this->wpdb->users} u
-		INNER JOIN {$this->wpdb->usermeta} um ON u.ID = um.user_id
-		WHERE um.meta_key = '{$this->wpdb->prefix}capabilities'
-		  AND um.meta_value LIKE %s
-		  AND u.ID NOT IN (
-			SELECT user_id FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value != ''
-		  )
-		ORDER BY u.user_registered ASC
-		LIMIT %d
-	", '%' . $this->wpdb->esc_like(self::CUSTOMER) . '%', $this->meta_key, $this->number_for_export);
-
-        return $this->wpdb->get_col($query);
-        */
     }
 
     /**

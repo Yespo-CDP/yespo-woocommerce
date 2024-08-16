@@ -29,12 +29,15 @@ class Yespo_Order
 
         if($data){
             $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $data, 'orders');
-            if ($response > 199 && $response < 300) {
+            if (($response > 199 && $response < 300) || $response == 400) {
                 if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
                     update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
+                    if($response == 400) update_post_meta($order->get_id(), Yespo_Errors::get_mark_br(), 'true'); //400 error
                     (new Yespo_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
                     (new Yespo_Logging_Data())->create_single_contact_log($order->get_billing_email()); //add entry contact log file
                 }
+            } else if($response == 429 || $response == 500){
+                Yespo_Errors::set_error_entry($response);
             }
         } else{
             update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
@@ -56,7 +59,7 @@ class Yespo_Order
 
             (new Yespo_Export_Orders())->add_entry_queue_items();
 
-            if ($response > 199 && $response < 300) {
+            if (($response > 199 && $response < 300) || $response == 400) {
                 $orderCounter = 0;
                 $values = [];
                 $order_logs = [];
@@ -66,18 +69,14 @@ class Yespo_Order
                     if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
                         $order_id = $order->get_id();
                         $values[] = $this->wpdb->prepare("(%d, %s, %s)", $order_id, self::ORDER_META_KEY, 'true');
+                        if($response == 400) $error_400[] = $this->wpdb->prepare("(%d, %s, %s)", $order_id, Yespo_Errors::get_mark_br(), 'true');
                         $order_logs[] = $this->wpdb->prepare("(%d, %s, %d, %s)", $order_id, $operation, $response, date('Y-m-d H:i:s', time()) );
                         $orderCounter++;
                     }
                 }
 
-                if (!empty($values)) {
-                    $values_string = implode(", ", $values);
-                    $query = "INSERT INTO {$this->wpdb->postmeta} (post_id, meta_key, meta_value) VALUES $values_string 
-              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
-
-                    $this->wpdb->query($query);
-                }
+                if (!empty($values)) $this->add_labels_to_orders($values);
+                if(isset($error_400) && count($error_400) > 0) Yespo_Errors::error_400($error_400,'orders'); //add labels bad request
 
                 //add log entries
                 if (!empty($order_logs)) {
@@ -92,9 +91,19 @@ class Yespo_Order
                 (new Yespo_Export_Orders())->error_export_orders('401');
             } else if($response === 0){
                 (new Yespo_Export_Orders())->error_export_orders('555');
+            } else if($response == 429 || $response == 500){
+                return ['error'=> $response];
             }
         }
         return false;
+    }
+
+    public function add_labels_to_orders($values){
+        $values_string = implode(", ", $values);
+        $query = "INSERT INTO {$this->wpdb->postmeta} (post_id, meta_key, meta_value) VALUES $values_string 
+              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+
+        $this->wpdb->query($query);
     }
 
     private function find_orders_by_user_email($email){

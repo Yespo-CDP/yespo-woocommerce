@@ -10,7 +10,7 @@ class Yespo_Export_Orders
     private $period_selection_since = 300;
     private $period_selection_up = 30;
     private $number_for_export = 1000;
-    private $export_time = 3.5;
+    private $export_time = 7.5;
     private $table_name;
     private $table_yespo_queue_orders;
     private $table_posts;
@@ -24,6 +24,7 @@ class Yespo_Export_Orders
     private $table_yespo_curl_json;
     private $table_yespo_removed;
     private $id_more_then;
+    private $is_response_error;
 
     public function __construct(){
         global $wpdb;
@@ -38,6 +39,7 @@ class Yespo_Export_Orders
         $this->table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json';
         $this->table_yespo_removed = $this->wpdb->prefix . 'yespo_removed_users';
         $this->id_more_then = $this->get_exported_order_id();
+        $this->is_response_error = Yespo_Errors::get_error_entry();
     }
 
     public function add_orders_export_task(){
@@ -94,28 +96,43 @@ class Yespo_Export_Orders
     public function schedule_export_orders(){
 
         $orders = $this->get_latest_orders();
+        $status = $this->get_order_export_status_processed('error');
+        $orders_when_error = $this->get_orders_while_error();
 
-        if(count($orders) > 0 ){
-            foreach ($orders as $order) {
-                $item = wc_get_order($order);
-                if (!empty($item) && !is_bool($item) && method_exists($item, 'get_billing_email') && !empty($item->get_billing_email())) {
-                    if (!$this->is_email_in_removed_users($item->get_billing_email())) {
-                        (new Yespo_Order())->create_order_on_yespo($item, 'update');
+        if($this->is_response_error == null) {
+            if (count($orders) > 0) {
+                foreach ($orders as $order) {
+                    $item = wc_get_order($order);
+                    if (!empty($item) && !is_bool($item) && method_exists($item, 'get_billing_email') && !empty($item->get_billing_email())) {
+                        if (!$this->is_email_in_removed_users($item->get_billing_email())) {
+                            (new Yespo_Order())->create_order_on_yespo($item, 'update');
+                        }
                     }
                 }
-            }
-        } else {
-            $status = $this->get_order_export_status();
-            if(!empty($status) && ($status->status === 'completed' || $this->get_export_orders_count() < 1) && $status->code === null){
-                $this->update_table_data($status->id, intval($status->total), 'completed');
+            } else if(!empty($status) && $status->status == 'error') {
+                $fresh_error = Yespo_Errors::get_error_entry();
+                if ($fresh_error === null) {
+                    $error = Yespo_Errors::get_error_entry_old();
+                    if ($error !== null && isset($error->error) && ($error->error === 429 || $error->error === 500)) {
+                        $this->update_table_data($status->id, intval($status->exported), 'active', '200');
+                    }
+                }
+            } else if( count($orders_when_error) > 0 ){
+                //$this->start_bulk_export_orders(); //send orders what created when was error 500 or 429
+            } else {
+                $status = $this->get_order_export_status();
+                if (!empty($status) && ($status->status === 'completed' || $this->get_export_orders_count() < 1) && $status->code === null) {
+                    $this->update_table_data($status->id, intval($status->total), 'completed');
+                }
             }
         }
 
     }
     public function start_bulk_export_orders(){
         $status = $this->get_order_export_status_processed('active');
+
         //$orders = $this->get_bulk_export_orders();
-        if(!empty($status) && $status->status == 'active' && !$this->check_queue_items_for_session()){
+        if(!empty($status) && $status->status == 'active' && !$this->check_queue_items_for_session() && $this->is_response_error == null){
             $startTime = microtime(true);
             $total = intval($status->total);
             $exported = intval($status->exported);
@@ -134,17 +151,22 @@ class Yespo_Export_Orders
 
                 $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
 
-                $endTime = microtime(true);
-                $live_exported += count($orders);
-                if($export_res) {
+                if(is_array($export_res) && isset($export_res['error']) && ($export_res['error'] == 429 || $export_res['error'] == 500)){
                     $this->update_entry_queue_items('FINISHED');
+                    Yespo_Errors::set_error_entry($export_res['error']);
+                } else {
+                    $endTime = microtime(true);
+                    $live_exported += count($orders);
+                    if ($export_res) {
+                        $this->update_entry_queue_items('FINISHED');
+                    }
+
+                    if (count($orders) > 0) $this->set_exported_order_id($last_element);
                 }
 
-                if(count($orders) > 0 )$this->set_exported_order_id($last_element);
+                $this->is_response_error = Yespo_Errors::get_error_entry();
 
-
-
-            } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3);
+            } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3 && $this->is_response_error == null);
 
             if($total <= $exported + $live_exported){
                 $current_status = 'completed';
@@ -261,7 +283,7 @@ class Yespo_Export_Orders
         );
     }
 
-    private function update_table_data($id, $exported, $status, $code = null){
+    public function update_table_data($id, $exported, $status, $code = null){
         return $this->wpdb->update(
             $this->table_name,
             array('exported' => $exported, 'status' => $status, 'code' => $code),
@@ -501,6 +523,31 @@ class Yespo_Export_Orders
             $options['highest_exported_order'] = $order->id;
             update_option('yespo_options', $options);
         }
+    }
+
+    private function get_orders_while_error(){
+        $error = Yespo_Errors::get_error_entry_old();
+        if(!empty($error)){
+            return $this->get_unsent_orders_since_time($error->time);
+        }
+    }
+
+    public function get_unsent_orders_since_time($time){
+        return $this->wpdb->get_results(
+            $this->wpdb->prepare(
+                "SELECT p.id 
+                FROM $this->table_posts p
+                LEFT JOIN {$this->wpdb->postmeta} pm ON p.id = pm.post_id AND pm.meta_key = 'sent_order_to_yespo'
+                WHERE p.type = %s 
+                AND p.status != %s 
+                AND p.date_updated_gmt BETWEEN %s AND %s
+                AND pm.post_id IS NULL",
+                'shop_order',
+                'wc-checkout-draft',
+                date('Y-m-d H:i:s', time() - $time),
+                date('Y-m-d H:i:s', time() - $this->period_selection)
+            )
+        );
     }
 
 }

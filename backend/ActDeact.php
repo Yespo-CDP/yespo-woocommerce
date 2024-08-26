@@ -299,6 +299,7 @@ class ActDeact extends Base {
                 exported varchar(255) NOT NULL,
                 status varchar(255) NOT NULL,
                 code varchar(255) default NULL,
+                updated_at datetime default NULL,
                 PRIMARY KEY  (id)
             ) $charset_collate_export;";
 

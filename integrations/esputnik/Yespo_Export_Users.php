@@ -37,10 +37,13 @@ class Yespo_Export_Users
                 'status' => 'active'
             ];
             if($data['total'] > 0) {
-                $result = $this->wpdb->insert($this->table_name, $data);
+                $uncompleted_orders = $this->get_last_order_entry_not_completed();
+                if(!$uncompleted_orders) {
+                    $result = $this->wpdb->insert($this->table_name, $data);
 
-                if ($result !== false) return true;
-                else return false;
+                    if ($result !== false) return true;
+                    else return false;
+                }
             }
         }
         else return false;
@@ -51,6 +54,8 @@ class Yespo_Export_Users
         $status = $this->get_user_export_status_processed('active');
         $queue = $this->get_yespo_queue_statuses();
         $error = Yespo_Errors::get_error_entry();
+        //$this->update_after_activation();
+
         if (
             !empty($status) &&
             $status->status == 'active' &&
@@ -77,12 +82,19 @@ class Yespo_Export_Users
                     if ($response == 429 || $response == 500) {
                         $this->update_entry_yespo_queue($response, "FINISHED", "FINISHED");
                         Yespo_Errors::set_error_entry($response);
+                    } else if($response == 'blocked' || strpos($response, 'Connection refused') !== false){
+                        $this->update_entry_yespo_queue($response, "FINISHED", "FINISHED");
+                        $http_code = '0';
                     } else if($response){
+                        $last_element = end($usersForExport);
                         $this->esputnikContact->add_bulk_esputnik_id_to_userprofile($usersForExport, 'true');
-                        if($response == 400) Yespo_Errors::error_400($usersForExport, 'users');
+                        if($response == 400){
+                            Yespo_Errors::error_400($usersForExport, 'users');
+                        }
                         if(isset($response) && $this->check_queue_items_for_session($response)) $this->update_entry_yespo_queue($response, "FINISHED", "FINISHED");
                         $live_exported += count($usersForExport);
-                        if(count($usersForExport) > 0 ) $this->set_exported_user_id(end($usersForExport));
+                        if(count($usersForExport) > 0 ) $this->set_exported_user_id($last_element);
+                        $http_code = 200;
                     }
                 }
 
@@ -95,7 +107,7 @@ class Yespo_Export_Users
                 $exported = $total;
             } else $exported += $live_exported;
 
-            $this->update_table_data($status->id, $exported, $current_status);
+            $this->update_table_data($status->id, $exported, $current_status, $http_code);
 
         } else {
             $status = $this->get_user_export_status();
@@ -313,12 +325,18 @@ class Yespo_Export_Users
     private function update_table_data($id, $exported, $status, $code = null){
         return $this->wpdb->update(
             $this->table_name,
-            array('exported' => $exported, 'status' => $status, 'code' => $code),
+            array(
+                'exported' => $exported,
+                'status' => $status,
+                'code' => $code,
+                'updated_at' => date('Y-m-d H:i:s', time())
+            ),
             array('id' => $id),
-            array('%d', '%s', '%s'),
+            array('%d', '%s', '%s', '%s'),
             array('%d')
         );
     }
+
     private function update_table_total($id, $total){
         return $this->wpdb->update(
             $this->table_name,
@@ -444,6 +462,16 @@ class Yespo_Export_Users
             $options['highest_exported_user'] = intval($user);
             update_option('yespo_options', $options);
         }
+    }
+
+    private function get_last_order_entry_not_completed(){
+        return $this->wpdb->get_row(
+            $this->wpdb->prepare(
+                "SELECT * FROM $this->table_name WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
+                'orders',
+                'completed'
+            )
+        );
     }
 
 }

@@ -89,8 +89,9 @@ class Yespo_Order
 
             } else if($response === 401){
                 (new Yespo_Export_Orders())->error_export_orders('401');
-            } else if($response === 0){
-                (new Yespo_Export_Orders())->error_export_orders('555');
+            } else if($response === 0 || strpos($response, 'Connection refused') !== false){
+                //(new Yespo_Export_Orders())->error_export_orders('555');
+                return ['error'=> 0];
             } else if($response == 429 || $response == 500){
                 return ['error'=> $response];
             }

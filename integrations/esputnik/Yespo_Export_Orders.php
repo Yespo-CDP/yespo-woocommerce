@@ -316,17 +316,7 @@ class Yespo_Export_Orders
             array('%d')
         );
     }
-/*
-    public function update_table_data($id, $exported, $status, $code = null){
-        return $this->wpdb->update(
-            $this->table_name,
-            array('exported' => $exported, 'status' => $status, 'code' => $code),
-            array('id' => $id),
-            array('%d', '%s', '%s'),
-            array('%d')
-        );
-    }
-*/
+
     private function update_table_data($id, $exported, $status, $code = null){
         return $this->wpdb->update(
             $this->table_name,

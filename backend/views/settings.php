@@ -344,7 +344,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             this.resume = '<?php echo esc_html__( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', YESPO_TEXTDOMAIN ); ?>';
             this.error = '<?php echo esc_html__('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', YESPO_TEXTDOMAIN)?>';
             this.error401 = '<?php echo esc_html__('Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', YESPO_TEXTDOMAIN)?>';
-            this.error555 = '<?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved. Reload the page to see the updated synchronization process state.', YESPO_TEXTDOMAIN)?>';
+            this.error555 = '<?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', YESPO_TEXTDOMAIN)?>';
             this.success = '<?php echo esc_html__( 'Data is successfully synchronized', YESPO_TEXTDOMAIN ); ?>';
             this.synhStarted = '<?php echo esc_html__( 'Data synchronization has started', YESPO_TEXTDOMAIN ); ?>';
             this.pluginUrl = '<?php echo YESPO_PLUGIN_URL?>';
@@ -549,7 +549,7 @@ if ( get_option( 'yespo_options' ) !== false ){
                     resumeIcon,
                     resumeButton,
                     this.pluginUrl + 'assets/images/subtract.svg',
-                    this.contactSupportButton
+                    code !== 555 ? this.contactSupportButton : null
                 );
             } else {
                 fieldGroup2.classList.add('flexRow');
@@ -927,11 +927,23 @@ if ( get_option( 'yespo_options' ) !== false ){
                     this.updateProgress(Math.floor( (response.exported / response.total) * 100), 'export');
                 }
 
+
                 if( response.percent === 100 && way === 'users' && response.status === 'completed'){
                     this.startExportOrders();
                 } else if(response.percent === 100 && way === 'orders' && response.status === 'completed') this.updateProgress(100);
-                if (response.exported !== response.total && response.status === 'active') {
+
+                if(response.code && parseInt(response.code) === 0){
+                    
+                    if(document.querySelector('.processPercent')) response.percent = document.querySelector('.processPercent').innerText;
+                    if(!document.querySelector('.messageIconError')) this.showErrorPage(response.percent, '555');
+                    setTimeout(() => {
+                        if(way === 'users') this.processExportUsers();
+                        if(way === 'orders') this.processExportOrders();
+                    }, 5000);
+
+                } else if (response.exported !== response.total && response.status === 'active') {
                     this.exportStatus = true;
+                    if(document.querySelector('.messageIconError')) this.resumeExportData();
                     setTimeout(() => {
                         if(way === 'users') this.processExportUsers();
                         if(way === 'orders') this.processExportOrders();

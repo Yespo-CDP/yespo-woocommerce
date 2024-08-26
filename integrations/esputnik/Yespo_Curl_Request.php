@@ -37,6 +37,8 @@ class Yespo_Curl_Request
             $err = curl_error($curl);
 
             $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            
+            if(strpos($response, 'Connection refused') !== false || $response === false) $http_code = 0;
 
             if(
                 $custom_request === 'DELETE' ||

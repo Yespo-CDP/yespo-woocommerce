@@ -67,7 +67,6 @@ class Yespo_Contact
         if($result){
             $response = json_decode($result);
             if($response[0]->id) {
-                var_dump($response[0]->id);
                 update_user_meta($id, self::USER_META_KEY, $response[0]->id);
                 return $response[0]->id;
             }
@@ -82,7 +81,10 @@ class Yespo_Contact
             //(new Yespo_Export_Orders())->add_json_log_entry($data);// add log entry to DB
 
             $response = $this->process_on_yespo($data, 'bulk');
-            if($response === 0) (new Yespo_Export_Users())->error_export_users('555');
+            if($response === 0) {
+                (new Yespo_Export_Users())->error_export_users('555');
+                return 'blocked';
+            }
             else if($response == 400 || $response == 429 || $response == 500) return $response;
 
             if($response) $response = json_decode($response, true);

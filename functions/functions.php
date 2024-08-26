@@ -89,6 +89,7 @@ function yespo_check_api_authorization_function(){
             (new \Yespo\Integrations\Esputnik\Yespo_Account())->add_entry_auth_log($yespo_api_key, $result);
             if (strpos($result, 'Connection refused') !== false) $result = 0;
             if ($result === 200) {
+                (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
                 wp_send_json_success(['auth' => 'success']);
             } else if($result === 401 || $result === 0){
                 wp_send_json_error(['auth' => 'incorrect', 'code' => $result]);
@@ -406,6 +407,7 @@ add_filter( 'cron_schedules', 'yespo_establish_custom_cron_interval_function' );
 
 /*** START CRON JOB ***/
 function yespo_export_data_cron_function(){
+    (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Users())->start_active_bulk_export_users();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_bulk_export_orders();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->schedule_export_orders();

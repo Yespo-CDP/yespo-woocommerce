@@ -2,7 +2,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Esputnik_Contact_Validation
+class Yespo_Contact_Validation
 {
     const STRING_LENGTH = "/^.{2,40}$/u";
     const APOSTROPHE = "/^(?!['`’]).*(?<!['`’])$/";

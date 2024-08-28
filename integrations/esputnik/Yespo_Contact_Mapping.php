@@ -2,10 +2,14 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Esputnik_Contact_Mapping
+class Yespo_Contact_Mapping
 {
     public static function woo_to_yes($user_data){
         return self::data_woo_to_yes(self::user_transformation_to_array($user_data));
+    }
+
+    public static function update_woo_to_yes($request, $user_id){
+        return self::data_woo_to_yes(self::update_user_transformation_to_array($request, $user_id));
     }
 
     public static function guest_user_woo_to_yes($order){
@@ -34,33 +38,31 @@ class Esputnik_Contact_Mapping
         $region = ($user['state']) ?? $user['country'] ?? ' ';
 
         $data['channels'][] = [
-            'value' => $user['email'],
+            'value' => sanitize_email($user['email']),
             'type' => 'email'
         ];
         if (isset($user['phone']) && !empty($user['phone'])) {
-            //if(!empty($user['country_id'])) $phoneNumber = Esputnik_Phone_Validation::start_validation($user['phone'], $user['country_id']);
-            //else $phoneNumber = preg_replace("/[^0-9]/", "", $user['phone']);
             $phoneNumber = preg_replace("/[^0-9]/", "", $user['phone']);
         } else $phoneNumber = ' ';
         $data['channels'][] = [
-            'value' => $phoneNumber,
+            'value' => sanitize_text_field($phoneNumber),
             'type' => 'sms'
         ];
 
-        if(isset($user['ID'])) $data['externalCustomerId'] = $user['ID'];
-        if($user['first_name'] !== null && Esputnik_Contact_Validation::name_validation($user['first_name'])) $data['firstName'] = $user['first_name'];
+        if(isset($user['ID'])) $data['externalCustomerId'] = absint($user['ID']);
+        if($user['first_name'] !== null && Yespo_Contact_Validation::name_validation($user['first_name'])) $data['firstName'] = sanitize_text_field($user['first_name']);
         else $data['firstName'] = ' ';
 
-        if($user['last_name'] !== null && Esputnik_Contact_Validation::lastname_validation($user['last_name'])) $data['lastName'] = $user['last_name'];
+        if($user['last_name'] !== null && Yespo_Contact_Validation::lastname_validation($user['last_name'])) $data['lastName'] = sanitize_text_field($user['last_name']);
         else $data['lastName'] = ' ';
 
         $data['address'] = [
-            'region' => $region,
-            'town' => $user['city'] ?? ' ',
-            'address' => $address,
-            'postcode' => $user['postcode'] ?? ' '
+            'region' => sanitize_text_field($region),
+            'town' => sanitize_text_field($user['city']) ?? ' ',
+            'address' => sanitize_text_field($address),
+            'postcode' => sanitize_text_field($user['postcode']) ?? ' '
         ];
-        if($user['languageCode']) $data['languageCode'] = $user['languageCode'];
+        if($user['languageCode']) $data['languageCode'] = sanitize_text_field($user['languageCode']);
         if (!empty($meta_data) && is_array($meta_data)){
             $data['fields'] = self::fields_transformation($meta_data);
         }
@@ -71,16 +73,17 @@ class Esputnik_Contact_Mapping
     //array users for bulk export
     public static function create_bulk_export_array($users){
         $data = [];
-        $contact = new Esputnik_Export_Users();
+        $contact = new Yespo_Export_Users();
+
         if($users && count($users) > 0){
-            $data['dedupeOn'] = 'email';
-            foreach($users as $user){
-                $data['contacts'][] = self::data_woo_to_yes(
-                    self::user_transformation_to_array(get_user_by('id', $user))
-                );
-                $contact->add_entry_queue_items(
-                    (get_userdata($user))->user_email
-                );
+            $data['dedupeOn'] = 'externalCustomerId';
+
+            $user_objects = get_users(['include' => $users]);
+
+            foreach($user_objects as $user){
+                $user_array = self::user_transformation_to_array($user);
+                $data['contacts'][] = self::data_woo_to_yes($user_array);
+                $contact->add_entry_queue_items($user->user_email);
             }
         }
         return $data;
@@ -96,7 +99,7 @@ class Esputnik_Contact_Mapping
                     'channels' => [
                         [
                             'type' => 'email',
-                            'value' => $email
+                            'value' => sanitize_email($email)
                         ]
                     ]
                 ]
@@ -107,7 +110,7 @@ class Esputnik_Contact_Mapping
     //removes personal user data
     private static function remove_all_personal_data($email){
         $data['channels'][] = [
-            'value' => $email,
+            'value' => sanitize_email($email),
             'type' => 'email'
         ];
         $data['firstName'] = ' ';
@@ -127,41 +130,54 @@ class Esputnik_Contact_Mapping
     private static function fields_transformation($fields) {
         return array_map(function($field) {
             return [
-                'id' => $field['id'],
-                'value' => $field['value']
+                'id' => sanitize_text_field($field['id']),
+                'value' => sanitize_text_field($field['value'])
             ];
         }, $fields);
     }
 
     private static function user_transformation_to_array($user){
         return [
-            'email' => $user->data->user_email,
-            'ID' => $user->ID,
-            'first_name' => !empty($user->first_name) ? $user->first_name : (!empty($user->billing_first_name) ? $user->billing_first_name : (!empty($user->shipping_first_name) ? $user->shipping_first_name : '')),
-            'last_name' => !empty($user->last_name) ? $user->last_name : (!empty($user->billing_last_name) ? $user->billing_last_name : (!empty($user->shipping_last_name) ? $user->shipping_last_name : '')),
+            'email' => sanitize_email($user->data->user_email),
+            'ID' => absint($user->ID),
+            'first_name' => !empty($user->first_name) ? sanitize_text_field($user->first_name) : (!empty($user->billing_first_name) ? sanitize_text_field($user->billing_first_name) : (!empty($user->shipping_first_name) ? sanitize_text_field($user->shipping_first_name) : '')),
+            'last_name' => !empty($user->last_name) ? sanitize_text_field($user->last_name) : (!empty($user->billing_last_name) ? sanitize_text_field($user->billing_last_name) : (!empty($user->shipping_last_name) ? sanitize_text_field($user->shipping_last_name) : '')),
             'state' => !empty(self::get_state_name($user->billing_country, $user->billing_state)) ? self::get_state_name($user->billing_country, $user->billing_state) : (!empty(self::get_state_name($user->shipping_country, $user->shipping_state)) ? self::get_state_name($user->shipping_country, $user->shipping_state) : ''),
-            //'country' => self::get_country_name($user->billing_country) ?? '',
-            'country_id' => !empty($user->billing_country) ? $user->billing_country : (!empty($user->shipping_country) ? $user->shipping_country : ''),
-            'city' => !empty($user->billing_city) ? $user->billing_city : (!empty($user->shipping_city) ? $user->shipping_city : ''),
-            'address_1' => !empty($user->billing_address_1) ? $user->billing_address_1 : (!empty($user->shipping_address_1) ? $user->shipping_address_1 : ''),
-            'address_2' => !empty($user->billing_address_2) ? $user->billing_address_2 : (!empty($user->shipping_address_2) ? $user->shipping_address_2 : ''),
-            'phone' => !empty($user->billing_phone) ? $user->billing_phone : (!empty($user->shipping_phone) ? $user->shipping_phone : ''),
-            'postcode' => !empty($user->billing_postcode) ? $user->billing_postcode : (!empty($user->shipping_postcode) ? $user->shipping_postcode : ''),
+            'country_id' => !empty($user->billing_country) ? sanitize_text_field($user->billing_country) : (!empty($user->shipping_country) ? sanitize_text_field($user->shipping_country) : ''),
+            'city' => !empty($user->billing_city) ? sanitize_text_field($user->billing_city) : (!empty($user->shipping_city) ? sanitize_text_field($user->shipping_city) : ''),
+            'address_1' => !empty($user->billing_address_1) ? sanitize_text_field($user->billing_address_1) : (!empty($user->shipping_address_1) ? sanitize_text_field($user->shipping_address_1) : ''),
+            'address_2' => !empty($user->billing_address_2) ? sanitize_text_field($user->billing_address_2) : (!empty($user->shipping_address_2) ? sanitize_text_field($user->shipping_address_2) : ''),
+            'phone' => !empty($user->billing_phone) ? sanitize_text_field($user->billing_phone) : (!empty($user->shipping_phone) ? sanitize_text_field($user->shipping_phone) : ''),
+            'postcode' => !empty($user->billing_postcode) ? sanitize_text_field($user->billing_postcode) : (!empty($user->shipping_postcode) ? sanitize_text_field($user->shipping_postcode) : ''),
             'languageCode' => !empty(substr(get_user_meta($user->ID, 'locale', true), 0, 2)) ? substr(get_user_meta($user->ID, 'locale', true), 0, 2) : ( get_bloginfo('language') ? get_bloginfo('language') : '')
+        ];
+    }
+
+    private static function update_user_transformation_to_array($request, $user_id){
+        return [
+            'email' => sanitize_email($request['billing_email']),
+            'ID' => absint($user_id),
+            'first_name' => isset($request['billing_first_name']) ? sanitize_text_field($request['billing_first_name']) : '',
+            'last_name' => isset($request['billing_last_name']) ? sanitize_text_field($request['billing_last_name']) : '',
+            'state' => isset($request['billing_state']) ? sanitize_text_field($request['billing_state']) : '',
+            'country_id' => isset($request['billing_country']) ? sanitize_text_field($request['billing_country']) : '',
+            'city' => isset($request['billing_city']) ? sanitize_text_field($request['billing_city']) : '',
+            'address_1' => isset($request['billing_address_1']) ? sanitize_text_field($request['billing_address_1']) : '',
+            'address_2' => isset($request['billing_address_2']) ? sanitize_text_field($request['billing_address_2']) : '',
+            'phone' => isset($request['billing_phone']) ? sanitize_text_field($request['billing_phone']) : '',
+            'postcode' => isset($request['billing_postcode']) ? sanitize_text_field($request['billing_postcode']) : '',
+            'languageCode' => ''
         ];
     }
 
     private static function order_transformation_to_array($order){
         return [
             'email' => !empty($order->get_billing_email()) ? $order->get_billing_email() : (!empty($order->get_shipping_email()) ? $order->get_shipping_email() : ''),
-            //'ID' => !empty($order->get_billing_email()) ? $order->get_billing_email() : (!empty($order->get_shipping_email()) ? $order->get_shipping_email() : ''),
             'ID' => self::get_registered_user_id($order),
             'first_name' => !empty($order->get_billing_first_name()) ? $order->get_billing_first_name() : (!empty($order->get_shipping_first_name()) ? $order->get_shipping_first_name() : ''),
             'last_name' => !empty($order->get_billing_last_name()) ? $order->get_billing_last_name() : (!empty($order->get_shipping_last_name()) ? $order->get_shipping_last_name() : ''),
             'state' => !empty(self::get_state_name($order->get_billing_country(), $order->get_billing_state())) ? self::get_state_name($order->get_billing_country(), $order->get_billing_state()) : (!empty(self::get_state_name($order->get_shipping_country(), $order->get_shipping_state())) ? self::get_state_name($order->get_shipping_country(), $order->get_shipping_state()) : ''),
-            //'country' => self::get_country_name($user->billing_country) ?? '',
             'country_id' => !empty($order->get_billing_country()) ? $order->get_billing_country() : (!empty($order->get_shipping_country()) ? $order->get_shipping_country() : ''),
-            //'timeZone' => $user->billing_country ?? '',
             'city' => !empty($order->get_billing_city()) ? $order->get_billing_city() : (!empty($order->get_shipping_city()) ? $order->get_shipping_city() : ''),
             'address_1' => (!empty($order->get_billing_address_1()) ? $order->get_billing_address_1() : '') . (!empty($order->get_billing_address_2()) ? ', ' . $order->get_billing_address_2() : '') ?? (!empty($order->get_shipping_address_1()) ? $order->get_shipping_address_1() : '') . (!empty($order->get_shipping_address_2()) ? ', ' . $order->get_shipping_address_2() : ''),
             'address_2' => (!empty($order->get_billing_address_1()) ? $order->get_billing_address_1() : '') . (!empty($order->get_billing_address_2()) ? ', ' . $order->get_billing_address_2() : '') ?? (!empty($order->get_shipping_address_1()) ? $order->get_shipping_address_1() : '') . (!empty($order->get_shipping_address_2()) ? ', ' . $order->get_shipping_address_2() : ''),
@@ -172,26 +188,23 @@ class Esputnik_Contact_Mapping
 
     private static function admin_order_transformation_to_array($post){
         return [
-            'email' => $post['_billing_email'],
-            //'ID' => $post['_billing_email'],
-            'first_name' => !empty($post['_billing_first_name']) ? $post['_billing_first_name'] : (!empty($post['_shipping_first_name']) ? $post['_shipping_first_name'] : ''),
-            'last_name' => !empty($post['_billing_last_name']) ? $post['_billing_last_name'] : (!empty($post['_shipping_last_name']) ? $post['_shipping_last_name'] : ''),
+            'email' => sanitize_email($post['_billing_email']),
+            'first_name' => !empty($post['_billing_first_name']) ? sanitize_text_field($post['_billing_first_name']) : (!empty($post['_shipping_first_name']) ? sanitize_text_field($post['_shipping_first_name']) : ''),
+            'last_name' => !empty($post['_billing_last_name']) ? sanitize_text_field($post['_billing_last_name']) : (!empty($post['_shipping_last_name']) ? sanitize_text_field($post['_shipping_last_name']) : ''),
             'state' => !empty(self::get_state_name($post['_billing_country'], $post['_billing_state'])) ? self::get_state_name($post['_billing_country'], $post['_billing_state']) : (!empty(self::get_state_name($post['_shipping_country'], $post['_shipping_state'])) ? self::get_state_name($post['_shipping_country'], $post['_shipping_state']) : ''),
-            //'country' => self::get_country_name($user->billing_country) ?? '',
-            'country_id' => !empty($post['_billing_country']) ? $post['_billing_country'] : (!empty($post['_shipping_country']) ? $post['_shipping_country'] : ''),
-            //'timeZone' => $user->billing_country ?? '',
-            'city' => !empty($post['_billing_city']) ? $post['_billing_city'] : (!empty($post['_shipping_city']) ? $post['_shipping_city'] : ''),
-            'address_1' => !empty($post['_billing_address_1']) ? $post['_billing_address_1'] : (!empty($post['_shipping_address_1']) ? $post['_shipping_address_1'] : ''),
-            'address_2' => !empty($post['_billing_address_2']) ? $post['_billing_address_2'] : (!empty($post['_shipping_address_2']) ? $post['_shipping_address_2'] : ''),
-            'phone' => !empty($post['_billing_phone']) ? $post['_billing_phone'] : '',
-            'postcode' => !empty($post['_billing_postcode']) ? $post['_billing_postcode'] : (!empty($post['_shipping_postcode']) ? $post['_shipping_postcode'] : '')
+            'country_id' => !empty($post['_billing_country']) ? sanitize_text_field($post['_billing_country']) : (!empty($post['_shipping_country']) ? sanitize_text_field($post['_shipping_country']) : ''),
+            'city' => !empty($post['_billing_city']) ? sanitize_text_field($post['_billing_city']) : (!empty($post['_shipping_city']) ? sanitize_text_field($post['_shipping_city']) : ''),
+            'address_1' => !empty($post['_billing_address_1']) ? sanitize_text_field($post['_billing_address_1']) : (!empty($post['_shipping_address_1']) ? sanitize_text_field($post['_shipping_address_1']) : ''),
+            'address_2' => !empty($post['_billing_address_2']) ? sanitize_text_field($post['_billing_address_2']) : (!empty($post['_shipping_address_2']) ? sanitize_text_field($post['_shipping_address_2']) : ''),
+            'phone' => !empty($post['_billing_phone']) ? sanitize_text_field($post['_billing_phone']) : '',
+            'postcode' => !empty($post['_billing_postcode']) ? sanitize_text_field($post['_billing_postcode']) : (!empty($post['_shipping_postcode']) ? sanitize_text_field($post['_shipping_postcode']) : '')
         ];
     }
 
     private static function subscription_transformation_to_array($email){
         return [
-            'email' => $email,
-            'ID' => $email
+            'email' => sanitize_email( $email ),
+            'ID'    => sanitize_email( $email )
         ];
     }
 

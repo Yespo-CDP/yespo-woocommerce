@@ -28,8 +28,8 @@ class CMB extends Base {
 	public function initialize() {
 		parent::initialize();
 
-		require_once Y_PLUGIN_ROOT . 'vendor/cmb2/init.php';
-		require_once Y_PLUGIN_ROOT . 'vendor/cmb2-grid/Cmb2GridPluginLoad.php';
+		require_once YESPO_PLUGIN_ROOT . 'vendor/cmb2/init.php';
+		require_once YESPO_PLUGIN_ROOT . 'vendor/cmb2-grid/Cmb2GridPluginLoad.php';
 		\add_action( 'cmb2_init', array( $this, 'cmb_demo_metaboxes' ) );
 	}
 
@@ -45,7 +45,7 @@ class CMB extends Base {
 		$cmb_demo = \new_cmb2_box(
 			array(
 				'id'           => $prefix . 'metabox',
-				'title'        => \__( 'Demo Metabox', Y_TEXTDOMAIN ),
+				'title'        => \__( 'Demo Metabox', YESPO_TEXTDOMAIN ),
 				'object_types' => array( 'demo' ),
 				'context'      => 'normal',
 				'priority'     => 'high',
@@ -56,34 +56,34 @@ class CMB extends Base {
 		$row      = $cmb2Grid->addRow(); //phpcs:ignore WordPress.NamingConventions
 		$field1 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text', Y_TEXTDOMAIN ),
-				'desc' => \__( 'field description (optional)', Y_TEXTDOMAIN ),
-				'id'   => $prefix . Y_TEXTDOMAIN . '_text',
+				'name' => \__( 'Text', YESPO_TEXTDOMAIN ),
+				'desc' => \__( 'field description (optional)', YESPO_TEXTDOMAIN ),
+				'id'   => $prefix . YESPO_TEXTDOMAIN . '_text',
 				'type' => 'text',
 				)
 			);
 		$field2 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text 2', Y_TEXTDOMAIN ),
-				'desc' => \__( 'field description (optional)', Y_TEXTDOMAIN ),
-				'id'   => $prefix . Y_TEXTDOMAIN . '_text2',
+				'name' => \__( 'Text 2', YESPO_TEXTDOMAIN ),
+				'desc' => \__( 'field description (optional)', YESPO_TEXTDOMAIN ),
+				'id'   => $prefix . YESPO_TEXTDOMAIN . '_text2',
 				'type' => 'text',
 				)
 			);
 
 		$field3 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text Small', Y_TEXTDOMAIN ),
-				'desc' => \__( 'field description (optional)', Y_TEXTDOMAIN ),
-				'id'   => $prefix . Y_TEXTDOMAIN . '_textsmall',
+				'name' => \__( 'Text Small', YESPO_TEXTDOMAIN ),
+				'desc' => \__( 'field description (optional)', YESPO_TEXTDOMAIN ),
+				'id'   => $prefix . YESPO_TEXTDOMAIN . '_textsmall',
 				'type' => 'text_small',
 				)
 			);
 		$field4 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text Small 2', Y_TEXTDOMAIN ),
-				'desc' => \__( 'field description (optional)', Y_TEXTDOMAIN ),
-				'id'   => $prefix . Y_TEXTDOMAIN . '_textsmall2',
+				'name' => \__( 'Text Small 2', YESPO_TEXTDOMAIN ),
+				'desc' => \__( 'field description (optional)', YESPO_TEXTDOMAIN ),
+				'id'   => $prefix . YESPO_TEXTDOMAIN . '_textsmall2',
 				'type' => 'text_small',
 		)
 			);

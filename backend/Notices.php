@@ -29,7 +29,7 @@ class Notices extends Base {
 			return;
 		}
 
-		//\wpdesk_wp_notice( \__( 'Updated Messages', Y_TEXTDOMAIN ), 'updated' );
+		//\wpdesk_wp_notice( \__( 'Updated Messages', YESPO_TEXTDOMAIN ), 'updated' );
 
 		/*
 		 * Review plugin notice.
@@ -39,10 +39,10 @@ class Notices extends Base {
 			array(
 				'days_after' => 15,
 				'type'       => 'plugin',
-				'slug'       => Y_TEXTDOMAIN,
+				'slug'       => YESPO_TEXTDOMAIN,
 				'rating'     => 5,
-				'message'    => \__( 'Review me!', Y_TEXTDOMAIN ),
-				'link_label' => \__( 'Click here to review', Y_TEXTDOMAIN ),
+				'message'    => \__( 'Review me!', YESPO_TEXTDOMAIN ),
+				'link_label' => \__( 'Click here to review', YESPO_TEXTDOMAIN ),
 			)
 		);
         */
@@ -54,8 +54,8 @@ class Notices extends Base {
 		if ( \apply_filters( 'yespo_alert_localization', true ) ) {
 			new I18n_Notice_WordPressOrg(
 			array(
-				'textdomain'  => Y_TEXTDOMAIN,
-				'yespo' => Y_NAME,
+				'textdomain'  => YESPO_TEXTDOMAIN,
+				'yespo' => YESPO_NAME,
 				'hook'        => 'admin_notices',
 			),
 			true

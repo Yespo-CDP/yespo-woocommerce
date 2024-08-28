@@ -28,7 +28,7 @@ class Base {
 	 * @return bool
 	 */
 	public function initialize() {
-		$this->settings = \y_get_settings();
+		$this->settings = \yespo_get_settings();
 
 		return true;
 	}

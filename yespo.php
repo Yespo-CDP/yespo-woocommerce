@@ -13,8 +13,8 @@
  * Version:         1.0.0
  * Author:          Yespo Omnichannel CDP
  * Author URI:      https://yespo.io/
- * Text Domain:     yespo
- * License:         GPL 3.0+
+ * Text Domain:     yespo-woocommerce-plugin
+ * License:         GPLv3 or later
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.txt
  * Domain Path:     /languages
  * Requires PHP:    7.4
@@ -26,28 +26,28 @@ if ( !defined( 'ABSPATH' ) ) {
 	die( 'We\'re sorry, but you can not directly access this file.' );
 }
 
-define( 'Y_VERSION', '1.0.0' );
-define( 'Y_TEXTDOMAIN', 'yespo' );
-define( 'Y_MAIN_PLUGIN_FOLDER', 'yespo-woocommerce-plugin' );
-define( 'Y_NAME', 'Yespo' );
-define( 'Y_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
-define( 'Y_PLUGIN_ABSOLUTE', __FILE__ );
-define( 'Y_MIN_PHP_VERSION', '7.4' );
-define( 'Y_WP_VERSION', '5.3' );
-define( 'Y_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'YESPO_VERSION', '1.0.0' );
+define( 'YESPO_TEXTDOMAIN', 'yespo' );
+define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-woocommerce-plugin' );
+define( 'YESPO_NAME', 'Yespo' );
+define( 'YESPO_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
+define( 'YESPO_PLUGIN_ABSOLUTE', __FILE__ );
+define( 'YESPO_MIN_PHP_VERSION', '7.4' );
+define( 'YESPO_WP_VERSION', '6.5.5' );
+define( 'YESPO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
-define( 'YOUR_CLIENT_ID', 'd048ab4ffd96be4ee0c17510d8a42486' );
-define( 'YOUR_CALLBACK', '9bf62295abbb565a5f4e248f30e00b741d3dd713d7cea79c737f14a5ed775486' );
+define( 'YESPO_CLIENT_ID', 'd048ab4ffd96be4ee0c17510d8a42486' );
+define( 'YESPO_CALLBACK', '9bf62295abbb565a5f4e248f30e00b741d3dd713d7cea79c737f14a5ed775486' );
 
 
 add_action(
 	'init',
 	static function () {
-		load_plugin_textdomain( Y_TEXTDOMAIN, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain( YESPO_TEXTDOMAIN, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 	);
 
-if ( version_compare( PHP_VERSION, Y_MIN_PHP_VERSION, '<=' ) ) {
+if ( version_compare( PHP_VERSION, YESPO_MIN_PHP_VERSION, '<=' ) ) {
 	add_action(
 		'admin_init',
 		static function() {
@@ -60,7 +60,7 @@ if ( version_compare( PHP_VERSION, Y_MIN_PHP_VERSION, '<=' ) ) {
 			echo wp_kses_post(
 			sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				__( '"Yespo" requires PHP 7.4 or newer.', Y_TEXTDOMAIN )
+				__( '"Yespo" requires PHP 7.4 or newer.', YESPO_TEXTDOMAIN )
 			)
 			);
 		}
@@ -70,22 +70,19 @@ if ( version_compare( PHP_VERSION, Y_MIN_PHP_VERSION, '<=' ) ) {
 	return;
 }
 
-$yespo_libraries = require Y_PLUGIN_ROOT . 'vendor/autoload.php'; //phpcs:ignore
+$yespo_libraries = require YESPO_PLUGIN_ROOT . 'vendor/autoload.php'; //phpcs:ignore
 
-require_once Y_PLUGIN_ROOT . 'functions/functions.php';
-require_once Y_PLUGIN_ROOT . 'functions/debug.php';
+require_once YESPO_PLUGIN_ROOT . 'functions/functions.php';
+require_once YESPO_PLUGIN_ROOT . 'functions/debug.php';
 
 // Add your new plugin on the wiki: https://github.com/WPBP/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate
 
 $requirements = new \Micropackage\Requirements\Requirements(
 	'Yespo',
 	array(
-		'php'            => Y_MIN_PHP_VERSION,
+		'php'            => YESPO_MIN_PHP_VERSION,
 		'php_extensions' => array( 'mbstring' ),
-		'wp'             => Y_WP_VERSION,
-		// 'plugins'            => array(
-		// array( 'file' => 'hello-dolly/hello.php', 'name' => 'Hello Dolly', 'version' => '1.5' )
-		// ),
+		'wp'             => YESPO_WP_VERSION,
 	)
 );
 
@@ -95,54 +92,9 @@ if ( ! $requirements->satisfied() ) {
 	return;
 }
 
-
-/**
- * Create a helper function for easy SDK access.
- *
- * @global type $y_fs
- * @return object
- */
-function y_fs() {
-	global $y_fs;
-
-	if ( !isset( $y_fs ) ) {
-		require_once Y_PLUGIN_ROOT . 'vendor/freemius/wordpress-sdk/start.php';
-		$y_fs = fs_dynamic_init(
-			array(
-				'id'             => '',
-				'slug'           => 'yespo',
-				'public_key'     => '',
-				'is_live'        => false,
-				'is_premium'     => true,
-				'has_addons'     => false,
-				'has_paid_plans' => true,
-				'menu'           => array(
-					'slug' => 'yespo',
-				),
-			)
-		);
-
-		if ( $y_fs->is_premium() ) {
-			$y_fs->add_filter(
-				'support_forum_url',
-				static function ( $wp_org_support_forum_url ) { //phpcs:ignore
-					return 'https://your-url.test';
-				}
-			);
-		}
-	}
-
-	return $y_fs;
-}
-
-// y_fs();
-
-// Documentation to integrate GitHub, GitLab or BitBucket https://github.com/YahnisElsts/plugin-update-checker/blob/master/README.md
-//Puc_v4_Factory::buildUpdateChecker( 'https://github.com/user-name/repo-name/', __FILE__, 'unique-plugin-or-theme-slug' ); 24022024
-
 if ( ! wp_installing() ) {
-	register_activation_hook( Y_MAIN_PLUGIN_FOLDER . '/' . Y_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'activate' ) );
-	register_deactivation_hook( Y_MAIN_PLUGIN_FOLDER . '/' . Y_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'deactivate' ) );
+	register_activation_hook( YESPO_MAIN_PLUGIN_FOLDER . '/' . YESPO_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'activate' ) );
+	register_deactivation_hook( YESPO_MAIN_PLUGIN_FOLDER . '/' . YESPO_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'deactivate' ) );
 	add_action(
 		'plugins_loaded',
 		static function () use ( $yespo_libraries ) {
@@ -151,9 +103,10 @@ if ( ! wp_installing() ) {
 	);
 }
 
-function export_data_activation(){
+function yespo_export_data_activation(){
     if (!wp_next_scheduled('yespo_export_data_cron')) {
         wp_schedule_event(time(), 'every_minute', 'yespo_export_data_cron');
     }
+
 }
-export_data_activation();
+yespo_export_data_activation();

@@ -329,7 +329,7 @@ class Yespo_Export_Users
                 'exported' => $exported,
                 'status' => $status,
                 'code' => $code,
-                'updated_at' => date('Y-m-d H:i:s', time())
+                'updated_at' => gmdate('Y-m-d H:i:s', time())
             ),
             array('id' => $id),
             array('%d', '%s', '%s', '%s'),
@@ -449,7 +449,7 @@ class Yespo_Export_Users
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
             $yespo_api_key = 0;
-            if (isset($options['highest_exported_user'])) $yespo_api_key = intval($options['highest_exported_user']);
+            if (isset($options['yespo_highest_exported_user'])) $yespo_api_key = intval($options['yespo_highest_exported_user']);
 
             return $yespo_api_key;
         }
@@ -459,7 +459,7 @@ class Yespo_Export_Users
     private function set_exported_user_id($user){
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
-            $options['highest_exported_user'] = intval($user);
+            $options['yespo_highest_exported_user'] = intval($user);
             update_option('yespo_options', $options);
         }
     }

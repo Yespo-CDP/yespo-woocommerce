@@ -58,7 +58,7 @@ class Yespo_Contact_Mapping
 
         $data['address'] = [
             'region' => sanitize_text_field($region),
-            'town' => $user['city'] ?? ' ',
+            'town' => sanitize_text_field($user['city']) ?? ' ',
             'address' => sanitize_text_field($address),
             'postcode' => sanitize_text_field($user['postcode']) ?? ' '
         ];
@@ -189,15 +189,15 @@ class Yespo_Contact_Mapping
     private static function admin_order_transformation_to_array($post){
         return [
             'email' => sanitize_email($post['_billing_email']),
-            'first_name' => !empty($post['_billing_first_name']) ? $post['_billing_first_name'] : (!empty($post['_shipping_first_name']) ? $post['_shipping_first_name'] : ''),
-            'last_name' => !empty($post['_billing_last_name']) ? $post['_billing_last_name'] : (!empty($post['_shipping_last_name']) ? $post['_shipping_last_name'] : ''),
+            'first_name' => !empty($post['_billing_first_name']) ? sanitize_text_field($post['_billing_first_name']) : (!empty($post['_shipping_first_name']) ? sanitize_text_field($post['_shipping_first_name']) : ''),
+            'last_name' => !empty($post['_billing_last_name']) ? sanitize_text_field($post['_billing_last_name']) : (!empty($post['_shipping_last_name']) ? sanitize_text_field($post['_shipping_last_name']) : ''),
             'state' => !empty(self::get_state_name($post['_billing_country'], $post['_billing_state'])) ? self::get_state_name($post['_billing_country'], $post['_billing_state']) : (!empty(self::get_state_name($post['_shipping_country'], $post['_shipping_state'])) ? self::get_state_name($post['_shipping_country'], $post['_shipping_state']) : ''),
-            'country_id' => !empty($post['_billing_country']) ? $post['_billing_country'] : (!empty($post['_shipping_country']) ? $post['_shipping_country'] : ''),
-            'city' => !empty($post['_billing_city']) ? $post['_billing_city'] : (!empty($post['_shipping_city']) ? $post['_shipping_city'] : ''),
-            'address_1' => !empty($post['_billing_address_1']) ? $post['_billing_address_1'] : (!empty($post['_shipping_address_1']) ? $post['_shipping_address_1'] : ''),
-            'address_2' => !empty($post['_billing_address_2']) ? $post['_billing_address_2'] : (!empty($post['_shipping_address_2']) ? $post['_shipping_address_2'] : ''),
-            'phone' => !empty($post['_billing_phone']) ? $post['_billing_phone'] : '',
-            'postcode' => !empty($post['_billing_postcode']) ? $post['_billing_postcode'] : (!empty($post['_shipping_postcode']) ? $post['_shipping_postcode'] : '')
+            'country_id' => !empty($post['_billing_country']) ? sanitize_text_field($post['_billing_country']) : (!empty($post['_shipping_country']) ? sanitize_text_field($post['_shipping_country']) : ''),
+            'city' => !empty($post['_billing_city']) ? sanitize_text_field($post['_billing_city']) : (!empty($post['_shipping_city']) ? sanitize_text_field($post['_shipping_city']) : ''),
+            'address_1' => !empty($post['_billing_address_1']) ? sanitize_text_field($post['_billing_address_1']) : (!empty($post['_shipping_address_1']) ? sanitize_text_field($post['_shipping_address_1']) : ''),
+            'address_2' => !empty($post['_billing_address_2']) ? sanitize_text_field($post['_billing_address_2']) : (!empty($post['_shipping_address_2']) ? sanitize_text_field($post['_shipping_address_2']) : ''),
+            'phone' => !empty($post['_billing_phone']) ? sanitize_text_field($post['_billing_phone']) : '',
+            'postcode' => !empty($post['_billing_postcode']) ? sanitize_text_field($post['_billing_postcode']) : (!empty($post['_shipping_postcode']) ? sanitize_text_field($post['_shipping_postcode']) : '')
         ];
     }
 

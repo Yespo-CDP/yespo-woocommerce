@@ -70,7 +70,7 @@ class Yespo_Order
                         $order_id = $order->get_id();
                         $values[] = $this->wpdb->prepare("(%d, %s, %s)", $order_id, self::ORDER_META_KEY, 'true');
                         if($response == 400) $error_400[] = $this->wpdb->prepare("(%d, %s, %s)", $order_id, Yespo_Errors::get_mark_br(), 'true');
-                        $order_logs[] = $this->wpdb->prepare("(%d, %s, %d, %s)", $order_id, $operation, $response, date('Y-m-d H:i:s', time()) );
+                        $order_logs[] = $this->wpdb->prepare("(%d, %s, %d, %s)", $order_id, $operation, $response, gmdate('Y-m-d H:i:s', time()) );
                         $orderCounter++;
                     }
                 }
@@ -130,11 +130,11 @@ class Yespo_Order
         $status = $order->get_status();
 
         if (strpos($status, 'draft') === false) {
-            $order_time = $order->get_meta('order_time');
+            $order_time = $order->get_meta('yespo_order_time');
 
             if (empty($order_time)) {
                 $current_time = gmdate('Y-m-d H:i:s', current_time('timestamp', true));
-                $order->update_meta_data('order_time', $current_time);
+                $order->update_meta_data('yespo_order_time', $current_time);
                 $order->save();
             }
         }
@@ -146,7 +146,7 @@ class Yespo_Order
 
             if ($orders) {
                 foreach ($orders as $order) {
-                    $order->update_meta_data('customer_removed', 'deleted');
+                    $order->update_meta_data('yespo_customer_removed', 'deleted');
                     $order->save();
                 }
             }

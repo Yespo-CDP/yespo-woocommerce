@@ -10,34 +10,24 @@ class Yespo_Account
 
     public function send_keys($api_key) {
         try {
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-                CURLOPT_URL => self::YESPO_REMOTE_ESPUTNIK_URL,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-                CURLOPT_HTTPHEADER => [
-                    "accept: application/json; charset=UTF-8",
-                    "authorization: Basic " . base64_encode(':' . $api_key)
+            $response = wp_remote_get(self::YESPO_REMOTE_ESPUTNIK_URL, [
+                'timeout' => 30,
+                'headers' => [
+                    'Accept' => 'application/json; charset=UTF-8',
+                    'Authorization' => 'Basic ' . base64_encode(':' . $api_key)
                 ],
             ]);
 
-            $response = curl_exec($curl);
-
-            if ($response === false) {
-                throw new Exception(curl_error($curl), curl_errno($curl));
+            if (is_wp_error($response)) {
+                return 'Error: ' . $response->get_error_message();
             }
 
-            $result = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            curl_close($curl);
+            $status_code = wp_remote_retrieve_response_code($response);
 
-            return $result;
+            return $status_code;
 
         } catch (Exception $e) {
-            return "Error: " . $e->getMessage();
+            return 'Error: ' . $e->getMessage();
         }
     }
 
@@ -52,7 +42,7 @@ class Yespo_Account
         $data = [
             'api_key' => sanitize_text_field($api_key),
             'response' => sanitize_text_field($response),
-            'time' => date('Y-m-d H:i:s', time())
+            'time' => gmdate('Y-m-d H:i:s')
         ];
 
         $wpdb->insert($table_yespo_auth, $data);

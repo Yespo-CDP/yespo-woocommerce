@@ -4,7 +4,7 @@ namespace Yespo\Integrations\Esputnik;
 
 class Yespo_Errors
 {
-    const BAD_REQUEST = 'bad_request';
+    const BAD_REQUEST = 'yespo_bad_request';
     const WAITING_TIME = 300;
 
     public static function get_mark_br(){
@@ -40,7 +40,7 @@ class Yespo_Errors
         $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
 
         $time_current = current_time('mysql');
-        $time_selection = date('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
+        $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
         $sql = $wpdb->prepare("
             SELECT * 
@@ -60,7 +60,7 @@ class Yespo_Errors
 
 
         $time_current = current_time('mysql');
-        $time_selection = date('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
+        $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
         $sql = $wpdb->prepare("
             SELECT * 

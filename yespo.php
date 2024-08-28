@@ -13,7 +13,7 @@
  * Version:         1.0.0
  * Author:          Yespo Omnichannel CDP
  * Author URI:      https://yespo.io/
- * Text Domain:     yespo
+ * Text Domain:     yespo-woocommerce-plugin
  * License:         GPLv3 or later
  * License URI:     http://www.gnu.org/licenses/gpl-3.0.txt
  * Domain Path:     /languages
@@ -33,7 +33,7 @@ define( 'YESPO_NAME', 'Yespo' );
 define( 'YESPO_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
 define( 'YESPO_PLUGIN_ABSOLUTE', __FILE__ );
 define( 'YESPO_MIN_PHP_VERSION', '7.4' );
-define( 'YESPO_WP_VERSION', '5.3' );
+define( 'YESPO_WP_VERSION', '6.5.5' );
 define( 'YESPO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 define( 'YESPO_CLIENT_ID', 'd048ab4ffd96be4ee0c17510d8a42486' );

@@ -252,8 +252,8 @@ class Yespo_Contact
             $this->wpdb->prepare(
                 "SELECT * FROM $this->table_log_users WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
                 'delete',
-                date('Y-m-d H:i:s', time() - $this->period_selection_since),
-                date('Y-m-d H:i:s', time() - $this->period_selection_up),
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection_since),
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection_up),
                 200
             )
         );
@@ -263,7 +263,7 @@ class Yespo_Contact
         return $this->wpdb->get_col(
             $this->wpdb->prepare(
                 "SELECT ID FROM $this->table_users WHERE user_registered > %s",
-                date('Y-m-d H:i:s', time() - $this->period_selection)
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection)
             )
         );
     }

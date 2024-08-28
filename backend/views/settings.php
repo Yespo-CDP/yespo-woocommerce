@@ -8,7 +8,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 <div class="yespo-settings-page">
     <section class="topPanel">
         <div class="contentPart panelBox">
-            <img src="<?php echo YESPO_PLUGIN_URL;?>assets/images/yespologosmall.svg" width="33" height="33" alt="<?php echo esc_attr(YESPO_NAME); ?>" title="<?php echo esc_attr(YESPO_NAME); ?>">
+            <img src="<?php echo esc_url(YESPO_PLUGIN_URL);?>assets/images/yespologosmall.svg" width="33" height="33" alt="<?php echo esc_attr(YESPO_NAME); ?>" title="<?php echo esc_attr(YESPO_NAME); ?>">
             <div class="panelUser">
                 <?php
                 if(isset($yespo_username)) echo esc_html($yespo_username);;
@@ -347,18 +347,18 @@ if ( get_option( 'yespo_options' ) !== false ){
             this.error555 = '<?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', YESPO_TEXTDOMAIN)?>';
             this.success = '<?php echo esc_html__( 'Data is successfully synchronized', YESPO_TEXTDOMAIN ); ?>';
             this.synhStarted = '<?php echo esc_html__( 'Data synchronization has started', YESPO_TEXTDOMAIN ); ?>';
-            this.pluginUrl = '<?php echo YESPO_PLUGIN_URL?>';
+            this.pluginUrl = '<?php echo esc_url(YESPO_PLUGIN_URL);?>';
             this.pauseButton = '<?php echo esc_html__('Pause', YESPO_TEXTDOMAIN)?>';
             this.resumeButton = '<?php echo esc_html__('Resume', YESPO_TEXTDOMAIN)?>';
             this.contactSupportButton = '<?php echo esc_html__('Contact Support', YESPO_TEXTDOMAIN)?>';
-            this.ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+            this.ajaxUrl = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
 
-            this.nonceApiKeyForm = '<?php echo wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false ); ?>';
-            this.apiKeyValue = '<?php echo isset($yespo_api_key) ? $yespo_api_key : ''; ?>';
-            this.apiKeyText = '<?php echo __( 'The API key to connect the account can be received by the', YESPO_TEXTDOMAIN ); ?> ';
+            this.nonceApiKeyForm = '<?php esc_html__(wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, true )); ?>';
+            this.apiKeyValue = '<?php echo isset($yespo_api_key) ? esc_js($yespo_api_key) : ''; ?>';
+            this.apiKeyText = '<?php echo esc_html__( 'The API key to connect the account can be received by the', YESPO_TEXTDOMAIN ); ?> ';
             this.yespoLink = 'https://my.yespo.io/settings-ui/#/api-keys-list';
-            this.yespoLinkText = '<?php echo __( 'link', YESPO_TEXTDOMAIN ); ?>';
-            this.wpNonce = '<?php wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' ); ?>';
+            this.yespoLinkText = '<?php echo esc_html__( 'link', YESPO_TEXTDOMAIN ); ?>';
+            this.wpNonce = '<?php esc_html__(wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' )); ?>';
 
             this.eventSource = null;
             this.percentTransfered = 0;
@@ -613,7 +613,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             let formId = 'checkYespoAuthorization';
 
             const form = this.createForm(formId, 'post', '');
-            const h4 = this.createHeading(4, '<?php echo __( 'API Key', YESPO_TEXTDOMAIN ); ?>');
+            const h4 = this.createHeading(4, '<?php echo esc_js(__( 'API Key', YESPO_TEXTDOMAIN )); ?>');
 
             const fieldGroup0 = this.createFieldGroup();
             const inputApiLine = this.createElement("div", { className: 'inputApiLine' });
@@ -637,7 +637,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             const fieldGroup2 = this.createFieldGroup();
 
-            const submitButton = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo __( 'Synchronize', YESPO_TEXTDOMAIN ); ?>' });
+            const submitButton = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo esc_js(__( 'Synchronize', YESPO_TEXTDOMAIN )); ?>' });
             fieldGroup2.appendChild(submitButton);
 
             form.append(h4, fieldGroup0, fieldGroup1, nonceField, fieldGroup2);

@@ -3,7 +3,7 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-class Esputnik_Contact
+class Yespo_Contact
 {
     const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
@@ -21,6 +21,7 @@ class Esputnik_Contact
     const USER_META_KEY = 'yespo_contact_id';
     private $authData;
     private $wpdb;
+    private $table_yespo_removed;
 
     public function __construct(){
         global $wpdb;
@@ -28,41 +29,25 @@ class Esputnik_Contact
         $this->authData = get_option('yespo_options');
         $this->table_log_users = $this->wpdb->prefix . 'yespo_contact_log';
         $this->table_users = $this->wpdb->prefix . 'users';
+        $this->table_yespo_removed = $this->wpdb->prefix . 'yespo_removed_users';
     }
 
     public function create_on_yespo($email, $wc_id){
         $user = get_user_by('id', $wc_id);
         if ($this->check_user_role($user) || !email_exists($email)) {
-            return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'create', $wc_id);
-        }
-    }
-
-    public function create_guest_user_on_yespo($order){
-        $email = $order->get_billing_email();
-        $user = get_user_by('email', $email);
-        if ($this->check_user_role($user) || !email_exists($email)) {
-            if ($user) return $this->create_on_yespo($email, $user->ID);
-            else return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
-        }
-        //return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_woo_to_yes($order), 'guest', $email);
-    }
-
-    public function create_guest_user_admin_on_yespo($post){
-        $email = $post['_billing_email'] ?? $post['_shipping_email'];
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Esputnik_Contact_Mapping::guest_user_admin_woo_to_yes($post), 'guest', $email);
-        }
-    }
-
-    public function create_subscribed_user_on_yespo($email){
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Esputnik_Contact_Mapping::subscribed_user_woo_to_yes($email), 'subscription', $email);
+            return $this->process_on_yespo(Yespo_Contact_Mapping::woo_to_yes($user), 'create', $wc_id);
         }
     }
 
     public function update_on_yespo($user){
         if ($this->check_user_role($user)) {
-            return $this->process_on_yespo(Esputnik_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
+            return $this->process_on_yespo(Yespo_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
+        }
+    }
+
+    public function update_woo_profile_yespo($request, $user){
+        if ($this->check_user_role($user)) {
+            return $this->process_on_yespo(Yespo_Contact_Mapping::update_woo_to_yes($request, $user->ID), 'update', $user->ID);
         }
     }
 
@@ -82,7 +67,6 @@ class Esputnik_Contact
         if($result){
             $response = json_decode($result);
             if($response[0]->id) {
-                var_dump($response[0]->id);
                 update_user_meta($id, self::USER_META_KEY, $response[0]->id);
                 return $response[0]->id;
             }
@@ -94,18 +78,23 @@ class Esputnik_Contact
     public function export_bulk_users($data){
         if(!empty($data)){
 
-            (new Esputnik_Export_Orders())->add_json_log_entry($data);// add log entry to DB
+            //(new Yespo_Export_Orders())->add_json_log_entry($data);// add log entry to DB
 
             $response = $this->process_on_yespo($data, 'bulk');
-            if($response === 0) (new Esputnik_Export_Users())->error_export_users('555');
+            if($response === 0) {
+                (new Yespo_Export_Users())->error_export_users('555');
+                return 'blocked';
+            }
+            else if($response == 400 || $response == 429 || $response == 500) return $response;
+
             if($response) $response = json_decode($response, true);
 
             if(isset($response["asyncSessionId"])){
-                (new Esputnik_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
+                (new Yespo_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
 
-                return $this->get_bulk_response($response["asyncSessionId"]);
+                return $response["asyncSessionId"];
             } else if(isset($response["status"]) && intval($response["status"]) === 401){
-                (new Esputnik_Export_Users())->error_export_users($response["status"]);
+                (new Yespo_Export_Users())->error_export_users($response["status"]);
             }
         }
     }
@@ -114,7 +103,7 @@ class Esputnik_Contact
     public function get_bulk_response($sessionId) {
         if (isset($sessionId) && !empty($sessionId)) {
             do {
-                $response = Esputnik_Curl_Request::curl_request(self::GET_EXPORT_BULK_ESPUTNIK_URL . $sessionId, self::CUSTOM_REQUEST_GET, $this->authData);
+                $response = Yespo_Curl_Request::curl_request(self::GET_EXPORT_BULK_ESPUTNIK_URL . $sessionId, self::CUSTOM_REQUEST_GET, $this->authData);
 
                 if ($response) {
                     $response = json_decode($response, true);
@@ -132,42 +121,14 @@ class Esputnik_Contact
         }
         return false;
     }
-    /*
-    public function get_bulk_response($sessionId){
-        //$sessionId = 'e76ec64c-4243-4124-a9e7-b50a2a7a6c90';
-        if(isset($sessionId) && !empty($sessionId) ){
-            $response = json_decode(Esputnik_Curl_Request::curl_request(self::GET_EXPORT_BULK_ESPUTNIK_URL . $sessionId, self::CUSTOM_REQUEST_GET, $this->authData));
-            if($response) $response = json_decode($response, true);
-
-            if($response && $response["status"] === "FINISHED"){
-                if (isset($response["mapping"]) && is_array($response["mapping"])) {
-                    return $response["mapping"];
-                }
-            }
-            return false;
-        }
-    }
-    */
 
     public function remove_user_phone_on_yespo($email){
         if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_phone_data($email), 'clean');
-        }
-    }
-
-    public function remove_user_data_from_yespo($email){
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
-            return $this->process_on_yespo(Esputnik_Contact_Mapping::clean_user_personal_data($email), 'update');
+            return $this->process_on_yespo(Yespo_Contact_Mapping::clean_user_phone_data($email), 'clean');
         }
     }
 
     public function delete_from_yespo($user_id, $relocate = false){
-        //$yespo_id = $this->get_user_metafield_id($user_id);
-        /*
-        if (!empty($this->authData) && !empty($yespo_id)) {
-            return $this->process_on_yespo(null, 'delete', null, $yespo_id);
-        }
-        */
         if (!empty($this->authData) && !empty($user_id)) {
             return $this->process_on_yespo(null, 'delete', null, $user_id, $relocate);
         }
@@ -186,7 +147,7 @@ class Esputnik_Contact
 
     private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null, $relocate = false) {
         if (empty($this->authData)) {
-            return __( 'Empty user authorization data', Y_TEXTDOMAIN );
+            return esc_html__( 'Empty user authorization data', YESPO_TEXTDOMAIN );
         }
 
         $url = self::REMOTE_CONTACT_ESPUTNIK_URL;
@@ -195,19 +156,17 @@ class Esputnik_Contact
             if ($relocate) $erase = '&erase=false';
             else $erase = '&erase=true';
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . $erase;
-            //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . '&erase=true';
-            //$url = self::REMOTE_CONTACT_ESPUTNIK_URL . '/' . $yespo_id . '?erase=false';
 
-            $response = Esputnik_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
-            (new \Yespo\Integrations\Esputnik\Esputnik_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
+            $response = Yespo_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
+            (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
         } else if($operation === 'add_meta_key'){
-            return Esputnik_Curl_Request::curl_request($data, self::CUSTOM_REQUEST_GET, $this->authData);
+            return Yespo_Curl_Request::curl_request($data, self::CUSTOM_REQUEST_GET, $this->authData);
         } else if($operation === 'bulk'){
-            return Esputnik_Curl_Request::curl_request(self::REMOTE_CONTACTS_ESPUTNIK_URL, $request, $this->authData, $data);
+            return Yespo_Curl_Request::curl_request(self::REMOTE_CONTACTS_ESPUTNIK_URL, $request, $this->authData, $data);
         } else {
             if ($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;
 
-            $response = Esputnik_Curl_Request::curl_request($url, $request, $this->authData, $data);
+            $response = Yespo_Curl_Request::curl_request($url, $request, $this->authData, $data);
 
             $responseArray = json_decode($response, true);
 
@@ -215,16 +174,17 @@ class Esputnik_Contact
                 if ($operation !== 'delete') {
                     if ($wc_id !== null) {
                         $this->add_esputnik_id_to_userprofile($wc_id, $responseArray['id']);
-                        //$log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : 'update');
                         $log_operation = ($operation === 'create') ? 'create' : (($operation === 'guest') ? 'guest' : (($operation === 'subscription') ? 'subscription' : 'update'));
-                        (new Esputnik_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], $log_operation); //add entry to logfile
+                        (new Yespo_Logging_Data())->create((string)$wc_id, (string)$responseArray['id'], $log_operation); //add entry to logfile
                         return true;
                     }
                 }
                 return true;
+            } else if ($response == 400){
+
             }
         }
-        return __( 'Other user authorization operation', Y_TEXTDOMAIN );
+        return esc_html__( 'Other user authorization operation', YESPO_TEXTDOMAIN );
     }
 
     public function get_meta_key(){
@@ -256,9 +216,25 @@ class Esputnik_Contact
         return get_user_meta($user_id, self::USER_META_KEY, true);
     }
 
+
     public function add_esputnik_id_to_userprofile($user_id, $external_id){
         if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);
+    }
+
+    public function add_bulk_esputnik_id_to_userprofile($usersForExport, $meta_value){
+        $values = [];
+        foreach ($usersForExport as $user_id) {
+            $values[] = $this->wpdb->prepare("(%d, %s, %s)", $user_id, self::USER_META_KEY, $meta_value);
+        }
+
+        if (!empty($values)) {
+            $values_string = implode(", ", $values);
+            $query = "INSERT INTO {$this->wpdb->usermeta} (user_id, meta_key, meta_value) VALUES $values_string 
+              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+
+            $this->wpdb->query($query);
+        }
     }
 
     private function get_latest_users_activity(){
@@ -276,8 +252,8 @@ class Esputnik_Contact
             $this->wpdb->prepare(
                 "SELECT * FROM $this->table_log_users WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
                 'delete',
-                date('Y-m-d H:i:s', time() - $this->period_selection_since),
-                date('Y-m-d H:i:s', time() - $this->period_selection_up),
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection_since),
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection_up),
                 200
             )
         );
@@ -287,8 +263,47 @@ class Esputnik_Contact
         return $this->wpdb->get_col(
             $this->wpdb->prepare(
                 "SELECT ID FROM $this->table_users WHERE user_registered > %s",
-                date('Y-m-d H:i:s', time() - $this->period_selection)
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection)
             )
         );
     }
+
+    public function add_entry_removed_user($email){
+        $time = current_time('mysql');
+
+        $this->wpdb->insert(
+            $this->table_yespo_removed,
+            array(
+                'email' => $email,
+                'time' => $time,
+            ),
+            array(
+                '%s',
+                '%s',
+            )
+        );
+    }
+
+
+
+    public function export_active_bulk_users($data){
+        if(!empty($data)){
+
+            //(new Yespo_Export_Orders())->add_json_log_entry($data);// add log entry to DB
+
+            $response = $this->process_on_yespo($data, 'bulk');
+            if($response === 0) (new Yespo_Export_Users())->error_export_users('555');
+            if($response) $response = json_decode($response, true);
+
+            if(isset($response["asyncSessionId"])){
+                (new Yespo_Export_Users())->add_entry_yespo_queue($response["asyncSessionId"]);
+
+                return $response["asyncSessionId"];
+            } else if(isset($response["status"]) && intval($response["status"]) === 401){
+                (new Yespo_Export_Users())->error_export_users($response["status"]);
+            }
+        }
+    }
+
+
 }

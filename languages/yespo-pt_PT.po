@@ -88,8 +88,9 @@ msgid "Invalid API key. Please delete the plugin and start the configuration fro
 msgstr "Chave de API inválida. Por favor, exclua o plugin e comece a configuração do zero usando uma chave de API válida. Nenhum dado será perdido."
 
 #: backend/views/settings.php:362
-msgid "Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss."
-msgstr "A atividade de saída no servidor está bloqueada. Entre em contato com seu provedor para resolver o problema. A sincronização de dados pode ser retomada após isso sem perda de dados."
+msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
+msgstr "A atividade de saída no servidor está bloqueada. Entre em contato com seu provedor para resolver este problema. A sincronização de dados será automaticamente retomada sem perda de dados assim que o problema for resolvido."
+
 
 #: backend/views/settings.php:86
 msgid "Contact Support"

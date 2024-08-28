@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TODO 1.0.0\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/plugins/yespo\n"
 "POT-Creation-Date: 2020-05-21 19:28+0200\n"
-"PO-Revision-Date: 2024-06-03 15:33+0300\n"
+"PO-Revision-Date: 2024-08-23 13:19+0300\n"
 "Last-Translator: \n"
 "Language-Team: LANGUAGE <translations@example.com >\n"
 "Language: uk_UA\n"
@@ -80,7 +80,7 @@ msgid "Resume"
 msgstr "Відновити"
 
 #: backend/views/settings.php:83
-msgid "Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support"
+msgid "Some error have occurred. Try to resume synchronization. If it doesn`t help, contact Support"
 msgstr "Виникла помилка. Спробуйте відновити синхронізацію. Якщо це не допоможе, зв`яжіться зі службою підтримки"
 
 #: backend/views/settings.php:361
@@ -88,8 +88,9 @@ msgid "Invalid API key. Please delete the plugin and start the configuration fro
 msgstr "Невалідний API ключ. Видаліть плагін і почніть конфігурацію спочатку, використовуючи дійсний API ключ. Дані не будуть втрачені."
 
 #: backend/views/settings.php:362
-msgid "Outgoing activity on the server is blocked. Contact your provider to resolve the issue. Data synchronization can be resumed after this without data loss."
-msgstr "Вихідна активність на сервері заблокована. Зв`яжіться з вашим провайдером для вирішення цієї проблеми. Синхронізацію даних можна буде відновити після цього без втрати даних."
+msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
+msgstr "Вихідна активність на сервері заблокована. Будь ласка, зв`яжіться з вашим провайдером для вирішення цієї проблеми. Синхронізація даних буде автоматично відновлена без втрати даних після вирішення проблеми."
+
 
 #: backend/views/settings.php:86
 msgid "Contact Support"

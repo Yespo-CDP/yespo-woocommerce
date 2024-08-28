@@ -93,7 +93,7 @@ class Initialize {
 				\do_action( 'yespo_initialize_failed', $err );
 
 				if ( WP_DEBUG ) {
-					throw new \Exception( $err->getMessage() );
+					throw new \Exception( esc_html($err->getMessage()) );
 				}
 			}
 		}
@@ -159,7 +159,7 @@ class Initialize {
 			$this->find_classes( $php_files, $folder, $namespacetofind );
 
 			if ( !WP_DEBUG ) {
-				\wp_die( \esc_html__( 'Yespo is on production environment with missing `composer dumpautoload -o` that will improve the performance on autoloading itself.', Y_TEXTDOMAIN ) );
+				\wp_die( \esc_html__( 'Yespo is on production environment with missing `composer dumpautoload -o` that will improve the performance on autoloading itself.', YESPO_TEXTDOMAIN ) );
 			}
 
 			return $this->classes;

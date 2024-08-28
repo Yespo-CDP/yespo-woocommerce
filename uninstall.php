@@ -66,8 +66,10 @@ function y_uninstall() { // phpcs:ignore
     $table_yespo_queue = $wpdb->prefix . 'yespo_queue';
     $table_yespo_queue_items = $wpdb->prefix . 'yespo_queue_items';
     $table_yespo_queue_orders = $wpdb->prefix . 'yespo_queue_orders';
-    $table_yespo_orders_json = $wpdb->prefix . 'yespo_orders_json'; //logging jsons to yespo
+    $table_yespo_curl_json = $wpdb->prefix . 'yespo_curl_json'; //logging jsons to yespo
     $table_yespo_auth_log = $wpdb->prefix . 'yespo_auth_log'; //auth logging
+    $table_yespo_removed = $wpdb->prefix . 'yespo_removed_users';
+    $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
 
     $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
     $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
@@ -75,22 +77,28 @@ function y_uninstall() { // phpcs:ignore
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_items" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_orders" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_orders_json" );
+    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_curl_json" );
     $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_auth_log" );
+    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_removed" );
+    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_errors" );
 
     $wpdb->query(
         $wpdb->prepare(
-            "DELETE FROM $wpdb->usermeta WHERE meta_key = %s",
-            'yespo_contact_id'
+            "DELETE FROM $wpdb->usermeta WHERE meta_key IN (%s, %s)",
+            'yespo_contact_id',
+            'yespo_bad_request'
         )
     );
 
     $wpdb->query(
         $wpdb->prepare(
-            "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (
-                SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
-            )",
-            'sent_order_to_yespo'
+            "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN (%s, %s, %s, %s) AND post_id IN (
+            SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
+        )",
+            'sent_order_to_yespo',
+            'yespo_order_time',
+            'yespo_customer_removed',
+            'yespo_bad_request'
         )
     );
 

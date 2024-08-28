@@ -324,7 +324,7 @@ class Yespo_Export_Orders
                 'exported' => $exported,
                 'status' => $status,
                 'code' => $code,
-                'updated_at' => date('Y-m-d H:i:s', time())
+                'updated_at' => gmdate('Y-m-d H:i:s', time())
             ),
             array('id' => $id),
             array('%d', '%s', '%s', '%s'),
@@ -455,7 +455,7 @@ class Yespo_Export_Orders
     }
 
     public function get_bulk_export_orders(){
-        $period_start = date('Y-m-d H:i:s', time() - $this->period_selection);
+        $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
 
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
@@ -482,7 +482,7 @@ class Yespo_Export_Orders
     }
 
     public function get_unexported_orders_because_error($last_exported) {
-        $period_start = date('Y-m-d H:i:s', time() - $this->period_selection);
+        $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
 
         return $this->wpdb->get_results(
             $this->wpdb->prepare(
@@ -543,15 +543,15 @@ class Yespo_Export_Orders
                 "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s AND date_updated_gmt BETWEEN %s AND %s",
                 'shop_order',
                 'wc-checkout-draft',
-                date('Y-m-d H:i:s', time() - $this->period_selection_since),
-                date('Y-m-d H:i:s', time() - $this->period_selection_up)
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection_since),
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
         );
     }
 
     public function is_email_in_removed_users($email) {
         $current_timestamp = strtotime(current_time('mysql'));
-        $searched_time = date('Y-m-d H:i:s', $current_timestamp - 360);
+        $searched_time = gmdate('Y-m-d H:i:s', $current_timestamp - 360);
 
         $query = $this->wpdb->prepare(
             "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s AND time >= %s",
@@ -569,7 +569,7 @@ class Yespo_Export_Orders
         if ($json !== false) {
             $data = [
                 'text' => $json,
-                'created_at' => current_time('mysql')
+                'created_at' =>  gmdate('Y-m-d H:i:s')
             ];
             $this->wpdb->insert($this->table_yespo_curl_json, $data);
         }
@@ -579,7 +579,7 @@ class Yespo_Export_Orders
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
             $yespo_api_key = 0;
-            if (isset($options['highest_exported_order'])) $yespo_api_key = intval($options['highest_exported_order']);
+            if (isset($options['yespo_highest_exported_order'])) $yespo_api_key = intval($options['yespo_highest_exported_order']);
 
             return $yespo_api_key;
         }
@@ -588,7 +588,7 @@ class Yespo_Export_Orders
     private function set_exported_order_id($order){
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
-            $options['highest_exported_order'] = $order->id;
+            $options['yespo_highest_exported_order'] = $order->id;
             update_option('yespo_options', $options);
         }
     }
@@ -612,8 +612,8 @@ class Yespo_Export_Orders
                 AND pm.post_id IS NULL",
                 'shop_order',
                 'wc-checkout-draft',
-                date('Y-m-d H:i:s', time() - $time),
-                date('Y-m-d H:i:s', time() - $this->period_selection)
+                gmdate('Y-m-d H:i:s', time() - $time),
+                gmdate('Y-m-d H:i:s', time() - $this->period_selection)
             )
         );
     }

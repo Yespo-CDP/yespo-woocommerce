@@ -49,7 +49,7 @@ class Yespo_Logging_Data
             'contact_id' => sanitize_text_field($contact_id),
             'action' => sanitize_text_field($action),
             'yespo' => 1,
-            'log_date' => date('Y-m-d H:i:s', time())
+            'log_date' => gmdate('Y-m-d H:i:s', time())
         );
 
         try {

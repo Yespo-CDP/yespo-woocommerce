@@ -93,7 +93,7 @@ class Initialize {
 				\do_action( 'yespo_initialize_failed', $err );
 
 				if ( WP_DEBUG ) {
-					throw new \Exception( $err->getMessage() );
+					throw new \Exception( esc_html($err->getMessage()) );
 				}
 			}
 		}

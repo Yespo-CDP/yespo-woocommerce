@@ -86,7 +86,7 @@ function y_uninstall() { // phpcs:ignore
         $wpdb->prepare(
             "DELETE FROM $wpdb->usermeta WHERE meta_key IN (%s, %s)",
             'yespo_contact_id',
-            'bad_request'
+            'yespo_bad_request'
         )
     );
 
@@ -96,9 +96,9 @@ function y_uninstall() { // phpcs:ignore
             SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('shop_order', 'shop_order_placehold')
         )",
             'sent_order_to_yespo',
-            'order_time',
-            'customer_removed',
-            'bad_request'
+            'yespo_order_time',
+            'yespo_customer_removed',
+            'yespo_bad_request'
         )
     );
 

@@ -1,50 +1,132 @@
-=== Yespo ===
-Tags: comments, spam (maximum 12)
-Requires at least: 6.55
+=== Yespo CDP for WooCommerce - Marketing Automation, Omnichannel, Segmentation & Personalization ===
+Contributors: yespo
+Tags: marketing automation, personalization, customer segmentation, omnichannel, CDP
+Requires at least: 6.5.5
 Tested up to: 6.6.1
 Stable tag: 1.0.0
-License: GPLv3 or later
-License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Requires PHP: 7.4
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
+Get CDP power for your business: improve customer conversion and retention with better personalization and omnichannel campaigns
 
 == Description ==
 
-This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
+# Yespo CDP for WooCommerce \- Marketing Automation, Omnichannel, Segmentation & Personalization
+
+[**Yespo**](https://yespo.io/?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce) **is an omnichannel customer data platform (CDP) that helps medium and large online projects easily use customer behavior data to increase loyalty and customer lifetime value (LTV).** The platform allows companies to collect and combine [clients’ data](https://yespo.io/privacy-policy) from the website, mobile app, offline, email and direct channels to marketing automation, customer segmentation, and personalization communications. More than 3,500 brands from 23 countries chose **Yespo**, and 300 of these companies are enterprise-level.
+
+## Yespo CDP integration with WooCommerce
+
+We have developed a connection for WooCommerce store owners to integrate with Yespo in a few clicks. The plugin allows you to transfer to Yespo CDP:
+
+1. contact information: after registering a customer on the site or creating a user in the WooCommerce admin, from orders, historical data;   
+2. order data: fact after creation and status update, historical order data.
+
+When changes are made in WooCommerce (contacts: creation, update, and deletion; orders: creation and status update), this data is also updated in the system. Consequently, you can target valuable contact segments and automatically move on to building strong customer relationships.
+
+We strive to empower companies [to use data](https://yespo.io/data-processing-agreement) to engage with customers, making marketing strategies more effective. Since the Yespo database integrates seamlessly with your technology stack, you can get complete information about every customer who interacts with your business. Then, use this data to automate personalized communications across 9 channels.
+
+## Yespo's [subscription](https://yespo.io/tarif-universum?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)\-based service includes the following features:
+
+### Data Collection
+
+The customer data platform collects first-party data, which is the most valuable type of data that the company owns. CDP transfers static information (name, age, gender, city, profession, etc.) and behavioral data of users from the website, mobile application, direct channels, and offline sources.
+
+### Profile Unification
+
+CDP processes customer data, brings it to a single view, and identifies information with the corresponding user profile. The system keeps a **single customer profile** up-to-date because CDP receives and processes data in real-time.
+
+### [Customer Segmentation](https://yespo.io/blog/customer-segmentation-key-role-types-usage-and-case-studies?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce) 
+
+Yespo CDP allows for in-depth customer segmentation based on all available information, including customer behavior data. There is no limit to the number of conditions that can be used to form a segment. The system also offers the following advanced functions:
+
+- Behavioral segmentation.  
+- [Segmentation by events](https://yespo.io/support/segmentation).   
+- Segmentation by parameter.   
+- Predictive segmentation (the system has a set of ready-made algorithms for the formation of segments that predict the probability of purchasing or churning customers).  
+- Value-based customer segmentation.  
+- [RFM segmentation.](https://yespo.io/blog/rfm-segmentation?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+- Cohort analysis segmentation.
+
+Processed and structured data can be immediately used in CDP to create a personalized omnichannel interaction on the website, in the mobile application, and through direct channels.
+
+### [Personalization](https://yespo.io/site-recommendations?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)
+
+Due to the completeness of data and its comprehensive analysis, you can encourage users to take the desired actions through personalized interactions. These interactions consider user needs, preferences, optimal channels, language, and timing of communication.  
+[Product recommendations](https://yespo.io/blog/personalized-product-recommendations-technology-details-and-case-studies?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce) are an important tool for personalization and increased sales for online stores. According to our statistics, personal product recommendations generate about 20% of online store sales. Personalized product sets created in Yespo can be used on the website, in the mobile application, in newsletters, and even by consultants in offline stores.  
+Thanks to the unification of data and the omnichannel nature of Yespo CDP technology, the customer receives the same offers in all channels, which provides them with a seamless and personalized user experience.  
+To enable each business to fully use product recommendations, 200 ready-made algorithms are available in the system, and there is also the possibility of custom algorithm development.
+
+### Workflows Automation
+
+The customer data platform solves the business challenge of communication automation. Our CDP enables the creation and launching of trigger campaigns that automatically respond to customer actions or inactions.   
+Over the years of analysis, the Yespo team has identified the most profitable scenarios for eCommerce:
+
+- Reduced cost of items in the cart;  
+- Regular demand;  
+- Out of stock;  
+- Next best offer;  
+- WishList event triggers;  
+- Abandoned cart;  
+- Abandoned browse;  
+- Abandoned search;  
+- Reactivation and others.
+
+Our team is currently working on implementing the ability to launch triggers via a plugin.
+
+### Multilingual Campaign Automation
+
+Another challenge for companies with a complex trigger map and operations in several markets is maintaining communication in the client's language. Yespo has a convenient solution for [automating multilingual campaigns](https://yespo.io/multilingual-campaigns?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce), which reduces work with multilingual audiences by 5 times. The interface allows the creation of a single message template for all language versions. The system will automatically determine which version to send based on the user's browser language.
+
+### Omnichannel Marketing
+
+The functionality of Yespo makes a real omnichannel approach possible: all communication channels are integrated into a single system. Each channel enriches a single profile and has access to the full set of data in the system. Thus, the channels are coordinated and complement each other, ensuring high-quality customer interaction.  
+In the Yespo system, you can use up to 9 channels in a single connection: 
+
+* [Email](https://yespo.io/email-campaigns?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+  * [Web push notifications](https://yespo.io/automated-web-push-notifications?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)   
+  * [Mobile push notifications](https://yespo.io/mobile-push-notifications?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+  * [App Inbox](https://yespo.io/app-inbox?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+  * [In-App](https://yespo.io/support/creating-in-app-message?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+  * [Widgets](https://yespo.io/popup?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+  * [SMS](https://yespo.io/sms-campaigns?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+  * [Viber](https://yespo.io/viber?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce)  
+  * Telegram
+
+### Data Protection Under GDPR
+
+[Yespo CDP fully complies with GDPR](https://yespo.io/gdpr-compliant). The data collected by Yespo is hosted and processed on AWS, and all Amazon Web Services Inc. services are GDPR compliant. The Yespo information security management system is certified by ISO/IEC 27001:2022. [You are the owner of your data](https://yespo.io/privacy-policy); security standards protect it. You can be sure that [your customers' data is collected and used responsibly.](https://yespo.io/terms-of-use) When you delete customer data in WooCommerce, it is deleted from the Yespo system accordingly.
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
+## **Installation**
 
-e.g.
+Integration of Yespo with your WooCommerce store can be done in a few clicks:
 
-= Using The WordPress Dashboard =
+1. Install and activate the Yespo plugin.
 
-1. Navigate to the 'Add New' in the plugins dashboard
-2. Search for 'yespo'
-3. Click 'Install Now'
-4. Activate the plugin on the Plugin dashboard
+2. A Yespo section will appear in the WordPress admin panel; go to it to authorize and start data synchronization.
 
-= Uploading in WordPress Dashboard =
+3. Enter the API key and click the **Synchronize** button. You can copy the API key from your [Yespo account](https://my.yespo.io/settings-ui/\#/api-keys-list).
 
-1. Navigate to the 'Add New' in the plugins dashboard
-2. Navigate to the 'Upload' area
-3. Select `yespo-woocommerce-plugin.zip` from your computer
-4. Click 'Install Now'
-5. Activate the plugin in the Plugin dashboard
+4. If there is no data for synchronization yet, historical data transfer will not occur.
 
-= Using FTP =
+5. After clicking the **Synchronize** button, the new contacts’ and orders’ data that appear in WooCommerce will be automatically transferred to Yespo.
 
-1. Download `yespo-woocommerce-plugin.zip`
-2. Extract the `yespo` directory to your computer
-3. Upload the `yespo` directory to the `/wp-content/plugins/` directory
-4. Activate the plugin in the Plugin dashboard
+Explore our [manual](https://yespo.io/support/installing-plugin-woocommerce-sites) for more details.
 
+If you need help with setting up the integration, please contact [Yespo support](https://yespo.io/support).
 
 == Changelog ==
 
 = 1.0.0 =
-* A change since the previous version.
-* This version is base.
 
+* Initial version
+
+== Screenshots ==
+
+1. Authorization
+2. Data  Synchronization Started
+3. Data Synchronization in Progress
+4. Data Synchronization Completed

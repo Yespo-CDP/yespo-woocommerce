@@ -6,7 +6,7 @@
  * @copyright 2024 Yespo
  * @license   GPL-2.0-or-later
  *
- * Plugin Name:     Yespo CDP for WooCommerce - Marketing Automation, Omnichannel, Segmentation & Personalization
+ * Plugin Name:     Yespo CDP - Marketing Automation, Omnichannel, Segmentation & Personalization
  * Description:     Get CDP power for your business: improve customer conversion and retention with better personalization and omnichannel campaigns
  * Version:         1.0.0
  * Author:          Yespo
@@ -25,7 +25,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 
 define( 'YESPO_VERSION', '1.0.0' );
-define( 'YESPO_TEXTDOMAIN', 'yespo-cdp-for-woocommerce' );
+define( 'YESPO_TEXTDOMAIN', 'yespo-cdp-plugin' );
 define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-woocommerce-plugin' );
 define( 'YESPO_NAME', 'Yespo' );
 define( 'YESPO_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );

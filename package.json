@@ -20,7 +20,7 @@
         "index.php",
         "LICENSE.txt",
         "yespo.php",
-        "README.txt",
+        "readme.txt",
         "uninstall.php"
     ],
     "scripts": {

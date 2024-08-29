@@ -2,23 +2,21 @@
 
 /**
  * @package   Yespo
- * @author    Yespo Omnichannel CDP <vadym.gmurya@asper.pro>
- * @copyright 2022 Yespo
- * @license   GPL 3.0+
- * @link      https://yespo.io/
+ * @author    Yespo
+ * @copyright 2024 Yespo
+ * @license   GPL-2.0-or-later
  *
- * Plugin Name:     Yespo
- * Plugin URI:      https://yespo.io
- * Description:     Yespo Woocomerce Integration
+ * Plugin Name:     Yespo CDP for WooCommerce - Marketing Automation, Omnichannel, Segmentation & Personalization
+ * Description:     Get CDP power for your business: improve customer conversion and retention with better personalization and omnichannel campaigns
  * Version:         1.0.0
- * Author:          Yespo Omnichannel CDP
+ * Author:          Yespo
  * Author URI:      https://yespo.io/
- * Text Domain:     yespo-woocommerce-plugin
- * License:         GPLv3 or later
- * License URI:     http://www.gnu.org/licenses/gpl-3.0.txt
+ * License:         GPLv2 or later
+ * License URI:     http://www.gnu.org/licenses/gpl-2.0.html
  * Domain Path:     /languages
  * Requires PHP:    7.4
- * WordPress-Plugin-Boilerplate-Powered: v3.3.0
+ * Requires at least: 6.5.5
+ * Requires Plugins: woocommerce
  */
 
 // If this file is called directly, abort.
@@ -27,7 +25,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 
 define( 'YESPO_VERSION', '1.0.0' );
-define( 'YESPO_TEXTDOMAIN', 'yespo' );
+define( 'YESPO_TEXTDOMAIN', 'yespo-cdp-for-woocommerce' );
 define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-woocommerce-plugin' );
 define( 'YESPO_NAME', 'Yespo' );
 define( 'YESPO_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );

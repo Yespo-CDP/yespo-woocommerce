@@ -1,4 +1,4 @@
-=== Yespo CDP for WooCommerce - Marketing Automation, Omnichannel, Segmentation & Personalization ===
+=== Yespo CDP - Marketing Automation, Omnichannel, Segmentation & Personalization ===
 Contributors: yespo
 Tags: marketing automation, personalization, customer segmentation, omnichannel, CDP
 Requires at least: 6.5.5
@@ -12,7 +12,7 @@ Get CDP power for your business: improve customer conversion and retention with 
 
 == Description ==
 
-# Yespo CDP for WooCommerce \- Marketing Automation, Omnichannel, Segmentation & Personalization
+# Yespo CDP \- Marketing Automation, Omnichannel, Segmentation & Personalization
 
 [**Yespo**](https://yespo.io/?utm\_source=wordpress\&utm\_medium=referral\&utm\_campaign=woocommerce) **is an omnichannel customer data platform (CDP) that helps medium and large online projects easily use customer behavior data to increase loyalty and customer lifetime value (LTV).** The platform allows companies to collect and combine [clients’ data](https://yespo.io/privacy-policy) from the website, mobile app, offline, email and direct channels to marketing automation, customer segmentation, and personalization communications. More than 3,500 brands from 23 countries chose **Yespo**, and 300 of these companies are enterprise-level.
 

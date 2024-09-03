@@ -22,7 +22,7 @@ class Yespo_Order
     public function create_order_on_yespo($order, $operation = 'update'){
 
         if (empty($this->authData)) {
-            return __( 'Empty user authorization data', YESPO_TEXTDOMAIN );
+            return __( 'Empty user authorization data', 'yespo-cdp-plugin' );
         }
 
         $data = Yespo_Order_Mapping::order_woo_to_yes($order);
@@ -48,8 +48,9 @@ class Yespo_Order
 
     public function create_bulk_orders_on_yespo($orders, $operation = 'update'){
 
+        global $wpdb;
         if (empty($this->authData)) {
-            return __( 'Empty user authorization data', YESPO_TEXTDOMAIN );
+            return __( 'Empty user authorization data', 'yespo-cdp-plugin' );
         }
 
         //(new Yespo_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
@@ -81,8 +82,7 @@ class Yespo_Order
                 //add log entries
                 if (!empty($order_logs)) {
                     $log_orders_string = implode(", ", $order_logs);
-                    $log_orders_query = "INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) VALUES $log_orders_string";
-                    $this->wpdb->query($log_orders_query);
+                    $wpdb->query("INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) VALUES $log_orders_string");
                 }
 
                 return $orderCounter;
@@ -100,11 +100,11 @@ class Yespo_Order
     }
 
     public function add_labels_to_orders($values){
-        $values_string = implode(", ", $values);
-        $query = "INSERT INTO {$this->wpdb->postmeta} (post_id, meta_key, meta_value) VALUES $values_string 
-              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+        global $wpdb;
 
-        $this->wpdb->query($query);
+        $values_string = implode(", ", $values);
+        $wpdb->query("INSERT INTO {$this->wpdb->postmeta} (post_id, meta_key, meta_value) VALUES $values_string 
+              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)");
     }
 
     private function find_orders_by_user_email($email){

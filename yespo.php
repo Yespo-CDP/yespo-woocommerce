@@ -58,7 +58,7 @@ if ( version_compare( PHP_VERSION, YESPO_MIN_PHP_VERSION, '<=' ) ) {
 			echo wp_kses_post(
 			sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				__( '"Yespo" requires PHP 7.4 or newer.', YESPO_TEXTDOMAIN )
+				__( '"Yespo" requires PHP 7.4 or newer.', 'yespo-cdp-plugin' )
 			)
 			);
 		}
@@ -91,8 +91,8 @@ if ( ! $requirements->satisfied() ) {
 }
 
 if ( ! wp_installing() ) {
-	register_activation_hook( YESPO_MAIN_PLUGIN_FOLDER . '/' . YESPO_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'activate' ) );
-	register_deactivation_hook( YESPO_MAIN_PLUGIN_FOLDER . '/' . YESPO_TEXTDOMAIN . '.php', array( new \Yespo\Backend\ActDeact, 'deactivate' ) );
+	register_activation_hook( YESPO_MAIN_PLUGIN_FOLDER . '/' . 'yespo' . '.php', array( new \Yespo\Backend\ActDeact, 'activate' ) );
+	register_deactivation_hook( YESPO_MAIN_PLUGIN_FOLDER . '/' . 'yespo' . '.php', array( new \Yespo\Backend\ActDeact, 'deactivate' ) );
 	add_action(
 		'plugins_loaded',
 		static function () use ( $yespo_libraries ) {
@@ -107,4 +107,5 @@ function yespo_export_data_activation(){
     }
 
 }
+
 yespo_export_data_activation();

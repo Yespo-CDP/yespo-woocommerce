@@ -179,16 +179,18 @@ class Yespo_Export_Users
     }
 
     private function get_user_export_status(){
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s ORDER BY id DESC LIMIT 1",
                 'users'
             )
         );
     }
     private function get_user_export_status_processed($action){
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
                 'users',
                 $action
@@ -206,9 +208,10 @@ class Yespo_Export_Users
     }
 
     public function get_users_total_count(){
+        global $wpdb;
         $capabilities_meta_key = $this->wpdb->prefix . 'capabilities';
-        return $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        return $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s",
                 $capabilities_meta_key,
                 '%"customer"%'
@@ -216,10 +219,11 @@ class Yespo_Export_Users
         );
     }
     public function get_users_export_count(){
+        global $wpdb;
         $capabilities_meta_key = $this->wpdb->prefix . 'capabilities';
 
-        return $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        return $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$this->wpdb->usermeta} um
                 WHERE um.meta_key = %s
                 AND um.meta_value LIKE %s
@@ -240,22 +244,30 @@ class Yespo_Export_Users
 
 
     public function get_bulk_users_object(){
+        global $wpdb;
 
-        $query = $this->wpdb->prepare("
-            SELECT u.ID 
-            FROM {$this->wpdb->users} u
-            INNER JOIN {$this->wpdb->usermeta} um ON u.ID = um.user_id
-            WHERE um.meta_key = '{$this->wpdb->prefix}capabilities'
-              AND um.meta_value LIKE %s
-              AND u.ID > %d
-              AND u.ID NOT IN (
-                SELECT user_id FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value != ''
-              )
-            ORDER BY u.user_registered ASC
-            LIMIT %d
-        ", '%' . $this->wpdb->esc_like(self::CUSTOMER) . '%', $this->id_more_then, $this->meta_key, $this->number_for_export);
+        return $wpdb->get_col($wpdb->prepare("
+                    SELECT u.ID 
+                    FROM {$wpdb->users} u
+                    INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id
+                    WHERE um.meta_key = '{$wpdb->prefix}capabilities'
+                      AND um.meta_value LIKE %s
+                      AND u.ID > %d
+                      AND u.ID NOT IN (
+                        SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value != ''
+                      )
+                    ORDER BY u.user_registered ASC
+                    LIMIT %d
+                ",
+                '%' . $wpdb->esc_like(self::CUSTOMER) . '%',
+                $this->id_more_then,
+                $this->meta_key,
+                $this->number_for_export
+            )
+        );
 
-        return $this->wpdb->get_col($query);
+
+
     }
 
     /**
@@ -310,8 +322,9 @@ class Yespo_Export_Users
         return $this->wpdb->update($this->table_yespo_queue_items, $data, $where);
     }
     public function check_queue_items_for_session($session_id) {
-        $count = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        global $wpdb;
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) 
                 FROM {$this->table_yespo_queue_items} 
                 WHERE session_id = %s 
@@ -435,12 +448,14 @@ class Yespo_Export_Users
     }
 
     private function check_sessios_importing(){
-        $query = $this->wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_yespo_queue WHERE export_status = %s",
-            'IMPORTING'
+        global $wpdb;
+
+        $count = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $this->table_yespo_queue WHERE export_status = %s",
+                'IMPORTING'
+            )
         );
 
-        $count = $this->wpdb->get_var($query);
         if ($count > 0) return true;
         else return false;
     }
@@ -465,8 +480,9 @@ class Yespo_Export_Users
     }
 
     private function get_last_order_entry_not_completed(){
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
                 'orders',
                 'completed'

@@ -262,8 +262,9 @@ class Yespo_Export_Orders
     }
 
     public function get_order_export_status(){
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s ORDER BY id DESC LIMIT 1",
                 'orders'
             )
@@ -285,8 +286,9 @@ class Yespo_Export_Orders
     }
 
     public function get_order_export_status_processed($action){
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
                 'orders',
                 $action
@@ -333,8 +335,9 @@ class Yespo_Export_Orders
     }
 
     public function get_total_orders(){
-        return $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$this->table_posts} 
                  WHERE type = %s 
                  AND status != %s",
@@ -344,8 +347,9 @@ class Yespo_Export_Orders
         );
     }
     public function get_export_orders_count(){
-        return $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM $this->table_posts
                 WHERE type = %s
                 AND status != %s
@@ -455,10 +459,11 @@ class Yespo_Export_Orders
     }
 
     public function get_bulk_export_orders(){
+        global $wpdb;
         $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
 
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT id FROM $this->table_posts
                 WHERE type = %s
                 AND status != %s
@@ -482,10 +487,11 @@ class Yespo_Export_Orders
     }
 
     public function get_unexported_orders_because_error($last_exported) {
+        global $wpdb;
         $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
 
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT id FROM $this->table_posts
             WHERE type = %s
             AND status != %s
@@ -511,8 +517,9 @@ class Yespo_Export_Orders
     }
 
     private function get_orders_from_database_without_metakey(){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_posts
             WHERE type = %s
             AND status != %s
@@ -528,8 +535,9 @@ class Yespo_Export_Orders
     }
 
     private function get_orders_from_database(){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s",
                 'shop_order',
                 'wc-checkout-draft'
@@ -538,8 +546,9 @@ class Yespo_Export_Orders
     }
 
     private function get_orders_from_db($time){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s AND date_updated_gmt BETWEEN %s AND %s",
                 'shop_order',
                 'wc-checkout-draft',
@@ -550,22 +559,23 @@ class Yespo_Export_Orders
     }
 
     public function is_email_in_removed_users($email) {
+        global $wpdb;
         $current_timestamp = strtotime(current_time('mysql'));
         $searched_time = gmdate('Y-m-d H:i:s', $current_timestamp - 360);
 
-        $query = $this->wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s AND time >= %s",
-            $email,
-            $searched_time
+        $count = $wpdb->get_var($wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s AND time >= %s",
+                    $email,
+                    $searched_time
+                )
+            )
         );
-        $count = $this->wpdb->get_var($query);
-
         return $count > 0;
     }
 
     //add json of exported orders
     public function add_json_log_entry($orders) {
-        $json = json_encode($orders);
+        $json = wp_json_encode($orders);
         if ($json !== false) {
             $data = [
                 'text' => $json,
@@ -601,8 +611,9 @@ class Yespo_Export_Orders
     }
 
     public function get_unsent_orders_since_time($time){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT p.id 
                 FROM $this->table_posts p
                 LEFT JOIN {$this->wpdb->postmeta} pm ON p.id = pm.post_id AND pm.meta_key = 'sent_order_to_yespo'

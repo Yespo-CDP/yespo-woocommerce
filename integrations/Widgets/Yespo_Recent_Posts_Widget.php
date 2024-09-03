@@ -23,8 +23,8 @@ class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 	 */
 	public function __construct() { // phpcs:ignore
 		$args = array(
-			'label'       => \__( 'My Recent Posts Example', YESPO_TEXTDOMAIN ),
-			'description' => \__( 'My Recent Posts Widget Description', YESPO_TEXTDOMAIN ),
+			'label'       => \__( 'My Recent Posts Example', 'yespo-cdp-plugin' ),
+			'description' => \__( 'My Recent Posts Widget Description', 'yespo-cdp-plugin' ),
 			'slug'        => 'recent-posts',
 			// 'options' => array( 'cache' => true )
 		);
@@ -33,9 +33,9 @@ class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 			// Title field
 			array(
 				// Field name/label
-				'name'     => \__( 'Title', YESPO_TEXTDOMAIN ),
+				'name'     => \__( 'Title', 'yespo-cdp-plugin' ),
 				// Field description
-				'desc'     => \__( 'Enter the widget title.', YESPO_TEXTDOMAIN ),
+				'desc'     => \__( 'Enter the widget title.', 'yespo-cdp-plugin' ),
 				// Field id
 				'id'       => 'title',
 				// Field type ( text, checkbox, textarea, select, select-group, taxonomy, taxonomyterm, pages, hidden )
@@ -43,7 +43,7 @@ class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 				// Class, rows, cols
 				'class'    => 'widefat',
 				// Default value
-				'std'      => \__( 'Recent Posts', YESPO_TEXTDOMAIN ),
+				'std'      => \__( 'Recent Posts', 'yespo-cdp-plugin' ),
 				/**
 				Set the field validation type/s
 				'alpha_dash'
@@ -74,16 +74,16 @@ class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Taxonomy Field
 			array(
-				'name'  => \__( 'Taxonomy', YESPO_TEXTDOMAIN ),
-				'desc'  => \__( 'Set the taxonomy.', YESPO_TEXTDOMAIN ),
+				'name'  => \__( 'Taxonomy', 'yespo-cdp-plugin' ),
+				'desc'  => \__( 'Set the taxonomy.', 'yespo-cdp-plugin' ),
 				'id'    => 'taxonomy',
 				'type'  => 'taxonomy',
 				'class' => 'widefat',
 			),
 			// Taxonomy Field
 			array(
-				'name'     => \__( 'Taxonomy terms', YESPO_TEXTDOMAIN ),
-				'desc'     => \__( 'Set the taxonomy terms.', YESPO_TEXTDOMAIN ),
+				'name'     => \__( 'Taxonomy terms', 'yespo-cdp-plugin' ),
+				'desc'     => \__( 'Set the taxonomy terms.', 'yespo-cdp-plugin' ),
 				'id'       => 'taxonomyterm',
 				'type'     => 'taxonomyterm',
 				'taxonomy' => 'category',
@@ -91,16 +91,16 @@ class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Pages Field
 			array(
-				'name'  => \__( 'Pages', YESPO_TEXTDOMAIN ),
-				'desc'  => \__( 'Set the page.', YESPO_TEXTDOMAIN ),
+				'name'  => \__( 'Pages', 'yespo-cdp-plugin' ),
+				'desc'  => \__( 'Set the page.', 'yespo-cdp-plugin' ),
 				'id'    => 'pages',
 				'type'  => 'pages',
 				'class' => 'widefat',
 			),
 			// Post type Field
 			array(
-				'name'     => \__( 'Post type', YESPO_TEXTDOMAIN ),
-				'desc'     => \__( 'Set the post type.', YESPO_TEXTDOMAIN ),
+				'name'     => \__( 'Post type', 'yespo-cdp-plugin'),
+				'desc'     => \__( 'Set the post type.', 'yespo-cdp-plugin' ),
 				'id'       => 'posttype',
 				'type'     => 'posttype',
 				'posttype' => 'post',
@@ -108,22 +108,22 @@ class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Amount Field
 			array(
-				'name'     => \__( 'Amount', YESPO_TEXTDOMAIN ),
-				'desc'     => \__( 'Select how many posts to show.', YESPO_TEXTDOMAIN ),
+				'name'     => \__( 'Amount', 'yespo-cdp-plugin' ),
+				'desc'     => \__( 'Select how many posts to show.', 'yespo-cdp-plugin' ),
 				'id'       => 'amount',
 				'type'     => 'select',
 				// Selectbox fields
 				'fields'   => array(
 					array(
-						'name'  => \__( '1 Post', YESPO_TEXTDOMAIN ),
+						'name'  => \__( '1 Post', 'yespo-cdp-plugin' ),
 						'value' => '1',
 					),
 					array(
-						'name'  => \__( '2 Posts', YESPO_TEXTDOMAIN ),
+						'name'  => \__( '2 Posts', 'yespo-cdp-plugin' ),
 						'value' => '2',
 					),
 					array(
-						'name'  => \__( '3 Posts', YESPO_TEXTDOMAIN ),
+						'name'  => \__( '3 Posts', 'yespo-cdp-plugin' ),
 						'value' => '3',
 					),
 
@@ -134,8 +134,8 @@ class Yespo_Recent_Posts_Widget extends \WPH_Widget {
 			),
 			// Output type checkbox
 			array(
-				'name'   => \__( 'Output as list', YESPO_TEXTDOMAIN ),
-				'desc'   => \__( 'Wraps posts with the <li> tag.', YESPO_TEXTDOMAIN ),
+				'name'   => \__( 'Output as list', 'yespo-cdp-plugin' ),
+				'desc'   => \__( 'Wraps posts with the <li> tag.', 'yespo-cdp-plugin' ),
 				'id'     => 'list',
 				'type'   => 'checkbox',
 				// Checked by default:

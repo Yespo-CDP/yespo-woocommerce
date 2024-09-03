@@ -15,6 +15,7 @@
  * @since 1.0.0
  * @return array
  */
+
 function yespo_get_settings() {
     return apply_filters( 'yespo_get_settings', get_option( YESPO_TEXTDOMAIN . '-settings' ) );
 }
@@ -36,14 +37,14 @@ function yespo_error_api_key_admin_notice_function() {
     if(!empty($yespo_api_key) && $result === 401){
         ?>
         <div class="notice notice-error is-dismissible">
-            <p><?php echo esc_html__("Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.", YESPO_TEXTDOMAIN); ?></p>
+            <p><?php echo esc_html__("Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.", 'yespo-cdp-plugin'); ?></p>
         </div>
         <?php
     }
     if(isset($result) && $result === 0){
         ?>
         <div class="notice notice-error is-dismissible">
-            <p><?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', YESPO_TEXTDOMAIN)?></p>
+            <p><?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp-plugin')?></p>
         </div>
         <?php
     }
@@ -53,7 +54,7 @@ add_action( 'admin_notices', 'yespo_error_api_key_admin_notice_function' );
 
 /*** Get profile username on Yespo ***/
 function yespo_get_account_profile_name_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_get_account_yespo_name' ) {
+    if (isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_account_yespo_name') {
         $organisationName = '';
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
@@ -79,7 +80,7 @@ add_action('wp_ajax_nopriv_yespo_get_account_yespo_name', 'yespo_get_account_pro
 
 /** check authorization **/
 function yespo_check_api_authorization_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_check_api_authorization_yespo' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_check_api_authorization_yespo' ) {
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
             if (isset($options['yespo_api_key'])) $yespo_api_key = sanitize_text_field($options['yespo_api_key']);
@@ -114,9 +115,10 @@ function yespo_save_settings_via_form_function() {
         return;
     }
 
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_check_api_key_esputnik' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_check_api_key_esputnik' ) {
         $options = [];
-        $options['yespo_api_key'] = sanitize_text_field($_POST['yespo_api_key']);
+        if (isset($_POST['yespo_api_key'])) $options['yespo_api_key'] = sanitize_text_field(wp_unslash($_POST['yespo_api_key']));
+        else $options['yespo_api_key'] = '';
         $accountClass = new \Yespo\Integrations\Esputnik\Yespo_Account();
         $result = $accountClass->send_keys($options['yespo_api_key']);
         if (strpos($result, 'Connection refused') !== false) $result = 0;
@@ -131,8 +133,8 @@ function yespo_save_settings_via_form_function() {
             }
             $response_data = array(
                 'status' => 'success',
-                'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", YESPO_TEXTDOMAIN) . '</p></div>'),
-                'total' => esc_html__("Completed successfully!", YESPO_TEXTDOMAIN),
+                'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp-plugin') . '</p></div>'),
+                'total' => esc_html__("Completed successfully!", 'yespo-cdp-plugin'),
                 'username' => isset($organisationName) ? $organisationName : ''
             );
         } else if($result === 0){
@@ -143,8 +145,8 @@ function yespo_save_settings_via_form_function() {
         } else {
             $response_data = array(
                 'status' => 'error',
-                'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Invalid API key", YESPO_TEXTDOMAIN) . '</p></div>'),
-                'total' => esc_html__("Completed unsuccessfully!", YESPO_TEXTDOMAIN),
+                'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Invalid API key", 'yespo-cdp-plugin') . '</p></div>'),
+                'total' => esc_html__("Completed unsuccessfully!", 'yespo-cdp-plugin'),
             );
         }
         $accountClass->add_entry_auth_log($options['yespo_api_key'], $result);
@@ -158,11 +160,11 @@ add_action('wp_ajax_nopriv_yespo_check_api_key_esputnik', 'yespo_save_settings_v
 
 /** update user profile on Yespo service **/
 function yespo_update_user_profile_function($user_id, $old_user_data) {
-    if (isset($_REQUEST['wc-ajax']) && sanitize_text_field($_REQUEST['wc-ajax']) === 'checkout') {
+    if (isset($_REQUEST['wc-ajax']) && sanitize_text_field(wp_unslash($_REQUEST['wc-ajax'])) === 'checkout') {
         return;
     }
 
-    if (isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'wp-privacy-erase-personal-data') {
+    if (isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'wp-privacy-erase-personal-data') {
         return;
     }
 
@@ -218,7 +220,7 @@ add_action('wp_ajax_nopriv_yespo_get_users_total_export', 'yespo_get_all_users_t
 
 /*** Export users to Yespo ***/
 function yespo_export_user_data_to_esputnik_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_export_user_data_to_esputnik' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_export_user_data_to_esputnik' ) {
         if(isset($_REQUEST['service'])){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Users)->add_users_export_task();
             wp_send_json($response);
@@ -231,7 +233,7 @@ add_action('wp_ajax_nopriv_yespo_export_user_data_to_esputnik', 'yespo_export_us
 
 /*** Get process status of exporting users to Yespo ***/
 function yespo_get_process_export_users_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_get_process_export_users_data_to_esputnik' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_process_export_users_data_to_esputnik' ) {
         $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Users())->get_process_users_exported();
         if( !empty($response)) {
             wp_send_json(['total' => Yespo\Integrations\Esputnik\Yespo_Export_Service::get_export_total(), 'exported' => Yespo\Integrations\Esputnik\Yespo_Export_Service::get_exported_number(), 'percent' => floor(($response->exported / $response->total) * 100), 'status' => $response->status, 'code' => $response->code]);
@@ -314,7 +316,7 @@ add_action('wp_ajax_nopriv_yespo_get_orders_total_export', 'yespo_get_all_orders
 
 /*** Export orders to Yespo ***/
 function yespo_export_order_data_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_export_order_data_to_esputnik' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_export_order_data_to_esputnik' ) {
         if(isset($_REQUEST['service'])){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Orders)->add_orders_export_task();
             wp_send_json($response);
@@ -327,7 +329,7 @@ add_action('wp_ajax_nopriv_yespo_export_order_data_to_esputnik', 'yespo_export_o
 
 /*** Get process status of exporting orders to Yespo ***/
 function yespo_get_process_export_orders_data_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_get_process_export_orders_data_to_esputnik' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_process_export_orders_data_to_esputnik' ) {
         $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Orders())->get_process_orders_exported();
         if( !empty($response)) {
             wp_send_json( [
@@ -359,7 +361,7 @@ add_action('woocommerce_thankyou', 'yespo_add_order_time', 10, 1);
  * STOP EXPORT DATA
  */
 function yespo_stop_export_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_stop_export_data_to_yespo' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_stop_export_data_to_yespo' ) {
         $exported = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_exported_number();
         $total = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_export_total();
         $users = (new Yespo\Integrations\Esputnik\Yespo_Export_Users())->stop_export_users();
@@ -378,7 +380,7 @@ add_action('wp_ajax_nopriv_yespo_stop_export_data_to_yespo', 'yespo_stop_export_
  * RESUME EXPORT DATA
  */
 function yespo_resume_export_function(){
-    if(isset($_REQUEST['action']) && sanitize_text_field($_REQUEST['action']) === 'yespo_resume_export_data' ) {
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_resume_export_data' ) {
         $exported = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_exported_number();
         $total = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_export_total();
         $users = (new Yespo\Integrations\Esputnik\Yespo_Export_Users())->resume_export_users();

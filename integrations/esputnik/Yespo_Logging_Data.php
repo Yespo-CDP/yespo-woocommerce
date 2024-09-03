@@ -65,8 +65,9 @@ class Yespo_Logging_Data
     }
 
     private function update_log_entry_user($user_id, $action, $response){
-        $this->wpdb->query(
-            $this->wpdb->prepare(
+        global $wpdb;
+        $wpdb->query(
+            $wpdb->prepare(
                 "UPDATE $this->table_name SET yespo = %d WHERE action = %s AND user_id = %s",
                 sanitize_text_field($response),
                 sanitize_text_field($action),
@@ -99,13 +100,15 @@ class Yespo_Logging_Data
     }
 
     private function check_presence_in_database(string $order_id, string $action, string $status){
-        $query = $this->wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name_order WHERE order_id = %s AND action = %s AND status = %s",
-            sanitize_text_field($order_id),
-            sanitize_text_field($action),
-            sanitize_text_field($status)
+        global $wpdb;
+
+        return $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $this->table_name_order WHERE order_id = %s AND action = %s AND status = %s",
+                sanitize_text_field($order_id),
+                sanitize_text_field($action),
+                sanitize_text_field($status)
+            )
         );
-       return $this->wpdb->get_var($query);
     }
 
 }

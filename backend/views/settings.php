@@ -18,13 +18,16 @@ if ( get_option( 'yespo_options' ) !== false ){
     </section>
     <section class="userPanel">
         <div class="contentPart">
-            <h1><?php echo esc_html__('Data synchronization', YESPO_TEXTDOMAIN); ?></h1>
-            <p><?php echo esc_html__('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools',YESPO_TEXTDOMAIN) ?></p>
+            <h1><?php echo esc_html__('Data synchronization', 'yespo-cdp-plugin'); ?></h1>
+            <p><?php echo esc_html__('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools','yespo-cdp-plugin') ?></p>
             <div class="settingsSection">
             </div>
         </div>
     </section>
 </div>
+<?php
+    $nonceApiKeyForm = wp_nonce_field('yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false);
+?>
 <style>
     #wpcontent{
         padding-left:0px;
@@ -338,27 +341,26 @@ if ( get_option( 'yespo_options' ) !== false ){
 
     class YespoExportData {
         constructor() {
-            this.h1 = '<?php echo esc_html__('Synchronization progress', YESPO_TEXTDOMAIN)?>';
-            this.outSideText = '<?php echo esc_html__('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', YESPO_TEXTDOMAIN)?>';
-            this.h4 = '<?php echo esc_html__('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', YESPO_TEXTDOMAIN)?>';
-            this.resume = '<?php echo esc_html__( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', YESPO_TEXTDOMAIN ); ?>';
-            this.error = '<?php echo esc_html__('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', YESPO_TEXTDOMAIN)?>';
-            this.error401 = '<?php echo esc_html__('Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', YESPO_TEXTDOMAIN)?>';
-            this.error555 = '<?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', YESPO_TEXTDOMAIN)?>';
-            this.success = '<?php echo esc_html__( 'Data is successfully synchronized', YESPO_TEXTDOMAIN ); ?>';
-            this.synhStarted = '<?php echo esc_html__( 'Data synchronization has started', YESPO_TEXTDOMAIN ); ?>';
+            this.h1 = '<?php echo esc_html__('Synchronization progress', 'yespo-cdp-plugin')?>';
+            this.outSideText = '<?php echo esc_html__('Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', 'yespo-cdp-plugin')?>';
+            this.h4 = '<?php echo esc_html__('The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', 'yespo-cdp-plugin')?>';
+            this.resume = '<?php echo esc_html__( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', 'yespo-cdp-plugin' ); ?>';
+            this.error = '<?php echo esc_html__('Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', 'yespo-cdp-plugin')?>';
+            this.error401 = '<?php echo esc_html__('Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', 'yespo-cdp-plugin')?>';
+            this.error555 = '<?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp-plugin')?>';
+            this.success = '<?php echo esc_html__( 'Data is successfully synchronized', 'yespo-cdp-plugin' ); ?>';
+            this.synhStarted = '<?php echo esc_html__( 'Data synchronization has started', 'yespo-cdp-plugin' ); ?>';
             this.pluginUrl = '<?php echo esc_url(YESPO_PLUGIN_URL);?>';
-            this.pauseButton = '<?php echo esc_html__('Pause', YESPO_TEXTDOMAIN)?>';
-            this.resumeButton = '<?php echo esc_html__('Resume', YESPO_TEXTDOMAIN)?>';
-            this.contactSupportButton = '<?php echo esc_html__('Contact Support', YESPO_TEXTDOMAIN)?>';
+            this.pauseButton = '<?php echo esc_html__('Pause', 'yespo-cdp-plugin')?>';
+            this.resumeButton = '<?php echo esc_html__('Resume', 'yespo-cdp-plugin')?>';
+            this.contactSupportButton = '<?php echo esc_html__('Contact Support', 'yespo-cdp-plugin')?>';
             this.ajaxUrl = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
 
-            this.nonceApiKeyForm = '<?php esc_html__(wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, true )); ?>';
+            this.nonceApiKeyForm = <?php echo wp_json_encode($nonceApiKeyForm); ?>;
             this.apiKeyValue = '<?php echo isset($yespo_api_key) ? esc_js($yespo_api_key) : ''; ?>';
-            this.apiKeyText = '<?php echo esc_html__( 'The API key to connect the account can be received by the', YESPO_TEXTDOMAIN ); ?> ';
+            this.apiKeyText = '<?php echo esc_html__( 'The API key to connect the account can be received by the', 'yespo-cdp-plugin' ); ?> ';
             this.yespoLink = 'https://my.yespo.io/settings-ui/#/api-keys-list';
-            this.yespoLinkText = '<?php echo esc_html__( 'link', YESPO_TEXTDOMAIN ); ?>';
-            this.wpNonce = '<?php esc_html__(wp_nonce_field( 'yespo_plugin_settings_save', 'yespo_plugin_settings_nonce' )); ?>';
+            this.yespoLinkText = '<?php echo esc_html__( 'link', 'yespo-cdp-plugin' ); ?>';
 
             this.eventSource = null;
             this.percentTransfered = 0;
@@ -613,7 +615,7 @@ if ( get_option( 'yespo_options' ) !== false ){
             let formId = 'checkYespoAuthorization';
 
             const form = this.createForm(formId, 'post', '');
-            const h4 = this.createHeading(4, '<?php echo esc_js(__( 'API Key', YESPO_TEXTDOMAIN )); ?>');
+            const h4 = this.createHeading(4, '<?php echo esc_js(__( 'API Key', 'yespo-cdp-plugin' )); ?>');
 
             const fieldGroup0 = this.createFieldGroup();
             const inputApiLine = this.createElement("div", { className: 'inputApiLine' });
@@ -637,7 +639,7 @@ if ( get_option( 'yespo_options' ) !== false ){
 
             const fieldGroup2 = this.createFieldGroup();
 
-            const submitButton = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo esc_js(__( 'Synchronize', YESPO_TEXTDOMAIN )); ?>' });
+            const submitButton = this.createElement('input', { type: 'submit', id: 'sendYespoAuthData', className: 'button button-primary', value: '<?php echo esc_js(__( 'Synchronize', 'yespo-cdp-plugin' )); ?>' });
             fieldGroup2.appendChild(submitButton);
 
             form.append(h4, fieldGroup0, fieldGroup1, nonceField, fieldGroup2);
@@ -1008,6 +1010,11 @@ if ( get_option( 'yespo_options' ) !== false ){
         }
 
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const yespoExportData = new YespoExportData();
+        yespoExportData.showApiKeyForm();
+    });
 
     new YespoExportData();
 

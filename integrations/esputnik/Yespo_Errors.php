@@ -42,15 +42,16 @@ class Yespo_Errors
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
-        $sql = $wpdb->prepare("
-            SELECT * 
-            FROM $table_yespo_errors
-            WHERE time >= %s
-            LIMIT 1
-        ", $time_selection);
+        return $wpdb->get_row($wpdb->prepare("
+                    SELECT * 
+                    FROM $table_yespo_errors
+                    WHERE time >= %s
+                    LIMIT 1
+                ",
+                $time_selection
+            )
+        );
 
-
-        return $wpdb->get_row($sql);
     }
 
     public static function get_error_entry_old(){
@@ -62,15 +63,16 @@ class Yespo_Errors
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
-        $sql = $wpdb->prepare("
-            SELECT * 
-            FROM $table_yespo_errors
-            WHERE time < %s
-            ORDER BY time DESC
-            LIMIT 1
-        ", $time_selection);
-
-        return $wpdb->get_row($sql);
+        return $wpdb->get_row($wpdb->prepare("
+                    SELECT * 
+                    FROM $table_yespo_errors
+                    WHERE time < %s
+                    ORDER BY time DESC
+                    LIMIT 1
+                ",
+                $time_selection
+            )
+        );
 
     }
 
@@ -93,10 +95,10 @@ class Yespo_Errors
 
         if (!empty($values)) {
             $values_string = implode(", ", $values);
-            $query = "INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value) VALUES $values_string 
-              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
 
-            $wpdb->query($query);
+            $wpdb->query("INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value) VALUES $values_string 
+              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)");
+
         }
     }
 

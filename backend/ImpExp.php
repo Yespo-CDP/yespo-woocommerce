@@ -99,13 +99,13 @@ class ImpExp extends Base {
 		$extension       = \end( $file_name_parts );
 
 		if ( 'json' !== $extension ) {
-			\wp_die( \esc_html__( 'Please upload a valid .json file', YESPO_TEXTDOMAIN ) );
+			\wp_die( \esc_html__( 'Please upload a valid .json file', 'yespo-cdp-plugin' ) );
 		}
 
 		$import_file = $_FILES[ 'y_import_file' ][ 'tmp_name' ]; //phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 
 		if ( empty( $import_file ) ) {
-			\wp_die( \esc_html__( 'Please upload a file to import', YESPO_TEXTDOMAIN ) );
+			\wp_die( \esc_html__( 'Please upload a file to import', 'yespo-cdp-plugin' ) );
 		}
 
 		// Retrieve the settings from the file and convert the json object to an array.
@@ -119,13 +119,13 @@ class ImpExp extends Base {
 				\update_option( YESPO_TEXTDOMAIN . '-settings-second', \get_object_vars( $settings[ 1 ] ) );
 			}
 
-			\wp_safe_redirect( \admin_url( 'options-general.php?page=' . YESPO_TEXTDOMAIN ) );
+			\wp_safe_redirect( \admin_url( 'options-general.php?page=' . 'yespo-cdp-plugin' ) );
 			exit;
 		}
 
 		new \WP_Error(
 				'yespo_import_settings_failed',
-				\__( 'Failed to import the settings.', YESPO_TEXTDOMAIN )
+				\__( 'Failed to import the settings.', 'yespo-cdp-plugin' )
 			);
 	}
 

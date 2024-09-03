@@ -159,7 +159,7 @@ class Initialize {
 			$this->find_classes( $php_files, $folder, $namespacetofind );
 
 			if ( !WP_DEBUG ) {
-				\wp_die( \esc_html__( 'Yespo is on production environment with missing `composer dumpautoload -o` that will improve the performance on autoloading itself.', YESPO_TEXTDOMAIN ) );
+				\wp_die( \esc_html__( 'Yespo is on production environment with missing `composer dumpautoload -o` that will improve the performance on autoloading itself.', 'yespo-cdp-plugin' ) );
 			}
 
 			return $this->classes;

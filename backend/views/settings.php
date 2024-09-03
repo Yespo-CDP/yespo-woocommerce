@@ -1011,11 +1011,6 @@ if ( get_option( 'yespo_options' ) !== false ){
 
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const yespoExportData = new YespoExportData();
-        yespoExportData.showApiKeyForm();
-    });
-
     new YespoExportData();
 
 </script>

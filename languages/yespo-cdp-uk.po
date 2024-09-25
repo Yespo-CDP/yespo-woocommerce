@@ -19,88 +19,88 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: node_modules\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 
-#: backend/views/settings.php:7
+#: functions/functions.php:7
 msgid "My account"
 msgstr "Мій акаунт"
 
-#: backend/views/settings.php:13
+#: functions/functions.php:13
 msgid "Data synchronization"
 msgstr "Синхронізація даних"
 
-#: backend/views/settings.php:14
+#: functions/functions.php:14
 msgid "Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools"
 msgstr "Синхронізуйте контакти та замовлення для подальшого аналізу та ефективного використання даних за допомогою інструментів автоматизації маркетингу Yespo"
 
-#: backend/views/settings.php:27
+#: functions/functions.php:27
 msgid "API Key"
 msgstr "API ключ"
 
-#: backend/views/settings.php:33
+#: functions/functions.php:33
 msgid "The API key to connect the account can be received by the"
 msgstr "API ключ для підключення акаунта можна отримати за"
 
-#: backend/views/settings.php:33
+#: functions/functions.php:33
 msgid "link"
 msgstr "посиланням"
 
-#: backend/views/settings.php:39
+#: functions/functions.php:39
 msgid "Synchronize"
 msgstr "Синхронізувати"
 
-#: backend/views/settings.php:51
+#: functions/functions.php:51
 msgid "Invalid API key"
 msgstr "Невалідний АРІ ключ"
 
-#: backend/views/settings.php:56
+#: functions/functions.php:56
 msgid "The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page"
 msgstr "Перший експорт даних займе деякий час; він відбудеться у фоновому режимі, залишатися на сторінці не обов`язково"
 
-#: backend/views/settings.php:61
+#: functions/functions.php:61
 msgid "Synchronization progress"
 msgstr "Прогрес синхронізації"
 
-#: backend/views/settings.php:64
+#: functions/functions.php:64
 msgid "Pause"
 msgstr "Призупинити"
 
-#: backend/views/settings.php:65
+#: functions/functions.php.php:65
 msgid "Pause synchronization. Are you sure you want to pause synchronization?"
 msgstr "Призупинити синхронізацію. Ви впевнені, що хочете призупинити синхронізацію?"
 
-#: backend/views/settings.php:66
+#: functions/functions.php.php:66
 msgid "Cancel"
 msgstr "Скасувати"
 
-#: backend/views/settings.php:73
+#: functions/functions.php.php:73
 msgid "The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress"
 msgstr "Процес синхронізації призупинено; ви можете продовжити його з моменту зупинки без втрати попереднього прогресу"
 
-#: backend/views/settings.php:78
+#: functions/functions.php:78
 msgid "Resume"
 msgstr "Відновити"
 
-#: backend/views/settings.php:83
+#: functions/functions.php:83
 msgid "Some error have occurred. Try to resume synchronization. If it doesn`t help, contact Support"
 msgstr "Виникла помилка. Спробуйте відновити синхронізацію. Якщо це не допоможе, зв`яжіться зі службою підтримки"
 
-#: backend/views/settings.php:361
+#: functions/functions.php:361
 msgid "Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost."
 msgstr "Невалідний API ключ. Видаліть плагін і почніть конфігурацію спочатку, використовуючи дійсний API ключ. Дані не будуть втрачені."
 
-#: backend/views/settings.php:362
+#: functions/functions.php:362
 msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
 msgstr "Вихідна активність на сервері заблокована. Будь ласка, зв`яжіться з вашим провайдером для вирішення цієї проблеми. Синхронізація даних буде автоматично відновлена без втрати даних після вирішення проблеми."
 
 
-#: backend/views/settings.php:86
+#: functions/functions.php:86
 msgid "Contact Support"
 msgstr "Зв`язатися зі службою підтримки"
 
-#: backend/views/settings.php:87
+#: bfunctions/functions.php:87
 msgid "Data is successfully synchronized"
 msgstr "Дані успішно синхронізовані"
 
-#: backend/views/settings.php:89
+#: functions/functions.php:89
 msgid "Data synchronization has started"
 msgstr "Синхронізація даних розпочалася"
 

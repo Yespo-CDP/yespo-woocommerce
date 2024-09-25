@@ -25,7 +25,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 
 define( 'YESPO_VERSION', '1.0.0' );
-define( 'YESPO_TEXTDOMAIN', 'yespo-cdp-plugin' );
+define( 'YESPO_TEXTDOMAIN', 'yespo-cdp' );
 define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-woocommerce-plugin' );
 define( 'YESPO_NAME', 'Yespo' );
 define( 'YESPO_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
@@ -58,7 +58,7 @@ if ( version_compare( PHP_VERSION, YESPO_MIN_PHP_VERSION, '<=' ) ) {
 			echo wp_kses_post(
 			sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				__( '"Yespo" requires PHP 7.4 or newer.', 'yespo-cdp-plugin' )
+				__( '"Yespo" requires PHP 7.4 or newer.', 'yespo-cdp' )
 			)
 			);
 		}

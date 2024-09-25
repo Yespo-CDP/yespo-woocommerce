@@ -32,7 +32,7 @@ if ( !defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  *
  * @return void
  */
-function y_uninstall_multisite() {
+function yespo_uninstall_multisite() {
 	if ( is_multisite() ) {
 		/** @var array<\WP_Site> $blogs */
 		$blogs = get_sites();
@@ -48,16 +48,16 @@ function y_uninstall_multisite() {
 		}
 	}
 
-	y_uninstall();
+	yespo_uninstall();
 }
 
 /**
- * What happen on uninstall?
+ * What happens on uninstallation?
  *
  * @global WP_Roles $wp_roles
  * @return void
  */
-function y_uninstall() { // phpcs:ignore
+function yespo_uninstall() { // phpcs:ignore
     global $wpdb;
 
     $contact_log = $wpdb->prefix . 'yespo_contact_log';
@@ -112,4 +112,4 @@ function y_uninstall() { // phpcs:ignore
 
 }
 
-y_uninstall_multisite();
+yespo_uninstall_multisite();

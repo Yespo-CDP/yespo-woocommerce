@@ -32,14 +32,14 @@ class Yespo_Export_Users
         if(empty($status)){
             $data = [
                 'export_type' => 'users',
-                'total' => $this->get_users_export_count(),
+                'total' => intval( $this->get_users_export_count() ),
                 'exported' => 0,
                 'status' => 'active'
             ];
             if($data['total'] > 0) {
                 $uncompleted_orders = $this->get_last_order_entry_not_completed();
                 if(!$uncompleted_orders) {
-                    $result = $this->wpdb->insert($this->table_name, $data);
+                    $result = $this->insert_export_users_data($data);
 
                     if ($result !== false) return true;
                     else return false;
@@ -52,7 +52,6 @@ class Yespo_Export_Users
     //after getting result bulk users export
     public function start_active_bulk_export_users() {
         $status = $this->get_user_export_status_processed('active');
-        $queue = $this->get_yespo_queue_statuses();
         $error = Yespo_Errors::get_error_entry();
         //$this->update_after_activation();
 
@@ -246,7 +245,8 @@ class Yespo_Export_Users
     public function get_bulk_users_object(){
         global $wpdb;
 
-        return $wpdb->get_col($wpdb->prepare("
+        return $wpdb->get_col(
+            $wpdb->prepare("
                     SELECT u.ID 
                     FROM {$wpdb->users} u
                     INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id
@@ -274,53 +274,108 @@ class Yespo_Export_Users
      * entry to yespo queue
      **/
     public function add_entry_yespo_queue($session_id){
-        $data = [
-            'session_id' => sanitize_text_field($session_id),
-            'export_status' => 'IMPORTING',
-            'local_status' => ''
-        ];
-        return $this->wpdb->insert($this->table_yespo_queue, $data);
-    }
-    public function update_entry_yespo_queue($session_id, $export_status = '', $local_status = '') {
-        $data = [];
-        if(!empty($export_status)) $data['export_status'] = sanitize_text_field($export_status);
-        if(!empty($local_status)) $data['local_status'] = sanitize_text_field($local_status);
-        $where = ['session_id' => $session_id];
+        global $wpdb;
 
-        return $this->wpdb->update($this->table_yespo_queue, $data, $where);
+        $session_id = sanitize_text_field($session_id);
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$this->table_yespo_queue} (session_id, export_status, local_status) VALUES (%s, %s, %s)",
+                $session_id,
+                'IMPORTING',
+                ''
+            )
+        );
     }
-    public function get_yespo_queue_statuses() {
-        $result = $this->wpdb->get_row(
-            "SELECT export_status, local_status 
-        FROM {$this->table_yespo_queue} 
-        ORDER BY id DESC 
-        LIMIT 1",
-            OBJECT
+
+    public function update_entry_yespo_queue($session_id, $export_status = '', $local_status = '') {
+        global $wpdb;
+
+        $data = [];
+        $values = [];
+
+        if (!empty($export_status)) {
+            $data[] = 'export_status = %s';
+            $values[] = sanitize_text_field($export_status);
+        }
+
+        if (!empty($local_status)) {
+            $data[] = 'local_status = %s';
+            $values[] = sanitize_text_field($local_status);
+        }
+
+        if (empty($data)) {
+            return false;
+        }
+
+        $where_clause = 'session_id = %s';
+        $values[] = sanitize_text_field($session_id);
+
+        $set_clause = implode(', ', $data);
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$this->table_yespo_queue} SET {$set_clause} WHERE {$where_clause}",
+                ...$values
+            )
         );
 
-        return $result;
     }
 
     /**
      * entry to yespo queue items
      **/
     public function add_entry_queue_items($user_id){
-        $data = [
-            'session_id' =>'',
-            'contact_id' => sanitize_text_field($user_id),
-            'yespo_id' =>''
-        ];
-        return $this->wpdb->insert($this->table_yespo_queue_items, $data);
-    }
-    public function update_entry_queue_items($session_id, $user_id, $yespo_id = null) {
-        $data = [
-            'session_id' => sanitize_text_field($session_id),
-            'yespo_id' => sanitize_text_field($yespo_id)
-        ];
-        $where = ['contact_id' => $user_id];
+        global $wpdb;
 
-        return $this->wpdb->update($this->table_yespo_queue_items, $data, $where);
+        $contact_id = sanitize_text_field($user_id);
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$this->table_yespo_queue_items} (session_id, contact_id, yespo_id) VALUES (%s, %s, %s)",
+                '', $contact_id, ''
+            )
+        );
     }
+
+    public function update_entry_queue_items($session_id, $user_id, $yespo_id = null) {
+        global $wpdb;
+
+        $session_id = sanitize_text_field($session_id);
+        $yespo_id = sanitize_text_field($yespo_id);
+        $contact_id = sanitize_text_field($user_id);
+
+        $data = [];
+        $values = [];
+
+        if (!empty($session_id)) {
+            $data[] = 'session_id = %s';
+            $values[] = $session_id;
+        }
+
+        if (!empty($yespo_id)) {
+            $data[] = 'yespo_id = %s';
+            $values[] = $yespo_id;
+        }
+
+        if (empty($data)) {
+            return false;
+        }
+
+        $where_clause = 'contact_id = %s';
+        $values[] = $contact_id;
+
+        $set_clause = implode(', ', $data);
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$this->table_yespo_queue_items} SET {$set_clause} WHERE {$where_clause}",
+                ...$values
+            )
+        );
+
+    }
+
     public function check_queue_items_for_session($session_id) {
         global $wpdb;
         $count = $wpdb->get_var(
@@ -336,36 +391,38 @@ class Yespo_Export_Users
     }
 
     private function update_table_data($id, $exported, $status, $code = null){
-        return $this->wpdb->update(
-            $this->table_name,
-            array(
-                'exported' => $exported,
-                'status' => $status,
-                'code' => $code,
-                'updated_at' => gmdate('Y-m-d H:i:s', time())
-            ),
-            array('id' => $id),
-            array('%d', '%s', '%s', '%s'),
-            array('%d')
+        global $wpdb;
+
+        $id = intval($id);
+        $exported = intval($exported);
+        $status = sanitize_text_field($status);
+        $code = sanitize_text_field($code);
+        $updated_at = gmdate('Y-m-d H:i:s', time());
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "
+                    UPDATE {$this->table_name} 
+                    SET exported = %d, status = %s, code = %s, updated_at = %s 
+                    WHERE id = %d
+                ",
+                $exported, $status, $code, $updated_at, $id
+            )
         );
     }
 
     private function update_table_total($id, $total){
-        return $this->wpdb->update(
-            $this->table_name,
-            array('total' => $total),
-            array('id' => $id),
-            array('%d'),
-            array('%d')
+        global $wpdb;
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$this->table_name} SET total = %d WHERE id = %d",
+                $total,
+                $id
+            )
         );
     }
-    private function get_users_total_args(){
-        return [
-            'role__in'    => [self::CUSTOMER],
-            'orderby' => 'registered',
-            'order'   => 'DESC',
-        ];
-    }
+
     private function get_users_export_args(){
         return [
             'role__in'    => [self::CUSTOMER],
@@ -488,6 +545,27 @@ class Yespo_Export_Users
                 'completed'
             )
         );
+    }
+
+    private function insert_export_users_data($data) {
+        global $wpdb;
+
+        $data['export_type'] = sanitize_text_field($data['export_type']);
+        $data['total'] = absint($data['total']);
+        $data['exported'] = absint($data['exported']);
+        $data['status'] = sanitize_text_field($data['status']);
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$this->table_name} (export_type, total, exported, status)
+        VALUES (%s, %d, %d, %s)",
+                $data['export_type'],
+                $data['total'],
+                $data['exported'],
+                $data['status']
+            )
+        );
+
     }
 
 }

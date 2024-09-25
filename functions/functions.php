@@ -16,6 +16,8 @@
  * @return array
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 function yespo_get_settings() {
     return apply_filters( 'yespo_get_settings', get_option( YESPO_TEXTDOMAIN . '-settings' ) );
 }
@@ -37,14 +39,14 @@ function yespo_error_api_key_admin_notice_function() {
     if(!empty($yespo_api_key) && $result === 401){
         ?>
         <div class="notice notice-error is-dismissible">
-            <p><?php echo esc_html__("Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.", 'yespo-cdp-plugin'); ?></p>
+            <p><?php echo esc_html__("Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.", 'yespo-cdp'); ?></p>
         </div>
         <?php
     }
     if(isset($result) && $result === 0){
         ?>
         <div class="notice notice-error is-dismissible">
-            <p><?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp-plugin')?></p>
+            <p><?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp')?></p>
         </div>
         <?php
     }
@@ -133,8 +135,8 @@ function yespo_save_settings_via_form_function() {
             }
             $response_data = array(
                 'status' => 'success',
-                'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp-plugin') . '</p></div>'),
-                'total' => esc_html__("Completed successfully!", 'yespo-cdp-plugin'),
+                'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp') . '</p></div>'),
+                'total' => esc_html__("Completed successfully!", 'yespo-cdp'),
                 'username' => isset($organisationName) ? $organisationName : ''
             );
         } else if($result === 0){
@@ -145,8 +147,8 @@ function yespo_save_settings_via_form_function() {
         } else {
             $response_data = array(
                 'status' => 'error',
-                'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Invalid API key", 'yespo-cdp-plugin') . '</p></div>'),
-                'total' => esc_html__("Completed unsuccessfully!", 'yespo-cdp-plugin'),
+                'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Invalid API key", 'yespo-cdp') . '</p></div>'),
+                'total' => esc_html__("Completed unsuccessfully!", 'yespo-cdp'),
             );
         }
         $accountClass->add_entry_auth_log($options['yespo_api_key'], $result);
@@ -168,19 +170,34 @@ function yespo_update_user_profile_function($user_id, $old_user_data) {
         return;
     }
 
-    if(isset($_REQUEST) && isset($_REQUEST['woocommerce-edit-address-nonce'])){
+    if (isset($_REQUEST['woocommerce-edit-address-nonce'])) {
         if(!empty($user_id)) {
             $user = get_user_by('id', $user_id);
-            return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_woo_profile_yespo($_REQUEST, $user);
+            $request = map_deep($_REQUEST, function($value, $key) {
+                if ($key === 'email') {
+                    return sanitize_email($value);
+                } elseif ($key === 'url') {
+                    return esc_url_raw($value);
+                } elseif (is_numeric($value)) {
+                    return absint($value);
+                }
+                return sanitize_text_field($value);
+            });
+            return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_woo_profile_yespo($request, $user);
         }
     } else {
-        if(!empty($user_id)) {
+        if (!empty($user_id)) {
             $user = get_user_by('id', $user_id);
-            if(empty($user->billing_phone) && empty($user->shipping_phone)) (new \Yespo\Integrations\Esputnik\Yespo_Contact())->remove_user_phone_on_yespo(sanitize_email($user->data->user_email));
-            if(isset($user->data->user_email)) return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_on_yespo($user);
+
+            if (empty($user->billing_phone) && empty($user->shipping_phone)) {
+                (new \Yespo\Integrations\Esputnik\Yespo_Contact())->remove_user_phone_on_yespo(sanitize_email($user->data->user_email));
+            }
+
+            if (isset($user->data->user_email)) {
+                return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_on_yespo($user);
+            }
         }
     }
-
 }
 add_action('profile_update', 'yespo_update_user_profile_function', 10, 2);
 
@@ -401,7 +418,7 @@ add_action('wp_ajax_nopriv_yespo_resume_export_data', 'yespo_resume_export_funct
 function yespo_establish_custom_cron_interval_function( $schedules ) {
     $schedules['every_minute'] = array(
         'interval' => 60,
-        'display'  => esc_html__( 'Start every minute' ),
+        'display'  => esc_html__('Start every minute', 'yespo-cdp' ),
     );
     return $schedules;
 }
@@ -416,3 +433,36 @@ function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Yespo_Contact())->remove_user_after_erase();
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
+
+/***
+ * JAVASCRIPT LOCALIZATION
+ */
+function yespo_enqueue_scripts_localization() {
+    wp_enqueue_script( 'yespo-js', YESPO_PLUGIN_ROOT . 'assets/build/plugin-admin.js', array(), '1.0', true );
+
+    wp_localize_script( 'yespo-js', 'yespoVars', array(
+        'h1' => esc_html__( 'Synchronization progress', 'yespo-cdp' ),
+        'outSideText' => esc_html__( 'Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', 'yespo-cdp' ),
+        'h4' => esc_html__( 'The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', 'yespo-cdp' ),
+        'resume' => esc_html__( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', 'yespo-cdp' ),
+        'error' => esc_html__( 'Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', 'yespo-cdp' ),
+        'error401' => esc_html__( 'Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', 'yespo-cdp' ),
+        'error555' => esc_html__( 'Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp' ),
+        'success' => esc_html__( 'Data is successfully synchronized', 'yespo-cdp' ),
+        'synhStarted' => esc_html__( 'Data synchronization has started', 'yespo-cdp' ),
+        'pluginUrl' => esc_url( YESPO_PLUGIN_URL ),
+        'pauseButton' => esc_html__( 'Pause', 'yespo-cdp' ),
+        'resumeButton' => esc_html__( 'Resume', 'yespo-cdp' ),
+        'contactSupportButton' => esc_html__( 'Contact Support', 'yespo-cdp' ),
+        'ajaxUrl' => esc_url( admin_url( 'admin-ajax.php' ) ),
+        //'nonceApiKeyForm' => wp_create_nonce( 'yespo_api_key_nonce' ),
+        'nonceApiKeyForm' => wp_nonce_field('yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false),
+        'apiKeyValue' => isset( $yespo_api_key ) ? esc_js( $yespo_api_key ) : '',
+        'apiKeyText' => esc_html__( 'The API key to connect the account can be received by the', 'yespo-cdp' ),
+        'yespoLink' => 'https://my.yespo.io/settings-ui/#/api-keys-list',
+        'yespoLinkText' => esc_html__( 'link', 'yespo-cdp' ),
+        'yespoApiKey' => esc_js(__( 'API Key', 'yespo-cdp' )),
+        'synchronize' =>  esc_js(__('Synchronize', 'yespo-cdp'))
+    ));
+}
+add_action( 'admin_enqueue_scripts', 'yespo_enqueue_scripts_localization' );

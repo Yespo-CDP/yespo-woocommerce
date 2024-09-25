@@ -59,7 +59,7 @@ class Settings_Page extends Base {
          * Add a settings page for this plugin to the main menu
          *
          */
-        \add_menu_page( \__( 'Yespo Settings', 'yespo-cdp-plugin' ), 'Yespo', 'manage_options', 'yespo-cdp-plugin', array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
+        \add_menu_page( \__( 'Yespo Settings', 'yespo-cdp' ), 'Yespo', 'manage_options', 'yespo-cdp', array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
 /*
         add_submenu_page(
             YESPO_TEXTDOMAIN,
@@ -119,7 +119,7 @@ class Settings_Page extends Base {
         return \array_merge(
             array(
                 //'settings' => '<a href="' . \admin_url( 'admin.php?page=' . YESPO_TEXTDOMAIN . '_settings' ) . '">' . \__( 'Settings', YESPO_TEXTDOMAIN ) . '</a>',
-                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . 'yespo-cdp-plugin' ) . '">' . \__( 'Settings', 'yespo-cdp-plugin' ) . '</a>',
+                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . 'yespo-cdp' ) . '">' . \__( 'Settings', 'yespo-cdp' ) . '</a>',
             ),
             $links
         );

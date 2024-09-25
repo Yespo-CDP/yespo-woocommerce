@@ -147,7 +147,7 @@ class Yespo_Contact
 
     private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null, $relocate = false) {
         if (empty($this->authData)) {
-            return esc_html__( 'Empty user authorization data', 'yespo-cdp-plugin' );
+            return esc_html__( 'Empty user authorization data', 'yespo-cdp' );
         }
 
         $url = self::REMOTE_CONTACT_ESPUTNIK_URL;
@@ -184,7 +184,7 @@ class Yespo_Contact
 
             }
         }
-        return esc_html__( 'Other user authorization operation', 'yespo-cdp-plugin' );
+        return esc_html__( 'Other user authorization operation', 'yespo-cdp' );
     }
 
     public function get_meta_key(){
@@ -222,27 +222,35 @@ class Yespo_Contact
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);
     }
 
-    public function add_bulk_esputnik_id_to_userprofile($usersForExport, $meta_value){
+    public function add_bulk_esputnik_id_to_userprofile($usersForExport, $meta_value) {
         global $wpdb;
 
         $usermeta_table = esc_sql($wpdb->usermeta);
         $values = [];
+        $placeholders = [];
+
         foreach ($usersForExport as $user_id) {
-            $values[] = $wpdb->prepare("(%d, %s, %s)", $user_id, self::USER_META_KEY, $meta_value);
+            $placeholders[] = "(%d, %s, %s)";
+            $values[] = $user_id;
+            $values[] = self::USER_META_KEY;
+            $values[] = $meta_value;
         }
 
         if (!empty($values)) {
-            $values_string = implode(", ", $values);
+            $placeholders_string = implode(", ", $placeholders);
 
-            $wpdb->query("
-                INSERT INTO {$usermeta_table} (user_id, meta_key, meta_value) 
-                VALUES $values_string 
-                ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
-            ");
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "
+                        INSERT INTO {$usermeta_table} (user_id, meta_key, meta_value) 
+                        VALUES {$placeholders_string}
+                        ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
+                    "
+                    , ...$values
+                )
+            );
         }
     }
-
-
 
     private function get_latest_users_activity(){
         $results = $this->get_users_from_log();
@@ -286,17 +294,14 @@ class Yespo_Contact
     }
 
     public function add_entry_removed_user($email){
+        global $wpdb;
         $time = current_time('mysql');
 
-        $this->wpdb->insert(
-            $this->table_yespo_removed,
-            array(
-                'email' => $email,
-                'time' => $time,
-            ),
-            array(
-                '%s',
-                '%s',
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$this->table_yespo_removed} (email, time) VALUES (%s, %s)",
+                $email,
+                $time
             )
         );
     }

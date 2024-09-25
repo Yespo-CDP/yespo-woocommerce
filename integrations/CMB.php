@@ -45,7 +45,7 @@ class CMB extends Base {
 		$cmb_demo = \new_cmb2_box(
 			array(
 				'id'           => $prefix . 'metabox',
-				'title'        => \__( 'Demo Metabox', 'yespo-cdp-plugin' ),
+				'title'        => \__( 'Demo Metabox', 'yespo-cdp' ),
 				'object_types' => array( 'demo' ),
 				'context'      => 'normal',
 				'priority'     => 'high',
@@ -56,34 +56,34 @@ class CMB extends Base {
 		$row      = $cmb2Grid->addRow(); //phpcs:ignore WordPress.NamingConventions
 		$field1 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text', 'yespo-cdp-plugin' ),
-				'desc' => \__( 'field description (optional)', 'yespo-cdp-plugin' ),
-				'id'   => $prefix . 'yespo-cdp-plugin' . '_text',
+				'name' => \__( 'Text', 'yespo-cdp' ),
+				'desc' => \__( 'field description (optional)', 'yespo-cdp' ),
+				'id'   => $prefix . 'yespo-cdp' . '_text',
 				'type' => 'text',
 				)
 			);
 		$field2 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text 2', 'yespo-cdp-plugin' ),
-				'desc' => \__( 'field description (optional)', 'yespo-cdp-plugin' ),
-				'id'   => $prefix . 'yespo-cdp-plugin' . '_text2',
+				'name' => \__( 'Text 2', 'yespo-cdp' ),
+				'desc' => \__( 'field description (optional)', 'yespo-cdp' ),
+				'id'   => $prefix . 'yespo-cdp' . '_text2',
 				'type' => 'text',
 				)
 			);
 
 		$field3 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text Small', 'yespo-cdp-plugin' ),
-				'desc' => \__( 'field description (optional)', 'yespo-cdp-plugin' ),
-				'id'   => $prefix . 'yespo-cdp-plugin' . '_textsmall',
+				'name' => \__( 'Text Small', 'yespo-cdp' ),
+				'desc' => \__( 'field description (optional)', 'yespo-cdp' ),
+				'id'   => $prefix . 'yespo-cdp' . '_textsmall',
 				'type' => 'text_small',
 				)
 			);
 		$field4 = $cmb_demo->add_field(
 			array(
-				'name' => \__( 'Text Small 2', 'yespo-cdp-plugin' ),
-				'desc' => \__( 'field description (optional)', 'yespo-cdp-plugin' ),
-				'id'   => $prefix . 'yespo-cdp-plugin' . '_textsmall2',
+				'name' => \__( 'Text Small 2', 'yespo-cdp' ),
+				'desc' => \__( 'field description (optional)', 'yespo-cdp' ),
+				'id'   => $prefix . 'yespo-cdp' . '_textsmall2',
 				'type' => 'text_small',
 		)
 			);

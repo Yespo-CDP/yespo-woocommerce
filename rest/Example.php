@@ -54,7 +54,7 @@ class Example extends Base {
 				'get_callback'    => array( $this, 'get_text_field' ),
 				'update_callback' => array( $this, 'update_text_field' ),
 				'schema'          => array(
-					'description' => \__( 'Text field demo of Post type', 'yespo-cdp-plugin' ),
+					'description' => \__( 'Text field demo of Post type', 'yespo-cdp' ),
 					'type'        => 'string',
 				),
 			)
@@ -117,7 +117,7 @@ class Example extends Base {
 	public function get_text_field( array $post_obj ) {
 		$post_id = $post_obj['id'];
 
-		return \strval( \get_post_meta( $post_id, 'yespo-cdp-plugin' . '_text', true ) );
+		return \strval( \get_post_meta( $post_id, 'yespo-cdp' . '_text', true ) );
 	}
 
 	/**
@@ -135,7 +135,7 @@ class Example extends Base {
 		if ( false === $post_id ) {
 			return new \WP_Error(
 				'rest_post_views_failed',
-				\__( 'Failed to update post views.', 'yespo-cdp-plugin' ),
+				\__( 'Failed to update post views.', 'yespo-cdp' ),
 				array( 'status' => 500 )
 			);
 		}

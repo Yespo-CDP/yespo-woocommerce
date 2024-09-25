@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4b09259801c12ecb312eb756dea42e71",
+    "content-hash": "7e8595e2e377008c6e09e3d81fb16da0",
     "packages": [
         {
             "name": "inpsyde/assets",
@@ -80,12 +80,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/inpsyde/wp-context.git",
-                "reference": "1022fbf34725a2d1dd24330617138334dafa460a"
+                "reference": "5278480596b77e105d62af993a67c2ac95292091"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/1022fbf34725a2d1dd24330617138334dafa460a",
-                "reference": "1022fbf34725a2d1dd24330617138334dafa460a",
+                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/5278480596b77e105d62af993a67c2ac95292091",
+                "reference": "5278480596b77e105d62af993a67c2ac95292091",
                 "shasum": ""
             },
             "require": {
@@ -133,7 +133,7 @@
                 "issues": "https://github.com/inpsyde/wp-context/issues",
                 "source": "https://github.com/inpsyde/wp-context/tree/main"
             },
-            "time": "2024-03-05T13:05:41+00:00"
+            "time": "2024-08-21T14:36:52+00:00"
         },
         {
             "name": "micropackage/internationalization",

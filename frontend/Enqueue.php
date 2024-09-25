@@ -89,7 +89,7 @@ class Enqueue extends Base {
 		$scripts[0]->withLocalize(
 			'exampleDemo',
 			array(
-				'alert'   => \__( 'Error!', YESPO_TEXTDOMAIN ),
+				'alert'   => \__( 'Error!', 'yespo-cdp' ),
 				'nonce'   => \wp_create_nonce( 'demo_example' ),
 				'wp_rest' => \wp_create_nonce( 'wp_rest' ),
 			)

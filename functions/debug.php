@@ -9,15 +9,15 @@
  * @link      https://yespo.io/
  */
 
-//$y_debug = new WPBP_Debug( __( 'Yespo', YESPO_TEXTDOMAIN ) ); 24022024
-
+//$yespo_debug = new WPBP_Debug( __( 'Yespo', YESPO_TEXTDOMAIN ) ); 24022024
+if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Log text inside the debugging plugins.
  *
  * @param string $text The text.
  * @return void
  */
-function y_log( string $text ) {
-	global $y_debug;
-	$y_debug->log( $text );
+function yespo_log( string $text ) {
+	global $yespo_debug;
+	$yespo_debug->log( $text );
 }

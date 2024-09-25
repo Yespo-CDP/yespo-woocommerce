@@ -26,9 +26,9 @@ class Shortcode extends Base {
 	 * @return void|bool
 	 */
 	public function initialize() {
-		parent::initialize();
+        parent::initialize();
 
-		\add_shortcode( 'foobar', array( $this, 'foobar_func' ) );
+        \add_shortcode( 'foobar', array( $this, 'yespo_foobar_func' ) );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class Shortcode extends Base {
 	 * @since 1.0.0
 	 * @return string
 	 */
-	public static function foobar_func( array $atts ) {
+	public static function yespo_foobar_func( array $atts ) {
 		\shortcode_atts( array( 'foo' => 'something', 'bar' => 'something else' ), $atts );
 
 		return Html::{'span.foo'}( 'foo = ' . $atts['foo'] ) . Html::{'span.bar'}( 'bar = ' . $atts['bar'] );

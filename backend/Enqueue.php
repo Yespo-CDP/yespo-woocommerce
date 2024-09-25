@@ -33,7 +33,10 @@ class Enqueue extends Base {
 			return;
 		}
 
-		\add_action( AssetManager::ACTION_SETUP, array( $this, 'enqueue_assets' ) );
+        if (isset($_GET['page']) && sanitize_text_field(wp_unslash($_GET['page'])) === 'yespo-cdp') {
+            \add_action(AssetManager::ACTION_SETUP, array($this, 'enqueue_assets'));
+        }
+
 	}
 
 	/**
@@ -44,21 +47,21 @@ class Enqueue extends Base {
 	 */
 	public function enqueue_assets( AssetManager $asset_manager ) {
 		// Load admin style sheet and JavaScript.
-		$assets = $this->enqueue_admin_styles();
+        $assets = $this->enqueue_admin_styles();
 
-		if ( !empty( $assets ) ) {
-			foreach ( $assets as $asset ) {
-				$asset_manager->register( $asset );
-			}
-		}
+        if ( !empty( $assets ) ) {
+            foreach ( $assets as $asset ) {
+                $asset_manager->register( $asset );
+            }
+        }
 
-		$assets = $this->enqueue_admin_scripts();
+        $assets = $this->enqueue_admin_scripts();
 
-		if ( !empty( $assets ) ) {
-			foreach ( $assets as $asset ) {
-				$asset_manager->register( $asset );
-			}
-		}
+        if (!empty($assets)) {
+            foreach ($assets as $asset) {
+                $asset_manager->register($asset);
+            }
+        }
 
 	}
 

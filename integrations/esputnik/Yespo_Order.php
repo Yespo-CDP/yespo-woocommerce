@@ -22,7 +22,7 @@ class Yespo_Order
     public function create_order_on_yespo($order, $operation = 'update'){
 
         if (empty($this->authData)) {
-            return __( 'Empty user authorization data', YESPO_TEXTDOMAIN );
+            return __( 'Empty user authorization data', 'yespo-cdp' );
         }
 
         $data = Yespo_Order_Mapping::order_woo_to_yes($order);
@@ -48,8 +48,9 @@ class Yespo_Order
 
     public function create_bulk_orders_on_yespo($orders, $operation = 'update'){
 
+        global $wpdb;
         if (empty($this->authData)) {
-            return __( 'Empty user authorization data', YESPO_TEXTDOMAIN );
+            return __( 'Empty user authorization data', 'yespo-cdp' );
         }
 
         //(new Yespo_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
@@ -68,21 +69,19 @@ class Yespo_Order
                     $order = wc_get_order($item['externalOrderId']);
                     if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
                         $order_id = $order->get_id();
-                        $values[] = $this->wpdb->prepare("(%d, %s, %s)", $order_id, self::ORDER_META_KEY, 'true');
-                        if($response == 400) $error_400[] = $this->wpdb->prepare("(%d, %s, %s)", $order_id, Yespo_Errors::get_mark_br(), 'true');
-                        $order_logs[] = $this->wpdb->prepare("(%d, %s, %d, %s)", $order_id, $operation, $response, gmdate('Y-m-d H:i:s', time()) );
+                        $values[] = $order_id;
+                        if($response == 400) $error_400[] = $order_id;
+                        $order_logs[] = $order_id;
                         $orderCounter++;
                     }
                 }
 
-                if (!empty($values)) $this->add_labels_to_orders($values);
-                if(isset($error_400) && count($error_400) > 0) Yespo_Errors::error_400($error_400,'orders'); //add labels bad request
+                if (!empty($values)) $this->add_labels_to_orders($values, self::ORDER_META_KEY, 'true');
+                if(isset($error_400) && count($error_400) > 0) Yespo_Errors::error_400($error_400,'orders');
 
                 //add log entries
                 if (!empty($order_logs)) {
-                    $log_orders_string = implode(", ", $order_logs);
-                    $log_orders_query = "INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) VALUES $log_orders_string";
-                    $this->wpdb->query($log_orders_query);
+                    $this->add_log_order_entry($order_logs, $operation, $response, gmdate('Y-m-d H:i:s', time()));
                 }
 
                 return $orderCounter;
@@ -99,12 +98,34 @@ class Yespo_Order
         return false;
     }
 
-    public function add_labels_to_orders($values){
-        $values_string = implode(", ", $values);
-        $query = "INSERT INTO {$this->wpdb->postmeta} (post_id, meta_key, meta_value) VALUES $values_string 
-              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+    public function add_labels_to_orders($values, $meta_key, $meta_value){
+        global $wpdb;
 
-        $this->wpdb->query($query);
+        $placeholders = [];
+        $query_values = [];
+
+        foreach ($values as $order_id) {
+            $placeholders[] = "(%d, %s, %s)";
+            $query_values[] = $order_id;
+            $query_values[] = $meta_key;
+            $query_values[] = $meta_value;
+        }
+
+        if (!empty($query_values)) {
+            $placeholders_string = implode(", ", $placeholders);
+
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "
+                    INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) 
+                    VALUES {$placeholders_string}
+                    ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
+                    ",
+                    ...$query_values
+                )
+            );
+        }
+        return false;
     }
 
     private function find_orders_by_user_email($email){
@@ -188,8 +209,35 @@ class Yespo_Order
         ];
     }
 
-    private function mark_exported_orders($order_id){
-        if (empty(get_user_meta($order_id, self::ORDER_META_KEY, true))) update_user_meta($order_id, self::ORDER_META_KEY, 'true');
-        else add_user_meta($order_id, self::ORDER_META_KEY, 'true', false);
+    private function add_log_order_entry($order_logs, $operation, $response, $time){
+        global $wpdb;
+
+        $placeholders = [];
+        $query_values = [];
+
+        foreach ($order_logs as $order_id) {
+            $placeholders[] = "(%d, %s, %s, %s)";
+            $query_values[] = $order_id;
+            $query_values[] = $operation;
+            $query_values[] = $response;
+            $query_values[] = $time;
+        }
+
+        if (!empty($query_values)) {
+            $placeholders_string = implode(", ", $placeholders);
+
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "
+                    INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) 
+                    VALUES {$placeholders_string}
+                    ",
+                    ...$query_values
+                )
+            );
+        }
+
+        return false;
     }
+
 }

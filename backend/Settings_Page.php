@@ -33,7 +33,7 @@ class Settings_Page extends Base {
         \add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
 
         $realpath        = (string) \realpath( __DIR__ );
-        $plugin_basename = \plugin_basename( \plugin_dir_path( $realpath ) . YESPO_TEXTDOMAIN . '.php' );
+        $plugin_basename = \plugin_basename( \plugin_dir_path( $realpath ) . 'yespo' . '.php' );
         \add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );
     }
 
@@ -59,7 +59,7 @@ class Settings_Page extends Base {
          * Add a settings page for this plugin to the main menu
          *
          */
-        \add_menu_page( \__( 'Yespo Settings', YESPO_TEXTDOMAIN ), 'Yespo', 'manage_options', YESPO_TEXTDOMAIN, array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
+        \add_menu_page( \__( 'Yespo Settings', 'yespo-cdp' ), 'Yespo', 'manage_options', 'yespo-cdp', array( $this, 'display_plugin_admin_page' ), 'dashicons-rest-api', 90 );
 /*
         add_submenu_page(
             YESPO_TEXTDOMAIN,
@@ -119,7 +119,7 @@ class Settings_Page extends Base {
         return \array_merge(
             array(
                 //'settings' => '<a href="' . \admin_url( 'admin.php?page=' . YESPO_TEXTDOMAIN . '_settings' ) . '">' . \__( 'Settings', YESPO_TEXTDOMAIN ) . '</a>',
-                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . YESPO_TEXTDOMAIN ) . '">' . \__( 'Settings', YESPO_TEXTDOMAIN ) . '</a>',
+                'settings' => '<a href="' . \admin_url( 'admin.php?page=' . 'yespo-cdp' ) . '">' . \__( 'Settings', 'yespo-cdp' ) . '</a>',
             ),
             $links
         );

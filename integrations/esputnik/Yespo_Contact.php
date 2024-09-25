@@ -147,7 +147,7 @@ class Yespo_Contact
 
     private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null, $relocate = false) {
         if (empty($this->authData)) {
-            return esc_html__( 'Empty user authorization data', YESPO_TEXTDOMAIN );
+            return esc_html__( 'Empty user authorization data', 'yespo-cdp' );
         }
 
         $url = self::REMOTE_CONTACT_ESPUTNIK_URL;
@@ -184,7 +184,7 @@ class Yespo_Contact
 
             }
         }
-        return esc_html__( 'Other user authorization operation', YESPO_TEXTDOMAIN );
+        return esc_html__( 'Other user authorization operation', 'yespo-cdp' );
     }
 
     public function get_meta_key(){
@@ -222,18 +222,33 @@ class Yespo_Contact
         else add_user_meta($user_id, self::USER_META_KEY, $external_id, true);
     }
 
-    public function add_bulk_esputnik_id_to_userprofile($usersForExport, $meta_value){
+    public function add_bulk_esputnik_id_to_userprofile($usersForExport, $meta_value) {
+        global $wpdb;
+
+        $usermeta_table = esc_sql($wpdb->usermeta);
         $values = [];
+        $placeholders = [];
+
         foreach ($usersForExport as $user_id) {
-            $values[] = $this->wpdb->prepare("(%d, %s, %s)", $user_id, self::USER_META_KEY, $meta_value);
+            $placeholders[] = "(%d, %s, %s)";
+            $values[] = $user_id;
+            $values[] = self::USER_META_KEY;
+            $values[] = $meta_value;
         }
 
         if (!empty($values)) {
-            $values_string = implode(", ", $values);
-            $query = "INSERT INTO {$this->wpdb->usermeta} (user_id, meta_key, meta_value) VALUES $values_string 
-              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+            $placeholders_string = implode(", ", $placeholders);
 
-            $this->wpdb->query($query);
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "
+                        INSERT INTO {$usermeta_table} (user_id, meta_key, meta_value) 
+                        VALUES {$placeholders_string}
+                        ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
+                    "
+                    , ...$values
+                )
+            );
         }
     }
 
@@ -247,44 +262,49 @@ class Yespo_Contact
         }
         return array_unique($users);
     }
-    private function get_users_from_log(){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM $this->table_log_users WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
+
+    private function get_users_from_log() {
+        global $wpdb;
+        $table_name = esc_sql($this->table_log_users);
+        $log_date_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection_since);
+        $log_date_end = gmdate('Y-m-d H:i:s', time() - $this->period_selection_up);
+
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table_name} WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
                 'delete',
-                gmdate('Y-m-d H:i:s', time() - $this->period_selection_since),
-                gmdate('Y-m-d H:i:s', time() - $this->period_selection_up),
+                $log_date_start,
+                $log_date_end,
                 200
             )
         );
     }
 
-    private function get_latest_created_users(){
-        return $this->wpdb->get_col(
-            $this->wpdb->prepare(
-                "SELECT ID FROM $this->table_users WHERE user_registered > %s",
-                gmdate('Y-m-d H:i:s', time() - $this->period_selection)
+    private function get_latest_created_users() {
+        global $wpdb;
+
+        $table_name = esc_sql($this->table_users);
+        $date_threshold = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
+        return $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT ID FROM {$table_name} WHERE user_registered > %s",
+                $date_threshold
             )
         );
     }
 
     public function add_entry_removed_user($email){
+        global $wpdb;
         $time = current_time('mysql');
 
-        $this->wpdb->insert(
-            $this->table_yespo_removed,
-            array(
-                'email' => $email,
-                'time' => $time,
-            ),
-            array(
-                '%s',
-                '%s',
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$this->table_yespo_removed} (email, time) VALUES (%s, %s)",
+                $email,
+                $time
             )
         );
     }
-
-
 
     public function export_active_bulk_users($data){
         if(!empty($data)){

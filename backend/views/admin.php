@@ -11,8 +11,5 @@
  * @license   GPL 3.0+
  * @link      https://yespo.io/
  */
-?>
 
-<div class="wrap">
-    <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
-</div>
+if ( ! defined( 'ABSPATH' ) ) exit;

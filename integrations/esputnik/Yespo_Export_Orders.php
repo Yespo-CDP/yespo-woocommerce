@@ -47,12 +47,12 @@ class Yespo_Export_Orders
         if(empty($status)){
             $data = [
                 'export_type' => 'orders',
-                'total' => $this->get_export_orders_count(),
+                'total' => intval( $this->get_export_orders_count() ),
                 'exported' => 0,
                 'status' => 'active'
             ];
             if($data['total'] > 0) {
-                $result = $this->wpdb->insert($this->table_name, $data);
+                $result = $this->insert_export_orders_data($data);
 
                 if ($result !== false) return true;
                 else return false;
@@ -253,6 +253,7 @@ class Yespo_Export_Orders
         if($status) return true;
         return false;
     }
+
     public function resume_export_orders(){
         $status = $this->get_order_export_status_processed('stopped');
         if(!empty($status) && $status->status == 'stopped'){
@@ -262,8 +263,9 @@ class Yespo_Export_Orders
     }
 
     public function get_order_export_status(){
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s ORDER BY id DESC LIMIT 1",
                 'orders'
             )
@@ -285,8 +287,9 @@ class Yespo_Export_Orders
     }
 
     public function get_order_export_status_processed($action){
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
                 'orders',
                 $action
@@ -308,33 +311,42 @@ class Yespo_Export_Orders
     }
 
     private function update_table_total($id, $total){
-        return $this->wpdb->update(
-            $this->table_name,
-            array('total' => $total),
-            array('id' => $id),
-            array('%d'),
-            array('%d')
+        global $wpdb;
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$this->table_name} SET total = %d WHERE id = %d",
+                $total,
+                $id
+            )
         );
     }
 
     private function update_table_data($id, $exported, $status, $code = null){
-        return $this->wpdb->update(
-            $this->table_name,
-            array(
-                'exported' => $exported,
-                'status' => $status,
-                'code' => $code,
-                'updated_at' => gmdate('Y-m-d H:i:s', time())
-            ),
-            array('id' => $id),
-            array('%d', '%s', '%s', '%s'),
-            array('%d')
+        global $wpdb;
+
+        $id = intval($id);
+        $exported = intval($exported);
+        $status = sanitize_text_field($status);
+        $code = sanitize_text_field($code);
+        $updated_at = gmdate('Y-m-d H:i:s', time());
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "
+                    UPDATE {$this->table_name} 
+                    SET exported = %d, status = %s, code = %s, updated_at = %s 
+                    WHERE id = %d
+                ",
+                $exported, $status, $code, $updated_at, $id
+            )
         );
     }
 
     public function get_total_orders(){
-        return $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$this->table_posts} 
                  WHERE type = %s 
                  AND status != %s",
@@ -344,8 +356,9 @@ class Yespo_Export_Orders
         );
     }
     public function get_export_orders_count(){
-        return $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM $this->table_posts
                 WHERE type = %s
                 AND status != %s
@@ -370,59 +383,58 @@ class Yespo_Export_Orders
         }
         return $order_ids;
     }
-    private function get_orders_args($shop_order){
-        return [
-            'post_type'      => $shop_order,
-            'posts_per_page' => -1,
-            'post_status'    => 'any',
-        ];
-    }
-    private function get_orders_export_args($shop_order){
-        return [
-            'post_type'      => $shop_order,
-            'posts_per_page' => -1,
-            'post_status'    => 'any',
-            'order'          => 'ASC',
-            'meta_query'     => array(
-                'relation' => 'OR',
-                array(
-                    'key'     => $this->meta_key,
-                    'value'   => 'true',
-                    'compare' => 'NOT EXISTS',
-                ),
-            ),
-        ];
-    }
 
     /**
      * entry to yespo queue orders
      **/
 
     public function add_entry_queue_items() {
+        global $wpdb;
         $count = $this->check_last_entry_status('STARTED');
 
         if ($count == 0) {
             $data = [
                 'yespo_status' => 'STARTED'
             ];
-            return $this->wpdb->insert($this->table_yespo_queue_orders, $data);
+
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$this->table_yespo_queue_orders} (yespo_status) VALUES (%s)",
+                    $data['yespo_status']
+                )
+            );
         }
 
         return false;
     }
 
     public function update_entry_queue_items($status) {
-        $last_id = $this->wpdb->get_var(
-            "SELECT ID 
-        FROM {$this->table_yespo_queue_orders} 
-        ORDER BY ID DESC 
-        LIMIT 1"
+        global $wpdb;
+        $last_id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT ID 
+                FROM {$this->table_yespo_queue_orders} 
+                ORDER BY ID DESC 
+                LIMIT 1"
+            )
         );
 
         if ($last_id) {
-            $data = ['yespo_status' => $status];
-            $where = ['ID' => $last_id];
-            return $this->wpdb->update($this->table_yespo_queue_orders, $data, $where);
+
+            $data = ['yespo_status' => $wpdb->prepare('%s', $status)];
+
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "
+                    UPDATE {$this->table_yespo_queue_orders}
+                    SET yespo_status = %s
+                    WHERE ID = %d
+                    ",
+                    $data['yespo_status'],
+                    $last_id
+                )
+            );
+
         }
 
         return false;
@@ -430,6 +442,7 @@ class Yespo_Export_Orders
     public function check_queue_items_for_session() {
         return $this->check_last_entry_status('STARTED');
     }
+
     private function check_last_entry_status($status) {
         $last_status = $this->wpdb->get_var(
             "SELECT yespo_status 
@@ -455,10 +468,11 @@ class Yespo_Export_Orders
     }
 
     public function get_bulk_export_orders(){
+        global $wpdb;
         $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
 
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT id FROM $this->table_posts
                 WHERE type = %s
                 AND status != %s
@@ -482,10 +496,11 @@ class Yespo_Export_Orders
     }
 
     public function get_unexported_orders_because_error($last_exported) {
+        global $wpdb;
         $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
 
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT id FROM $this->table_posts
             WHERE type = %s
             AND status != %s
@@ -511,8 +526,9 @@ class Yespo_Export_Orders
     }
 
     private function get_orders_from_database_without_metakey(){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_posts
             WHERE type = %s
             AND status != %s
@@ -527,19 +543,10 @@ class Yespo_Export_Orders
         );
     }
 
-    private function get_orders_from_database(){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s",
-                'shop_order',
-                'wc-checkout-draft'
-            )
-        );
-    }
-
     private function get_orders_from_db($time){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM $this->table_posts WHERE type = %s AND status != %s AND date_updated_gmt BETWEEN %s AND %s",
                 'shop_order',
                 'wc-checkout-draft',
@@ -550,29 +557,38 @@ class Yespo_Export_Orders
     }
 
     public function is_email_in_removed_users($email) {
+        global $wpdb;
         $current_timestamp = strtotime(current_time('mysql'));
         $searched_time = gmdate('Y-m-d H:i:s', $current_timestamp - 360);
 
-        $query = $this->wpdb->prepare(
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
             "SELECT COUNT(*) FROM $this->table_yespo_removed WHERE email = %s AND time >= %s",
-            $email,
-            $searched_time
+                $email,
+                $searched_time
+            )
         );
-        $count = $this->wpdb->get_var($query);
-
         return $count > 0;
     }
 
     //add json of exported orders
     public function add_json_log_entry($orders) {
-        $json = json_encode($orders);
+        global $wpdb;
+        $json = wp_json_encode($orders);
+
         if ($json !== false) {
-            $data = [
-                'text' => $json,
-                'created_at' =>  gmdate('Y-m-d H:i:s')
-            ];
-            $this->wpdb->insert($this->table_yespo_curl_json, $data);
+            $created_at = gmdate('Y-m-d H:i:s');
+
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$this->table_yespo_curl_json} (text, created_at) VALUES (%s, %s)",
+                    $json,
+                    $created_at
+                )
+            );
         }
+
+        return false;
     }
 
     private function get_exported_order_id(){
@@ -585,10 +601,11 @@ class Yespo_Export_Orders
         }
         return 0;
     }
+
     private function set_exported_order_id($order){
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
-            $options['yespo_highest_exported_order'] = $order->id;
+            $options['yespo_highest_exported_order'] = intval($order->id);
             update_option('yespo_options', $options);
         }
     }
@@ -601,8 +618,9 @@ class Yespo_Export_Orders
     }
 
     public function get_unsent_orders_since_time($time){
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        global $wpdb;
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT p.id 
                 FROM $this->table_posts p
                 LEFT JOIN {$this->wpdb->postmeta} pm ON p.id = pm.post_id AND pm.meta_key = 'sent_order_to_yespo'
@@ -616,6 +634,27 @@ class Yespo_Export_Orders
                 gmdate('Y-m-d H:i:s', time() - $this->period_selection)
             )
         );
+    }
+
+    private function insert_export_orders_data($data) {
+        global $wpdb;
+
+        $data['export_type'] = sanitize_text_field($data['export_type']);
+        $data['total'] = absint($data['total']);
+        $data['exported'] = absint($data['exported']);
+        $data['status'] = sanitize_text_field($data['status']);
+
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$this->table_name} (export_type, total, exported, status)
+        VALUES (%s, %d, %d, %s)",
+                $data['export_type'],
+                $data['total'],
+                $data['exported'],
+                $data['status']
+            )
+        );
+
     }
 
 }

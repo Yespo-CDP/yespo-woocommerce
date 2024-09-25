@@ -12,7 +12,7 @@ class Yespo_Errors
     }
     public static function error_400($data, $type){
         if($type == 'users') self::add_label_to_users($data, self::BAD_REQUEST);
-        if($type =='orders') (new Yespo_Order())->add_labels_to_orders($data);
+        if($type =='orders') (new Yespo_Order())->add_labels_to_orders($data, self::BAD_REQUEST, 'true');
     }
 
     public static function set_error_entry($error){
@@ -21,15 +21,20 @@ class Yespo_Errors
 
             $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
 
-            $data = array(
-                'error' => $error,
-                'time' => current_time('mysql')
+            $error_code = intval($error);
+            $current_time = current_time('mysql');
+
+            return $wpdb->query(
+                $wpdb->prepare(
+                "
+                    INSERT INTO {$table_yespo_errors} (error, time) 
+                    VALUES (%d, %s)
+                    ",
+                    $error_code,
+                    $current_time
+                )
             );
 
-            $wpdb->insert(
-                $table_yespo_errors,
-                $data
-            );
         }
 
     }
@@ -42,15 +47,17 @@ class Yespo_Errors
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
-        $sql = $wpdb->prepare("
-            SELECT * 
-            FROM $table_yespo_errors
-            WHERE time >= %s
-            LIMIT 1
-        ", $time_selection);
+        return $wpdb->get_row(
+            $wpdb->prepare("
+                    SELECT * 
+                    FROM $table_yespo_errors
+                    WHERE time >= %s
+                    LIMIT 1
+                ",
+                $time_selection
+            )
+        );
 
-
-        return $wpdb->get_row($sql);
     }
 
     public static function get_error_entry_old(){
@@ -62,15 +69,17 @@ class Yespo_Errors
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
-        $sql = $wpdb->prepare("
-            SELECT * 
-            FROM $table_yespo_errors
-            WHERE time < %s
-            ORDER BY time DESC
-            LIMIT 1
-        ", $time_selection);
-
-        return $wpdb->get_row($sql);
+        return $wpdb->get_row(
+            $wpdb->prepare("
+                    SELECT * 
+                    FROM $table_yespo_errors
+                    WHERE time < %s
+                    ORDER BY time DESC
+                    LIMIT 1
+                ",
+                $time_selection
+            )
+        );
 
     }
 
@@ -84,20 +93,35 @@ class Yespo_Errors
     }
 
 
-    public static function add_label_to_users($users, $meta_key){
+    public static function add_label_to_users($users, $meta_key) {
         global $wpdb;
+
         $values = [];
+        $placeholders = [];
+
         foreach ($users as $user_id) {
-            $values[] = $wpdb->prepare("(%d, %s, %s)", $user_id, $meta_key, 'true');
+            $placeholders[] = "(%d, %s, %s)";
+            $values[] = $user_id;
+            $values[] = $meta_key;
+            $values[] = 'true';
         }
 
         if (!empty($values)) {
-            $values_string = implode(", ", $values);
-            $query = "INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value) VALUES $values_string 
-              ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+            $placeholders_string = implode(", ", $placeholders);
 
-            $wpdb->query($query);
+            return $wpdb->query(
+                $wpdb->prepare(
+                    "
+                    INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value) 
+                    VALUES {$placeholders_string}
+                    ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
+                    ",
+                    ...$values
+                )
+            );
         }
+
+        return false;
     }
 
 }

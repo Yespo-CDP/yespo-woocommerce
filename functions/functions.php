@@ -479,14 +479,10 @@ function yespo_add_tracking_codes() {
 }
 add_action('wp_footer', 'yespo_add_tracking_codes');
 
-
-
 //generate code for sending to yespo
 function yespo_enqueue_tracking_scripts() {
     wp_enqueue_script('yespo-tracking-script', plugins_url('assets/build/plugin-public.js', YESPO_PLUGIN_ABSOLUTE), array(), null, true);
-
     (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Aggregator())->localize_scripts();
-
 }
 add_action('yespo_after_scripts', 'yespo_enqueue_tracking_scripts');
 

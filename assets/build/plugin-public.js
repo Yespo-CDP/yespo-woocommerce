@@ -1,6 +1,5 @@
-
-
-class YespoTracker{
+class YespoTracker
+{
     constructor() {
         this.categoryKey = trackingData.categoryKey;
 
@@ -14,6 +13,18 @@ class YespoTracker{
         eS('sendEvent', 'CategoryPage', {
             "CategoryPage": {
                 "categoryKey": categoryKey
+            }
+        });
+    }
+
+    sendProduct(){
+        eS('sendEvent', 'ProductPage', {
+            'ProductPage': {
+                'productKey': '24-MB02',
+                'price': '153',
+                'isInStock': 1,
+                'tag_some_field': ['123'],
+                'tag_another_field': ['321', '213']
             }
         });
     }

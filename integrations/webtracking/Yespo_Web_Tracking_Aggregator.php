@@ -14,6 +14,11 @@ class Yespo_Web_Tracking_Aggregator
 
         wp_localize_script('yespo-tracking-script', 'trackingData', array(
             'categoryKey' => esc_js($category_key),
+            'product' => array(
+                'id' => esc_js($product_id),
+                'name' => esc_js($product_name),
+                'price' => esc_js($product_price),
+            ),
         ));
     }
 }

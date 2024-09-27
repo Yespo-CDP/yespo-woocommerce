@@ -27,7 +27,7 @@ class Yespo_Web_Tracking_Script
         if(!$this->get_label_domain_from_options()) {
             $this->add_label_domain_options('true');
             if ($this->send_domain_to_yespo()) {
-                return $this->add_script_to_options();
+                $this->add_script_to_options();
             }
         }
     }

@@ -1,33 +1,37 @@
 class YespoTracker
 {
     constructor() {
-        this.categoryKey = trackingData.categoryKey;
+        this.category = trackingData.category;
+        this.product = trackingData.product;
 
         this.start();
     }
+
     start(){
-        if(this.categoryKey) this.sendCategory(this.categoryKey);
+        if(this.category) this.sendCategory(this.category);
+        if(this.product) this.sendProduct(this.product);
     }
-    sendCategory(categoryKey){
-        console.log('Category key has been sent with id:', categoryKey);
+
+    sendCategory(category){
+        console.log('Category key has been sent with id:', category);
         eS('sendEvent', 'CategoryPage', {
             "CategoryPage": {
-                "categoryKey": categoryKey
+                "categoryKey": category.categoryKey
             }
         });
     }
 
-    sendProduct(){
+    sendProduct(product){
+        console.log('Product key has been sent with id:', product);
         eS('sendEvent', 'ProductPage', {
             'ProductPage': {
-                'productKey': '24-MB02',
-                'price': '153',
-                'isInStock': 1,
-                'tag_some_field': ['123'],
-                'tag_another_field': ['321', '213']
+                'productKey': product.id,
+                'price': product.price,
+                'isInStock': product.stock
             }
         });
     }
+
 }
 
 

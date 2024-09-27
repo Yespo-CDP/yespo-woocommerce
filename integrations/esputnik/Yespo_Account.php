@@ -6,7 +6,7 @@ use Exception;
 
 class Yespo_Account
 {
-    const YESPO_REMOTE_ESPUTNIK_URL = "https://esputnik.com/api/v1/account/info";
+    const YESPO_REMOTE_ESPUTNIK_URL = "https://yespo.io/api/v1/account/info";
 
     public function send_keys($api_key) {
         try {

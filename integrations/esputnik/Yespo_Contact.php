@@ -12,9 +12,9 @@ class Yespo_Contact
     private $period_selection = 300;
     private $table_log_users;
     private $table_users;
-    const REMOTE_CONTACT_ESPUTNIK_URL = "https://esputnik.com/api/v1/contact";
-    const REMOTE_CONTACTS_ESPUTNIK_URL = "https://esputnik.com/api/v1/contacts";
-    const GET_EXPORT_BULK_ESPUTNIK_URL = "https://esputnik.com/api/v1/importstatus/";
+    const REMOTE_CONTACT_ESPUTNIK_URL = "https://yespo.io/api/v1/contact";
+    const REMOTE_CONTACTS_ESPUTNIK_URL = "https://yespo.io/api/v1/contacts";
+    const GET_EXPORT_BULK_ESPUTNIK_URL = "https://yespo.io/api/v1/importstatus/";
     const CUSTOM_REQUEST = "POST";
     const CUSTOM_REQUEST_DELETE = "DELETE";
     const CUSTOM_REQUEST_GET = "GET";
@@ -62,7 +62,7 @@ class Yespo_Contact
     }
 
     public function get_yespo_user_id($id){
-        $url = "https://esputnik.com/api/v1/contacts?externalCustomerId=" . $id ."&startindex=1&maxrows=500";
+        $url = "https://yespo.io/api/v1/contacts?externalCustomerId=" . $id ."&startindex=1&maxrows=500";
         $result = $this->process_on_yespo($url, 'add_meta_key');
         if($result){
             $response = json_decode($result);

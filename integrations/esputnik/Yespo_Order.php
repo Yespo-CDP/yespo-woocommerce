@@ -6,7 +6,7 @@ use WP_Query;
 
 class Yespo_Order
 {
-    const REMOTE_ORDER_YESPO_URL = 'https://esputnik.com/api/v1/orders';
+    const REMOTE_ORDER_YESPO_URL = 'https://yespo.io/api/v1/orders';
     const CUSTOM_ORDER_REQUEST = 'POST';
     private $authData;
     private $table_name_order;

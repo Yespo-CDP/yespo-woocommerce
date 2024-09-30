@@ -13,8 +13,8 @@ class Yespo_Web_Tracking_Aggregator
 
     public function localize_scripts(){
 
-        $category = $this->category->getData();
-        $product = $this->product->getData();
+        $category = $this->category->get_data();
+        $product = $this->product->get_data();
 
         $tracking_data = $this->get_localization_map(
             $category,
@@ -30,6 +30,8 @@ class Yespo_Web_Tracking_Aggregator
     private function get_localization_map($category, $product){
 
         $tracking_data = [];
+
+        $tracking_data['ajaxUrl'] = esc_url( admin_url( 'admin-ajax.php' ) );
 
         if (!is_null($category)) {
             $tracking_data['category'] = array(

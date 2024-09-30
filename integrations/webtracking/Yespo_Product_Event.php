@@ -11,7 +11,8 @@ class Yespo_Product_Event extends Yespo_Web_Tracking_Abstract
         $this->product = $product;
     }
 
-    public function getData(){
+    public function get_data(){
+        // TODO: Implement get_data() method.
         if(is_product()){
             return [
                 'id' => $this->getId(),

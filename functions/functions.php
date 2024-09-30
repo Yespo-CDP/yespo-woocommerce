@@ -476,6 +476,7 @@ add_action( 'admin_enqueue_scripts', 'yespo_enqueue_scripts_localization' );
 function yespo_add_tracking_codes() {
     echo (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_script_from_options();
     do_action('yespo_after_scripts');
+
 }
 add_action('wp_footer', 'yespo_add_tracking_codes');
 
@@ -490,12 +491,26 @@ add_action('yespo_after_scripts', 'yespo_enqueue_tracking_scripts');
 
 
 
+
+
+function yespo_get_cart_contents_function(){
+    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_cart_contents' ) {
+        $cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
+        if ($cart) {
+            wp_send_json_success(['cart' => $cart]);
+        } else wp_send_json_error(0);
+    }
+}
+add_action('wp_ajax_yespo_get_cart_contents', 'yespo_get_cart_contents_function');
+add_action('wp_ajax_nopriv_yespo_get_cart_contents', 'yespo_get_cart_contents_function');
+
+
+
+
+
+
 function get_all_users($post)
 {
-    $res = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
-
-    var_dump($res);
-
 
     /*
         $error = \Yespo\Integrations\Esputnik\Yespo_Errors::add_label_to_users([191,5080], 'yespo_bad_request');

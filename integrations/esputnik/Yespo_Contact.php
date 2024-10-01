@@ -265,29 +265,41 @@ class Yespo_Contact
 
     private function get_users_from_log() {
         global $wpdb;
-        $table_name = esc_sql($this->table_log_users);
+        $table_log_users = esc_sql($this->table_log_users);
         $log_date_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection_since);
         $log_date_end = gmdate('Y-m-d H:i:s', time() - $this->period_selection_up);
 
-        return $wpdb->get_results(
+        $cache_key = 'users_from_log_' . md5($log_date_start . $log_date_end);
+
+        $cached_results = wp_cache_get($cache_key);
+
+        if ($cached_results !== false) {
+            return $cached_results;
+        }
+
+        $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
+                "SELECT * FROM {$table_log_users} WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
                 'delete',
                 $log_date_start,
                 $log_date_end,
                 200
             )
         );
+
+        wp_cache_set($cache_key, $results, '', 1);
+
+        return $results;
     }
 
     private function get_latest_created_users() {
         global $wpdb;
 
-        $table_name = esc_sql($this->table_users);
+        $table_users = esc_sql($this->table_users);
         $date_threshold = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
         return $wpdb->get_col(
             $wpdb->prepare(
-                "SELECT ID FROM {$table_name} WHERE user_registered > %s",
+                "SELECT ID FROM {$table_users} WHERE user_registered > %s",
                 $date_threshold
             )
         );
@@ -296,10 +308,11 @@ class Yespo_Contact
     public function add_entry_removed_user($email){
         global $wpdb;
         $time = current_time('mysql');
+        $table_yespo_removed = esc_sql($this->table_yespo_removed);
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$this->table_yespo_removed} (email, time) VALUES (%s, %s)",
+                "INSERT INTO {$table_yespo_removed} (email, time) VALUES (%s, %s)",
                 $email,
                 $time
             )

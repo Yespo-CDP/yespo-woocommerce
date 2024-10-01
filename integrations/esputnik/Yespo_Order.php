@@ -212,6 +212,7 @@ class Yespo_Order
     private function add_log_order_entry($order_logs, $operation, $response, $time){
         global $wpdb;
 
+        $table_name_order = esc_sql($this->table_name_order);
         $placeholders = [];
         $query_values = [];
 
@@ -229,7 +230,7 @@ class Yespo_Order
             return $wpdb->query(
                 $wpdb->prepare(
                     "
-                    INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) 
+                    INSERT INTO {$table_name_order} (order_id, action, status, created_at) 
                     VALUES {$placeholders_string}
                     ",
                     ...$query_values

@@ -179,18 +179,22 @@ class Yespo_Export_Users
 
     private function get_user_export_status(){
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
+
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM $this->table_name WHERE export_type = %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM {$table_name} WHERE export_type = %s ORDER BY id DESC LIMIT 1",
                 'users'
             )
         );
     }
     private function get_user_export_status_processed($action){
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
+
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM $this->table_name WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM {$table_name} WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
                 'users',
                 $action
             )
@@ -208,7 +212,8 @@ class Yespo_Export_Users
 
     public function get_users_total_count(){
         global $wpdb;
-        $capabilities_meta_key = $this->wpdb->prefix . 'capabilities';
+        $capabilities_meta_key = esc_sql($this->wpdb->prefix) . 'capabilities';
+
         return $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s",
@@ -219,15 +224,15 @@ class Yespo_Export_Users
     }
     public function get_users_export_count(){
         global $wpdb;
-        $capabilities_meta_key = $this->wpdb->prefix . 'capabilities';
+        $capabilities_meta_key = esc_sql($this->wpdb->prefix) . 'capabilities';
 
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->wpdb->usermeta} um
+                "SELECT COUNT(*) FROM {$wpdb->usermeta} um
                 WHERE um.meta_key = %s
                 AND um.meta_value LIKE %s
                 AND NOT EXISTS (
-                    SELECT 1 FROM {$this->wpdb->usermeta} um2
+                    SELECT 1 FROM {$wpdb->usermeta} um2
                     WHERE um2.user_id = um.user_id
                     AND um2.meta_key = %s
                 )",
@@ -276,11 +281,12 @@ class Yespo_Export_Users
     public function add_entry_yespo_queue($session_id){
         global $wpdb;
 
+        $table_yespo_queue = esc_sql($this->table_yespo_queue);
         $session_id = sanitize_text_field($session_id);
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$this->table_yespo_queue} (session_id, export_status, local_status) VALUES (%s, %s, %s)",
+                "INSERT INTO {$table_yespo_queue} (session_id, export_status, local_status) VALUES (%s, %s, %s)",
                 $session_id,
                 'IMPORTING',
                 ''
@@ -291,6 +297,7 @@ class Yespo_Export_Users
     public function update_entry_yespo_queue($session_id, $export_status = '', $local_status = '') {
         global $wpdb;
 
+        $table_yespo_queue = esc_sql($this->table_yespo_queue);
         $data = [];
         $values = [];
 
@@ -315,7 +322,7 @@ class Yespo_Export_Users
 
         return $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$this->table_yespo_queue} SET {$set_clause} WHERE {$where_clause}",
+                "UPDATE {$table_yespo_queue} SET {$set_clause} WHERE {$where_clause}",
                 ...$values
             )
         );
@@ -327,12 +334,12 @@ class Yespo_Export_Users
      **/
     public function add_entry_queue_items($user_id){
         global $wpdb;
-
+        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
         $contact_id = sanitize_text_field($user_id);
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$this->table_yespo_queue_items} (session_id, contact_id, yespo_id) VALUES (%s, %s, %s)",
+                "INSERT INTO {$table_yespo_queue_items} (session_id, contact_id, yespo_id) VALUES (%s, %s, %s)",
                 '', $contact_id, ''
             )
         );
@@ -341,6 +348,7 @@ class Yespo_Export_Users
     public function update_entry_queue_items($session_id, $user_id, $yespo_id = null) {
         global $wpdb;
 
+        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
         $session_id = sanitize_text_field($session_id);
         $yespo_id = sanitize_text_field($yespo_id);
         $contact_id = sanitize_text_field($user_id);
@@ -369,7 +377,7 @@ class Yespo_Export_Users
 
         return $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$this->table_yespo_queue_items} SET {$set_clause} WHERE {$where_clause}",
+                "UPDATE {$table_yespo_queue_items} SET {$set_clause} WHERE {$where_clause}",
                 ...$values
             )
         );
@@ -378,10 +386,12 @@ class Yespo_Export_Users
 
     public function check_queue_items_for_session($session_id) {
         global $wpdb;
+        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
+
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) 
-                FROM {$this->table_yespo_queue_items} 
+                FROM {$table_yespo_queue_items} 
                 WHERE session_id = %s 
                 AND (yespo_id IS NULL OR yespo_id = '')",
                 $session_id
@@ -392,6 +402,7 @@ class Yespo_Export_Users
 
     private function update_table_data($id, $exported, $status, $code = null){
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
 
         $id = intval($id);
         $exported = intval($exported);
@@ -402,7 +413,7 @@ class Yespo_Export_Users
         return $wpdb->query(
             $wpdb->prepare(
                 "
-                    UPDATE {$this->table_name} 
+                    UPDATE {$table_name} 
                     SET exported = %d, status = %s, code = %s, updated_at = %s 
                     WHERE id = %d
                 ",
@@ -413,10 +424,11 @@ class Yespo_Export_Users
 
     private function update_table_total($id, $total){
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
 
         return $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$this->table_name} SET total = %d WHERE id = %d",
+                "UPDATE {$table_name} SET total = %d WHERE id = %d",
                 $total,
                 $id
             )
@@ -506,9 +518,10 @@ class Yespo_Export_Users
 
     private function check_sessios_importing(){
         global $wpdb;
+        $table_yespo_queue = esc_sql($this->table_yespo_queue);
 
         $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $this->table_yespo_queue WHERE export_status = %s",
+                "SELECT COUNT(*) FROM {$table_yespo_queue} WHERE export_status = %s",
                 'IMPORTING'
             )
         );
@@ -538,9 +551,11 @@ class Yespo_Export_Users
 
     private function get_last_order_entry_not_completed(){
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
+
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM $this->table_name WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM {$table_name} WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
                 'orders',
                 'completed'
             )
@@ -549,6 +564,7 @@ class Yespo_Export_Users
 
     private function insert_export_users_data($data) {
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
 
         $data['export_type'] = sanitize_text_field($data['export_type']);
         $data['total'] = absint($data['total']);
@@ -557,7 +573,7 @@ class Yespo_Export_Users
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$this->table_name} (export_type, total, exported, status)
+                "INSERT INTO {$table_name} (export_type, total, exported, status)
         VALUES (%s, %d, %d, %s)",
                 $data['export_type'],
                 $data['total'],

@@ -24,7 +24,7 @@
 
 // If uninstall not called from WordPress, then exit.
 if ( !defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	exit;
+    exit;
 }
 
 /**
@@ -33,22 +33,22 @@ if ( !defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  * @return void
  */
 function yespo_uninstall_multisite() {
-	if ( is_multisite() ) {
-		/** @var array<\WP_Site> $blogs */
-		$blogs = get_sites();
+    if ( is_multisite() ) {
+        /** @var array<\WP_Site> $blogs */
+        $blogs = get_sites();
 
-		if ( !empty( $blogs ) ) {
-			foreach ( $blogs as $blog ) {
-				switch_to_blog( (int) $blog->blog_id );
-				y_uninstall();
-				restore_current_blog();
-			}
+        if ( !empty( $blogs ) ) {
+            foreach ( $blogs as $blog ) {
+                switch_to_blog( (int) $blog->blog_id );
+                y_uninstall();
+                restore_current_blog();
+            }
 
-			return;
-		}
-	}
+            return;
+        }
+    }
 
-	yespo_uninstall();
+    yespo_uninstall();
 }
 
 /**
@@ -71,16 +71,65 @@ function yespo_uninstall() { // phpcs:ignore
     $table_yespo_removed = $wpdb->prefix . 'yespo_removed_users';
     $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
 
-    $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $order_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_items" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_orders" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_curl_json" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_auth_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_removed" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_errors" );
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $contact_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $export_status_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $order_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_queue
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_queue_items
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_queue_orders
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_curl_json
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_auth_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_removed
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_errors
+        )
+    );
 
     $wpdb->query(
         $wpdb->prepare(
@@ -105,7 +154,7 @@ function yespo_uninstall() { // phpcs:ignore
     delete_option('yespo_options');
     delete_option('yespo-version');
 
-    
+
     if (wp_next_scheduled('yespo_export_data_cron')) {
         wp_clear_scheduled_hook('yespo_export_data_cron');
     }

@@ -183,7 +183,8 @@ class Yespo_Export_Users
 
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE export_type = %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM %i WHERE export_type = %s ORDER BY id DESC LIMIT 1",
+                $table_name,
                 'users'
             )
         );
@@ -194,7 +195,8 @@ class Yespo_Export_Users
 
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM %i WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
+                $table_name,
                 'users',
                 $action
             )
@@ -216,7 +218,8 @@ class Yespo_Export_Users
 
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s",
+                "SELECT COUNT(*) FROM %i WHERE meta_key = %s AND meta_value LIKE %s",
+                $wpdb->usermeta,
                 $capabilities_meta_key,
                 '%"customer"%'
             )
@@ -249,13 +252,14 @@ class Yespo_Export_Users
 
     public function get_bulk_users_object(){
         global $wpdb;
+        $prefix_postmeta_capabilities = esc_sql($wpdb->prefix . 'capabilities');
 
         return $wpdb->get_col(
             $wpdb->prepare("
                     SELECT u.ID 
                     FROM {$wpdb->users} u
                     INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id
-                    WHERE um.meta_key = '{$wpdb->prefix}capabilities'
+                    WHERE um.meta_key = '{$prefix_postmeta_capabilities}'
                       AND um.meta_value LIKE %s
                       AND u.ID > %d
                       AND u.ID NOT IN (
@@ -286,7 +290,8 @@ class Yespo_Export_Users
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$table_yespo_queue} (session_id, export_status, local_status) VALUES (%s, %s, %s)",
+                "INSERT INTO %i (session_id, export_status, local_status) VALUES (%s, %s, %s)",
+                $table_yespo_queue,
                 $session_id,
                 'IMPORTING',
                 ''
@@ -339,8 +344,8 @@ class Yespo_Export_Users
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$table_yespo_queue_items} (session_id, contact_id, yespo_id) VALUES (%s, %s, %s)",
-                '', $contact_id, ''
+                "INSERT INTO %i (session_id, contact_id, yespo_id) VALUES (%s, %s, %s)",
+                $table_yespo_queue_items, '', $contact_id, ''
             )
         );
     }
@@ -391,9 +396,10 @@ class Yespo_Export_Users
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) 
-                FROM {$table_yespo_queue_items} 
+                FROM %i
                 WHERE session_id = %s 
                 AND (yespo_id IS NULL OR yespo_id = '')",
+                $table_yespo_queue_items,
                 $session_id
             )
         );
@@ -413,10 +419,11 @@ class Yespo_Export_Users
         return $wpdb->query(
             $wpdb->prepare(
                 "
-                    UPDATE {$table_name} 
+                    UPDATE %i 
                     SET exported = %d, status = %s, code = %s, updated_at = %s 
                     WHERE id = %d
                 ",
+                $table_name,
                 $exported, $status, $code, $updated_at, $id
             )
         );
@@ -428,7 +435,8 @@ class Yespo_Export_Users
 
         return $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$table_name} SET total = %d WHERE id = %d",
+                "UPDATE %i SET total = %d WHERE id = %d",
+                $table_name,
                 $total,
                 $id
             )
@@ -521,7 +529,8 @@ class Yespo_Export_Users
         $table_yespo_queue = esc_sql($this->table_yespo_queue);
 
         $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table_yespo_queue} WHERE export_status = %s",
+                "SELECT COUNT(*) FROM %i WHERE export_status = %s",
+            $table_yespo_queue,
                 'IMPORTING'
             )
         );
@@ -555,7 +564,8 @@ class Yespo_Export_Users
 
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM %i WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
+                $table_name,
                 'orders',
                 'completed'
             )
@@ -573,8 +583,9 @@ class Yespo_Export_Users
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$table_name} (export_type, total, exported, status)
+                "INSERT INTO %i (export_type, total, exported, status)
         VALUES (%s, %d, %d, %s)",
+                $table_name,
                 $data['export_type'],
                 $data['total'],
                 $data['exported'],

@@ -71,16 +71,65 @@ function yespo_uninstall() { // phpcs:ignore
     $table_yespo_removed = $wpdb->prefix . 'yespo_removed_users';
     $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
 
-    $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $order_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_items" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_orders" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_curl_json" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_auth_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_removed" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_errors" );
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $contact_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $export_status_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $order_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_queue
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_queue_items
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_queue_orders
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_curl_json
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_auth_log
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_removed
+        )
+    );
+
+    $wpdb->query(
+        $wpdb->prepare("DROP TABLE IF EXISTS %i",
+            $table_yespo_errors
+        )
+    );
 
     $wpdb->query(
         $wpdb->prepare(

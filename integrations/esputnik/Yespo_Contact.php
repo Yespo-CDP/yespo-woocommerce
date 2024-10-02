@@ -279,7 +279,8 @@ class Yespo_Contact
 
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$table_log_users} WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
+                "SELECT * FROM %i WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
+                $table_log_users,
                 'delete',
                 $log_date_start,
                 $log_date_end,
@@ -299,7 +300,8 @@ class Yespo_Contact
         $date_threshold = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
         return $wpdb->get_col(
             $wpdb->prepare(
-                "SELECT ID FROM {$table_users} WHERE user_registered > %s",
+                "SELECT ID FROM %i WHERE user_registered > %s",
+                $table_users,
                 $date_threshold
             )
         );
@@ -312,7 +314,8 @@ class Yespo_Contact
 
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$table_yespo_removed} (email, time) VALUES (%s, %s)",
+                "INSERT INTO %i (email, time) VALUES (%s, %s)",
+                $table_yespo_removed,
                 $email,
                 $time
             )

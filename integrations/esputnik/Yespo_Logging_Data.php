@@ -58,8 +58,9 @@ class Yespo_Logging_Data
         try {
             return $wpdb->query(
                 $wpdb->prepare(
-                    "INSERT INTO {$table_name} (user_id, contact_id, action, yespo, log_date)
+                    "INSERT INTO %i (user_id, contact_id, action, yespo, log_date)
                     VALUES (%s, %s, %s, %d, %s)",
+                    $table_name,
                     $data['user_id'],
                     $data['contact_id'],
                     $data['action'],
@@ -79,7 +80,8 @@ class Yespo_Logging_Data
 
         $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$table_name} SET yespo = %d WHERE action = %s AND user_id = %s",
+                "UPDATE %i SET yespo = %d WHERE action = %s AND user_id = %s",
+                $table_name,
                 sanitize_text_field($response),
                 sanitize_text_field($action),
                 sanitize_text_field($user_id)
@@ -105,9 +107,10 @@ class Yespo_Logging_Data
                 return $wpdb->query(
                     $wpdb->prepare(
                         "
-                        INSERT INTO {$table_name_order} (order_id, action, status, created_at) 
+                        INSERT INTO %i (order_id, action, status, created_at) 
                         VALUES (%s, %s, %s, %s)
                         ",
+                        $table_name_order,
                         $data['order_id'],
                         $data['action'],
                         $data['status'],
@@ -127,7 +130,8 @@ class Yespo_Logging_Data
 
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table_name_order} WHERE order_id = %s AND action = %s AND status = %s",
+                "SELECT COUNT(*) FROM %i WHERE order_id = %s AND action = %s AND status = %s",
+                sanitize_text_field($table_name_order),
                 sanitize_text_field($order_id),
                 sanitize_text_field($action),
                 sanitize_text_field($status)

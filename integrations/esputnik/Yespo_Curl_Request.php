@@ -35,6 +35,8 @@ class Yespo_Curl_Request
             $http_code = wp_remote_retrieve_response_code($response);
             $response_body = wp_remote_retrieve_body($response);
 
+            //$http_code = 0;
+
             if (
                 $custom_request === 'DELETE' ||
                 $type_response === 'orders' ||

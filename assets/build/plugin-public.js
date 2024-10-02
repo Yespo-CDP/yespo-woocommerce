@@ -112,7 +112,7 @@ jQuery(document.body).on('updated_cart_totals', function(){
 
 
 
-
+/*
 jQuery(document.body).on('updated_cart', function(){
     console.log('Cart has been updated_cart');
     // Дії після зміни в кошику
@@ -127,3 +127,49 @@ jQuery(document.body).on('added_to_cart', function(){
     console.log('Product added to cart');
     // Дії після додавання товару до кошика
 });
+*/
+
+/* WORKS when add products in category or shop page*/
+/*
+const originalFetch = window.fetch;
+let hasTriggered = false;
+
+window.fetch = function () {
+    if (arguments[0].includes('/wc/store/v1/batch') && !hasTriggered) {
+        hasTriggered = true;
+        console.log('product added to cart');
+
+        return originalFetch.apply(this, arguments)
+            .then(response => {
+                new YespoTracker('cart');
+
+                setTimeout(() => {
+                    hasTriggered = false;
+                }, 5000);
+
+                return response;
+            });
+
+    } else {
+        return originalFetch.apply(this, arguments);
+    }
+};
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    let addToCartButton = document.querySelector('.single_add_to_cart_button');
+
+    if (addToCartButton) {
+        addToCartButton.addEventListener('click', function(event) {
+            console.log('Product added to cart');
+            new YespoTracker('cart');
+
+            setTimeout(() => {
+                hasTriggered = false;
+            }, 10000);
+        });
+    }
+});
+*/

@@ -27,9 +27,10 @@ class Yespo_Errors
             return $wpdb->query(
                 $wpdb->prepare(
                     "
-                    INSERT INTO {$table_yespo_errors} (error, time) 
+                    INSERT INTO %i (error, time) 
                     VALUES (%d, %s)
                     ",
+                    $table_yespo_errors,
                     $error_code,
                     $current_time
                 )
@@ -50,10 +51,11 @@ class Yespo_Errors
         return $wpdb->get_row(
             $wpdb->prepare("
                     SELECT * 
-                    FROM {$table_yespo_errors}
+                    FROM %i
                     WHERE time >= %s
                     LIMIT 1
                 ",
+                $table_yespo_errors,
                 $time_selection
             )
         );
@@ -72,11 +74,12 @@ class Yespo_Errors
         return $wpdb->get_row(
             $wpdb->prepare("
                     SELECT * 
-                    FROM {$table_yespo_errors}
+                    FROM %i
                     WHERE time < %s
                     ORDER BY time DESC
                     LIMIT 1
                 ",
+                $table_yespo_errors,
                 $time_selection
             )
         );

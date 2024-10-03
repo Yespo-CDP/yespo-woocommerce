@@ -487,17 +487,6 @@ function yespo_enqueue_tracking_scripts() {
 add_action('yespo_after_scripts', 'yespo_enqueue_tracking_scripts');
 
 
-
-
-
-
-
-
-
-
-
-
-
 // get cart data due ajax request
 function yespo_get_cart_contents_function(){
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_cart_contents' ) {
@@ -522,63 +511,24 @@ add_action('wp_ajax_nopriv_yespo_get_cart_contents', 'yespo_get_cart_contents_fu
 
 
 
-
-add_action('woocommerce_add_to_cart', 'my_function_on_add_to_cart', 10, 6);
+/*
 function my_function_on_add_to_cart($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data) {
-    $cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = "woocommerce_add_to_cart " . json_encode($cart) . "\n";
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
+    do_action('yespo_after_scripts');
 }
+add_action('woocommerce_add_to_cart', 'my_function_on_add_to_cart', 10, 6);
 
-//add_action('woocommerce_cart_updated', 'my_function_on_cart_updated');
-function my_function_on_cart_updated() {
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = "woocommerce_cart_updated " . "\n";
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
-}
 
-add_action('woocommerce_before_cart_item_quantity_zero', 'my_function_on_cart_item_remove', 10, 1);
-function my_function_on_cart_item_remove($cart_item_key) {
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = "woocommerce_before_cart_item_quantity_zero " . "\n";
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
-}
-
-add_action('woocommerce_after_cart_item_quantity_update', 'my_function_on_quantity_update', 10, 2);
 function my_function_on_quantity_update($cart_item_key, $quantity) {
-    $cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = "woocommerce_after_cart_item_quantity_update " . json_encode($cart) . "\n";
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
+    do_action('yespo_after_scripts');
 }
+add_action('woocommerce_after_cart_item_quantity_update', 'my_function_on_quantity_update', 10, 2);
 
-add_action('woocommerce_cart_item_removed', 'my_function_on_cart_item_removed', 10, 2);
+
 function my_function_on_cart_item_removed($cart_item_key, $cart) {
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = "woocommerce_cart_item_removed " . "\n";
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
+    do_action('yespo_after_scripts');
 }
+add_action('woocommerce_cart_item_removed', 'my_function_on_cart_item_removed', 10, 2);
+*/
 
 
 
@@ -586,21 +536,6 @@ function my_function_on_cart_item_removed($cart_item_key, $cart) {
 
 
 
-
-
-
-
-add_action('woocommerce_rest_insert_batch', 'my_custom_function_on_batch', 10, 2);
-function my_custom_function_on_batch($request, $response) {
-    // Додаємо вашу логіку тут
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-    $data_to_append = "added product " . json_encode($request) . "\n";
-    $file_handle = fopen($file_path, 'a');
-    if ($file_handle) {
-        fwrite($file_handle, $data_to_append);
-        fclose($file_handle);
-    }
-}
 
 
 function catch_wc_batch_requests($result, $server, $request) {
@@ -631,6 +566,8 @@ function catch_wc_batch_requests($result, $server, $request) {
 function get_all_users($post)
 {
 
+    //$cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
+    //var_dump($cart);
     /*
         $error = \Yespo\Integrations\Esputnik\Yespo_Errors::add_label_to_users([191,5080], 'yespo_bad_request');
     var_dump($error);

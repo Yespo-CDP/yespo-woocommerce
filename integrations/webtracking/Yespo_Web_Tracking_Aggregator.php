@@ -6,15 +6,20 @@ class Yespo_Web_Tracking_Aggregator
 {
     private $category;
     private $product;
+    private $cart;
+
     public function __construct(){
         $this->category = new Yespo_Category_Event();
         $this->product = new Yespo_Product_Event();
+        $this->cart = new Yespo_Cart_Event();
     }
 
     public function localize_scripts(){
 
         $category = $this->category->get_data();
         $product = $this->product->get_data();
+        //if( is_cart() ) $cart = $this->cart->get_data();
+        //else $cart = null;
 
         $tracking_data = $this->get_localization_map(
             $category,
@@ -27,7 +32,10 @@ class Yespo_Web_Tracking_Aggregator
 
     }
 
-    private function get_localization_map($category, $product){
+    private function get_localization_map(
+        $category,
+        $product
+    ){
 
         $tracking_data = [];
 
@@ -46,6 +54,10 @@ class Yespo_Web_Tracking_Aggregator
                 'stock' => isset($product['stock']) ? esc_js($product['stock']) : '',
             );
         }
+
+        //if (!is_null($cart)) {
+            //$tracking_data['cart'] = $cart;
+        //}
 
         return $tracking_data;
     }

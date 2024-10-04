@@ -6,8 +6,8 @@ use Exception;
 
 class Yespo_Web_Tracking_Script
 {
-    const ADD_DOMAIN_URL = "https://esputnik.com/api/v1/site/domains";
-    const SCRIPT_URL = "https://esputnik.com/api/v1/site/script";
+    const ADD_DOMAIN_URL = "https://yespo.io/api/v1/site/domains";
+    const SCRIPT_URL = "https://yespo.io/api/v1/site/script";
     const METHOD_POST = "POST";
     const METHOD_GET = "GET";
     private $options;
@@ -35,7 +35,7 @@ class Yespo_Web_Tracking_Script
     public function send_domain_to_yespo(){
         $url = $this->get_url();
         //$url = 'https://www.padi.com/'; // needs be removed
-        $url = 'https://www.krabiresort.net/';
+        //$url = 'https://www.krabiresort.net/';
         if(!empty($url)) {
             $data = ['domain' => $url];
             return $this->make_curl_request(

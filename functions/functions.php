@@ -132,7 +132,6 @@ function yespo_save_settings_via_form_function() {
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
-                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
             }
             $response_data = array(
                 'status' => 'success',
@@ -172,6 +171,9 @@ function yespo_update_user_profile_function($user_id, $old_user_data) {
     }
 
     if (isset($_REQUEST['woocommerce-edit-address-nonce'])) {
+        if (!check_admin_referer('woocommerce-edit-address', 'woocommerce-edit-address-nonce')) {
+            return;
+        }
         if(!empty($user_id)) {
             $user = get_user_by('id', $user_id);
             $request = map_deep($_REQUEST, function($value, $key) {
@@ -238,6 +240,9 @@ add_action('wp_ajax_nopriv_yespo_get_users_total_export', 'yespo_get_all_users_t
 
 /*** Export users to Yespo ***/
 function yespo_export_user_data_to_esputnik_function(){
+    if ( ! isset( $_POST['yespo_start_export_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_POST['yespo_start_export_nonce'])), 'yespo_export_user_data_to_esputnik' ) ) {
+        return;
+    }
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_export_user_data_to_esputnik' ) {
         if(isset($_REQUEST['service'])){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Users)->add_users_export_task();
@@ -334,6 +339,11 @@ add_action('wp_ajax_nopriv_yespo_get_orders_total_export', 'yespo_get_all_orders
 
 /*** Export orders to Yespo ***/
 function yespo_export_order_data_function(){
+
+    if ( ! isset( $_POST['yespo_start_export_orders_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_POST['yespo_start_export_orders_nonce'])), 'yespo_export_order_data_to_esputnik' ) ) {
+        return;
+    }
+
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_export_order_data_to_esputnik' ) {
         if(isset($_REQUEST['service'])){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Orders)->add_orders_export_task();
@@ -463,7 +473,9 @@ function yespo_enqueue_scripts_localization() {
         'yespoLink' => 'https://my.yespo.io/settings-ui/#/api-keys-list',
         'yespoLinkText' => esc_html__( 'link', 'yespo-cdp' ),
         'yespoApiKey' => esc_js(__( 'API Key', 'yespo-cdp' )),
-        'synchronize' =>  esc_js(__('Synchronize', 'yespo-cdp'))
+        'synchronize' =>  esc_js(__('Synchronize', 'yespo-cdp')),
+        'startExportUsersNonce' => wp_create_nonce('yespo_export_user_data_to_esputnik'),
+        'startExportOrdersNonce' => wp_create_nonce('yespo_export_order_data_to_esputnik')
     ));
 }
 add_action( 'admin_enqueue_scripts', 'yespo_enqueue_scripts_localization' );

@@ -15,6 +15,9 @@ class YespoExportData {
         this.contactSupportButton = yespoVars.contactSupportButton;
         this.ajaxUrl = yespoVars.ajaxUrl;
 
+        this.startExportUsersNonce = yespoVars.startExportUsersNonce;
+        this.startExportOrdersNonce = yespoVars.startExportOrdersNonce;
+
         this.nonceApiKeyForm = yespoVars.nonceApiKeyForm;
         this.apiKeyValue = yespoVars.apiKeyValue;
         this.apiKeyText = yespoVars.apiKeyText + ' ';
@@ -520,26 +523,31 @@ class YespoExportData {
         if(this.users.export > 0) {
             this.startExport(
                 'yespo_export_user_data_to_esputnik',
-                'users'
+                'users',
+                'yespo_start_export_nonce',
+                this.startExportUsersNonce
             );
         }
     }
 
-    startExport(action, service){
-        this.startExportChunk(action, service);
+    startExport(action, service, nonceName, nonceAction){
+        this.startExportChunk(action, service, nonceName, nonceAction);
     }
 
     startExportOrders() {
         this.startExport(
             'yespo_export_order_data_to_esputnik',
-            'orders'
+            'orders',
+            'yespo_start_export_orders_nonce',
+            this.startExportOrdersNonce
         );
     }
 
-    startExportChunk(action, service) {
+    startExportChunk(action, service, nonceName, nonceAction) {
         const formData = new FormData();
         formData.append('service', service);
         formData.append('action', action);
+        formData.append(nonceName, nonceAction);
 
         fetch(this.ajaxUrl, {
             method: 'POST',

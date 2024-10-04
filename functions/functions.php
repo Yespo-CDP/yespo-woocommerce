@@ -449,9 +449,11 @@ add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
  * JAVASCRIPT LOCALIZATION
  */
 function yespo_enqueue_scripts_localization() {
-    wp_enqueue_script( 'yespo-js', YESPO_PLUGIN_ROOT . 'assets/build/plugin-admin.js', array(), '1.0', true );
+    if (!wp_script_is(YESPO_TEXTDOMAIN . '-settings-admin', 'enqueued')) {
+        wp_enqueue_script( YESPO_TEXTDOMAIN . '-settings-admin', plugins_url( 'assets/build/plugin-admin.js', YESPO_PLUGIN_ABSOLUTE ), array(), '1.0', true );
+    }
 
-    wp_localize_script( 'yespo-js', 'yespoVars', array(
+    wp_localize_script( YESPO_TEXTDOMAIN . '-settings-admin', 'yespoVars', array(
         'h1' => esc_html__( 'Synchronization progress', 'yespo-cdp' ),
         'outSideText' => esc_html__( 'Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', 'yespo-cdp' ),
         'h4' => esc_html__( 'The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', 'yespo-cdp' ),

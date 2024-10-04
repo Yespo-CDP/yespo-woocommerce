@@ -22,19 +22,19 @@ class YespoTracker
 
     sendCategory(category){
         console.log('Category key has been sent with id:', category);
-        // eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
+        eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
     }
 
     sendProduct(product){
         console.log('Product key has been sent with id:', product);
-        // eS('sendEvent', 'ProductPage', { 'ProductPage': { 'productKey': product.id, 'price': product.price, 'isInStock': product.stock } });
+        eS('sendEvent', 'ProductPage', { 'ProductPage': { 'productKey': product.id, 'price': product.price, 'isInStock': product.stock } });
     }
 
     sendCart(cart){
         const statusCart = this.cartMapping(cart);
         console.log('sendCart inside', statusCart);
         console.log(cart.GUID);
-        // eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
+        eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
     }
 
     cartMapping(cart){

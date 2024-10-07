@@ -27,7 +27,7 @@ class Yespo_Web_Tracking_Aggregator
         );
 
         if (!empty($tracking_data)) {
-            wp_localize_script('yespo-tracking-script', 'trackingData', $tracking_data);
+            wp_localize_script(YESPO_TEXTDOMAIN . '-plugin-script', 'trackingData', $tracking_data);
         }
 
     }

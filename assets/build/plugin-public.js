@@ -7,6 +7,7 @@ class YespoTracker
         if (trackingData.category) this.category = trackingData.category;
         if (trackingData.product) this.product = trackingData.product;
         if (trackingData.cart) this.cart = trackingData.cart;
+        if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
 
         console.log(trackingData);
 
@@ -14,12 +15,16 @@ class YespoTracker
     }
 
     start(){
+        if(this.thankYou && this.action === null) this.thankYouPage(this.thankYou);
         if(this.category && this.action === null) this.sendCategory(this.category);
         if(this.product && this.action === null) this.sendProduct(this.product);
         if(this.cart && this.action === null) this.sendCart(this.cart);
         if(this.action === 'cart' || this.action === 'cart_empty') this.getCartData();
     }
 
+    thankYouPage(purchase){
+        console.log('Category key has been sent with id:', purchase);
+    }
     sendCategory(category){
         console.log('Category key has been sent with id:', category);
         eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
@@ -205,5 +210,3 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.removeItem('productAdded');
     }
 });
-
-

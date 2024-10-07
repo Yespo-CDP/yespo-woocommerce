@@ -3,21 +3,41 @@
 namespace Yespo\Integrations\Webtracking;
 
 use WP_Query;
+use Yespo\Integrations\Esputnik\Yespo_Export_Orders;
 
-class Yespo_Purchased_Items extends Yespo_Web_Tracking_Abstract
+class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
 {
     public function get_data(){
         // TODO: Implement get_data() method.
-        if ( isset( $_GET['order-received'] ) && ! empty( $_GET['order-received'] ) ) {
+        if ( strpos(sanitize_text_field($_SERVER['REQUEST_URI']), 'order-received') !== false ) {
 
             $cart_items = [];
 
+            $order = $this->get_created_order();
+
+            $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
+            $data_to_append = json_encode($order) . '---order---data' . "\n";
+            $file_handle = fopen($file_path, 'a');
+            if ($file_handle) {
+                fwrite($file_handle, $data_to_append);
+                fclose($file_handle);
+            }
+/*
             $args = array(
-                'post_type' => 'shop_order', // Тип поста - замовлення
-                'post_status' => 'wc-completed', // Статус замовлення
+                'post_type'      => 'shop_order', // Тип поста - замовлення
+                'post_status'    => array(         // Включаємо всі статуси, окрім 'wc-checkout-draft'
+                    'wc-pending',
+                    'wc-processing',
+                    'wc-on-hold',
+                    'wc-completed',
+                    'wc-cancelled',
+                    'wc-refunded',
+                    'wc-failed',
+                    // Додаткові статуси замовлень, якщо вони є
+                ),
                 'posts_per_page' => 1,            // Тільки одне замовлення
-                'orderby' => 'date',       // Сортування за датою
-                'order' => 'DESC',       // Від найновішого
+                'orderby'        => 'date',        // Сортування за датою
+                'order'         => 'DESC',         // Від найновішого
             );
 
             $query = new WP_Query($args);
@@ -29,7 +49,7 @@ class Yespo_Purchased_Items extends Yespo_Web_Tracking_Abstract
 
 
                 $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-                $data_to_append = json_encode($order) . "\n";
+                $data_to_append = json_encode($order) . '---order' . "\n";
                 $file_handle = fopen($file_path, 'a');
                 if ($file_handle) {
                     fwrite($file_handle, $data_to_append);
@@ -41,6 +61,7 @@ class Yespo_Purchased_Items extends Yespo_Web_Tracking_Abstract
 
                 return $order; // Повертаємо об'єкт замовлення
             }
+*/
         }
 
         return null;
@@ -70,5 +91,25 @@ class Yespo_Purchased_Items extends Yespo_Web_Tracking_Abstract
         }
         return null;
         */
+    }
+
+    public function get_created_order(){
+
+        global $wpdb;
+        $table_posts = esc_sql($wpdb->prefix . 'wc_orders');
+
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM %s 
+                    WHERE type = %s 
+                    AND status != %s 
+                    ORDER BY id DESC
+                    LIMIT 1",
+                $table_posts,
+                'shop_order',
+                'wc-checkout-draft'
+            )
+        );
+
     }
 }

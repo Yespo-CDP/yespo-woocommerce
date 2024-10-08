@@ -10,8 +10,6 @@ class YespoTracker
         if (trackingData.cart) this.cart = trackingData.cart;
         if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
 
-        console.log(trackingData);
-
         this.start();
     }
 
@@ -104,7 +102,6 @@ class YespoTracker
             }
         };
 
-        //let data = 'action=yespo_get_cart_contents';
         let data = 'action=yespo_get_cart_contents&yespo_get_cart_nonce_name=' + encodeURIComponent(this.getCartContentNonce);
         xhr.send(data);
     }
@@ -143,25 +140,6 @@ class YespoTracker
         };
     }
 
-    static trackAddToCartOnProductPage(){
-        document.addEventListener('DOMContentLoaded', function() {
-            let addToCartButton = document.querySelector('.single_add_to_cart_button');
-
-            if (addToCartButton) {
-                addToCartButton.addEventListener('click', function() {
-                    console.log('Product added to cart');
-                    new YespoTracker('cart');
-                    /*
-                                        setTimeout(() => {
-                                            hasTriggered = false;
-                                        }, 10000);
-
-                     */
-                });
-            }
-        });
-    }
-
     static emptyCart(){
         document.addEventListener('click', function(event) {
             if (event.target.closest('a[href*="remove_item"]')) {
@@ -175,26 +153,22 @@ class YespoTracker
     }
 
     static addProductStorage(){
-        document.addEventListener('DOMContentLoaded', function() {
-            const addToCartButton = document.querySelector('.single_add_to_cart_button');
-            console.log('Товар додано в сесію');
+        const addToCartButton = document.querySelector('.single_add_to_cart_button');
 
-            if (addToCartButton) {
-                addToCartButton.addEventListener('click', function(event) {
-                    sessionStorage.setItem('productAdded', 'true');
-                });
-            }
-        });
+        if (addToCartButton) {
+            addToCartButton.addEventListener('click', function(event) {
+                sessionStorage.setItem('productAdded', 'true');
+                console.log('Товар додано в сесію');
+            });
+        }
     }
 
     static getProductStorage(){
-        document.addEventListener('DOMContentLoaded', function() {
-            if (sessionStorage.getItem('productAdded') === 'true') {
-                console.log('Товар додано в кошик зі сторінки продукту');
-                new YespoTracker('cart');
-                sessionStorage.removeItem('productAdded');
-            }
-        });
+        if (sessionStorage.getItem('productAdded') === 'true') {
+            console.log('Товар додано в кошик зі сторінки продукту');
+            new YespoTracker('cart');
+            sessionStorage.removeItem('productAdded');
+        }
     }
 
     static init(){
@@ -206,31 +180,10 @@ class YespoTracker
 
         YespoTracker.trackCartChanges();
         YespoTracker.interceptFetch();
-        YespoTracker.trackAddToCartOnProductPage();
         YespoTracker.emptyCart();
-        //YespoTracker.addProductStorage();
-        //YespoTracker.getProductStorage()
+        YespoTracker.addProductStorage();
+        YespoTracker.getProductStorage()
     }
 }
 
 document.addEventListener('DOMContentLoaded', YespoTracker.init);
-
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    const addToCartButton = document.querySelector('.single_add_to_cart_button');
-
-    if (addToCartButton) {
-        addToCartButton.addEventListener('click', function(event) {
-            sessionStorage.setItem('productAdded', 'true');
-        });
-    }
-
-    if (sessionStorage.getItem('productAdded') === 'true') {
-        console.log('Товар додано в кошик зі сторінки продукту');
-        new YespoTracker('cart');
-
-        sessionStorage.removeItem('productAdded');
-    }
-});

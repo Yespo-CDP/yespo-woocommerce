@@ -2,9 +2,6 @@
 
 namespace Yespo\Integrations\Webtracking;
 
-use WP_Query;
-use Yespo\Integrations\Esputnik\Yespo_Export_Orders;
-
 class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
 {
     public function get_data(){
@@ -17,21 +14,10 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
                 $order = wc_get_order($order_id[0]->id);
                 $hash = (new Yespo_Cart_Event())->get_option();
 
-
-                $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
-                $data_to_append = json_encode($order) . '-  order' . "\n";
-                $file_handle = fopen($file_path, 'a');
-                if ($file_handle) {
-                    fwrite($file_handle, $data_to_append);
-                    fclose($file_handle);
-                }
-
                 return $this->get_orders_items($order, $order_id[0]->id, $hash);
             }
         }
-
         return null;
-
     }
 
     public function get_orders_items($order, $id, $hash){

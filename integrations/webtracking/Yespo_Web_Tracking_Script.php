@@ -35,7 +35,7 @@ class Yespo_Web_Tracking_Script
     public function send_domain_to_yespo(){
         $url = $this->get_url();
         //$url = 'https://www.padi.com/'; // needs be removed
-        $url = 'https://www.krabiresort.net/';
+        //$url = 'https://www.krabiresort.net/';
         if(!empty($url)) {
             $data = ['domain' => $url];
             return $this->make_curl_request(
@@ -124,7 +124,7 @@ class Yespo_Web_Tracking_Script
             $http_code = wp_remote_retrieve_response_code($response);
             $response_body = wp_remote_retrieve_body($response);
 
-
+            /* code needs to be removed*/
             $file_path = $_SERVER['DOCUMENT_ROOT'] . '/filedebug.txt';
             $data_to_append = json_encode($data) . "\n" . json_encode($response) . "\n" . json_encode($http_code) . "\n" . json_encode($response_body) . "\n";
             $file_handle = fopen($file_path, 'a');

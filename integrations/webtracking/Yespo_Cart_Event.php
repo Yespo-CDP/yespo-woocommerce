@@ -33,8 +33,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
             } else $this->update_option($cart_items['GUID']);
 
             return $cart_items;
-            //if(count($cart_items['products']) > 0) return $cart_items;
-            //else return null;
+
         }
         return null;
     }
@@ -44,7 +43,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
         update_option('yespo_options', $this->options);
     }
 
-    private function get_option(){
+    public function get_option(){
         if (isset($this->options['cart_hash'])) return $this->options['cart_hash'];
     }
 }

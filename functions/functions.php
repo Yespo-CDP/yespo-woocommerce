@@ -507,6 +507,10 @@ add_action('yespo_after_scripts', 'yespo_enqueue_tracking_scripts');
 
 // get cart data due ajax request
 function yespo_get_cart_contents_function(){
+    if ( ! isset( $_POST['yespo_get_cart_nonce_name'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_POST['yespo_get_cart_nonce_name'])), 'yespo_get_cart_content_nonce' ) ) {
+        return;
+    }
+
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_cart_contents' ) {
         $cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
         if ($cart) {
@@ -531,9 +535,11 @@ add_action('wp_ajax_nopriv_yespo_get_cart_contents', 'yespo_get_cart_contents_fu
 function get_all_users($post)
 {
 
-    $res = (new Yespo\Integrations\Webtracking\Yespo_Purchased_Event())->get_created_order();
-
-    var_dump($res);
+    $order_id = (new Yespo\Integrations\Webtracking\Yespo_Purchased_Event())->get_created_order();
+    $order = wc_get_order($order_id[0]->id);
+    $arr = (new Yespo\Integrations\Webtracking\Yespo_Purchased_Event())->get_orders_items($order);
+    var_dump($arr);
+    //var_dump($order);
 
     //$cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
     //var_dump($cart);
@@ -737,4 +743,4 @@ function get_all_users($post)
     //$res = (new \Yespo\Integrations\Esputnik\Yespo_Contact())->remove_user_after_erase();
     //var_dump($res);
 }
-add_action('save_post', 'get_all_users' , 10 , 1);
+//add_action('save_post', 'get_all_users' , 10 , 1);

@@ -3,6 +3,7 @@ class YespoTracker
 {
     constructor(action = null) {
         this.ajaxUrl = trackingData.ajaxUrl;
+        this.getCartContentNonce = trackingData.getCartContentNonce;
         this.action = action;
         if (trackingData.category) this.category = trackingData.category;
         if (trackingData.product) this.product = trackingData.product;
@@ -23,7 +24,13 @@ class YespoTracker
     }
 
     thankYouPage(purchase){
-        console.log('Category key has been sent with id:', purchase);
+        console.log('Purchase has been sent with id:', purchase);
+        const purchasedItems = this.thankYouPageMapping(purchase);
+        eS('sendEvent', 'PurchasedItems', {
+            "OrderNumber": purchase.OrderNumber,
+            "PurchasedItems": purchasedItems,
+            "GUID": purchase.GUID
+        });
     }
     sendCategory(category){
         console.log('Category key has been sent with id:', category);
@@ -65,6 +72,22 @@ class YespoTracker
         return status;
     }
 
+    thankYouPageMapping(purchase){
+        let items = [];
+        if (purchase && purchase.products) {
+            purchase.products.forEach(product => {
+                items.push({
+                    'productKey': product.productKey,
+                    'price': product.price,
+                    'quantity': product.quantity,
+                    'currency': product.currency
+                });
+            });
+        }
+
+        return items;
+    }
+
     getCartData(){
         let xhr = new XMLHttpRequest();
         let url = this.ajaxUrl;
@@ -81,7 +104,8 @@ class YespoTracker
             }
         };
 
-        let data = 'action=yespo_get_cart_contents';
+        //let data = 'action=yespo_get_cart_contents';
+        let data = 'action=yespo_get_cart_contents&yespo_get_cart_nonce_name=' + encodeURIComponent(this.getCartContentNonce);
         xhr.send(data);
     }
 

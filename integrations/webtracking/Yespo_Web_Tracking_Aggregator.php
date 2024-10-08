@@ -45,6 +45,7 @@ class Yespo_Web_Tracking_Aggregator
         $tracking_data = [];
 
         $tracking_data['ajaxUrl'] = esc_url( admin_url( 'admin-ajax.php' ) );
+        $tracking_data['getCartContentNonce'] = wp_create_nonce('yespo_get_cart_content_nonce');
 
         if (!is_null($category)) {
             $tracking_data['category'] = array(
@@ -61,16 +62,8 @@ class Yespo_Web_Tracking_Aggregator
         }
 
         if (!is_null($purchase)) {
-            $tracking_data['product'] = array(
-                'id' => isset($product['id']) ? esc_js($product['id']) : '',
-                'price' => isset($product['price']) ? esc_js($product['price']) : '',
-                'stock' => isset($product['stock']) ? esc_js($product['stock']) : '',
-            );
+            $tracking_data['thankYou'] = $purchase;
         }
-
-        //if (!is_null($cart)) {
-            //$tracking_data['cart'] = $cart;
-        //}
 
         return $tracking_data;
     }

@@ -35,7 +35,7 @@ class Yespo_Web_Tracking_Script
     public function send_domain_to_yespo(){
         $url = $this->get_url();
         //$url = 'https://www.padi.com/'; // needs be removed
-        //$url = 'https://www.krabiresort.net/';
+        $url = 'https://www.krabiresort.net/';
         if(!empty($url)) {
             $data = ['domain' => $url];
             return $this->make_curl_request(
@@ -135,7 +135,7 @@ class Yespo_Web_Tracking_Script
 
 
             if ($custom_request === 'POST') {
-                if (($http_code === 200) || ($http_code === 400 && $response_body === "Domain already exists")) {
+                if (($http_code === 200) || ($http_code === 201) || ($http_code === 400 && $response_body === "Domain already exists")) {
                     return true;
                 }
 

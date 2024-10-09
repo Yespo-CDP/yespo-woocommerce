@@ -9,6 +9,7 @@ class YespoTracker
         if (trackingData.product) this.product = trackingData.product;
         if (trackingData.cart) this.cart = trackingData.cart;
         if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
+        if (trackingData.customerData) this.customerData = trackingData.customerData;
 
         this.start();
     }
@@ -18,9 +19,13 @@ class YespoTracker
         if(this.category && this.action === null) this.sendCategory(this.category);
         if(this.product && this.action === null) this.sendProduct(this.product);
         if(this.cart && this.action === null) this.sendCart(this.cart);
+        if(this.customerData && this.action === null) this.userData(this.customerData);
         if(this.action === 'cart' || this.action === 'cart_empty') this.getCartData();
     }
 
+    userData(customerData){
+        console.log('User with next data:', customerData);
+    }
     thankYouPage(purchase){
         console.log('Purchase has been sent with id:', purchase);
         const purchasedItems = this.thankYouPageMapping(purchase);

@@ -8,12 +8,14 @@ class Yespo_Web_Tracking_Aggregator
     private $product;
     private $cart;
     private $purchase;
+    private $user;
 
     public function __construct(){
         $this->category = new Yespo_Category_Event();
         $this->product = new Yespo_Product_Event();
         $this->cart = new Yespo_Cart_Event();
         $this->purchase = new Yespo_Purchased_Event();
+        $this->user = new Yespo_User_Event();
     }
 
     public function localize_scripts(){
@@ -21,13 +23,15 @@ class Yespo_Web_Tracking_Aggregator
         $category = $this->category->get_data();
         $product = $this->product->get_data();
         $purchase = $this->purchase->get_data();
+        $user = $this->user->get_data();
         //if( is_cart() ) $cart = $this->cart->get_data();
         //else $cart = null;
 
         $tracking_data = $this->get_localization_map(
             $category,
             $product,
-            $purchase
+            $purchase,
+            $user
         );
 
         if (!empty($tracking_data)) {
@@ -39,7 +43,8 @@ class Yespo_Web_Tracking_Aggregator
     private function get_localization_map(
         $category,
         $product,
-        $purchase
+        $purchase,
+        $user
     ){
 
         $tracking_data = [];
@@ -63,6 +68,10 @@ class Yespo_Web_Tracking_Aggregator
 
         if (!is_null($purchase)) {
             $tracking_data['thankYou'] = $purchase;
+        }
+
+        if (!is_null($user)) {
+            $tracking_data['customerData'] = $user;
         }
 
         return $tracking_data;

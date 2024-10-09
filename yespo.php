@@ -26,7 +26,7 @@ if ( !defined( 'ABSPATH' ) ) {
 
 define( 'YESPO_VERSION', '1.0.0' );
 define( 'YESPO_TEXTDOMAIN', 'yespo-cdp' );
-define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-woocommerce-plugin' );
+define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-cdp' );
 define( 'YESPO_NAME', 'Yespo' );
 define( 'YESPO_PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
 define( 'YESPO_PLUGIN_ABSOLUTE', __FILE__ );

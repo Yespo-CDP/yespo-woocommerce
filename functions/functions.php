@@ -78,7 +78,6 @@ function yespo_get_account_profile_name_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_get_account_yespo_name', 'yespo_get_account_profile_name_function');
-add_action('wp_ajax_nopriv_yespo_get_account_yespo_name', 'yespo_get_account_profile_name_function');
 
 /** check authorization **/
 function yespo_check_api_authorization_function(){
@@ -104,7 +103,6 @@ function yespo_check_api_authorization_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_check_api_authorization_yespo', 'yespo_check_api_authorization_function');
-add_action('wp_ajax_nopriv_yespo_check_api_authorization_yespo', 'yespo_check_api_authorization_function');
 
 /** check authorization via form **/
 function yespo_save_settings_via_form_function() {

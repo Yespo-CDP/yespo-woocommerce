@@ -18,17 +18,23 @@ class Yespo_Logging_Data
 
     }
     public function create(string $user_id, string $contact_id, string $action){
-        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") === $this->table_name)
+        global $wpdb;
+        $table_name = esc_sql($this->table_name);
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name)
             return $this->create_log_entry_user($user_id, $contact_id, $action); //if success returns 1
     }
 
     public function update_contact_log($user_id, $action, $response){
-        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") === $this->table_name)
+        global $wpdb;
+        $table_name = esc_sql($this->table_name);
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name)
             $this->update_log_entry_user($user_id, $action, $response);
     }
 
     public function create_entry_order($order_id, $action = 'update', $status = 200){
-        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name_order'") === $this->table_name_order)
+        global $wpdb;
+        $table_name_order = esc_sql($this->table_name_order);
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name_order)) === $table_name_order)
             return $this->create_log_entry_order($order_id, $action, $status); //if success returns 1
     }
 

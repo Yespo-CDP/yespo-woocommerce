@@ -274,9 +274,6 @@ class Yespo_Export_Users
                 $this->number_for_export
             )
         );
-
-
-
     }
 
     /**
@@ -325,12 +322,21 @@ class Yespo_Export_Users
 
         $set_clause = implode(', ', $data);
 
+        $sql = "UPDATE {$table_yespo_queue} SET {$set_clause} WHERE {$where_clause}";
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $prepared_sql = $wpdb->prepare($sql, ...$values);
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        return $wpdb->query($prepared_sql);
+        /*
         return $wpdb->query(
             $wpdb->prepare(
                 "UPDATE {$table_yespo_queue} SET {$set_clause} WHERE {$where_clause}",
                 ...$values
             )
         );
+        */
 
     }
 
@@ -348,45 +354,6 @@ class Yespo_Export_Users
                 $table_yespo_queue_items, '', $contact_id, ''
             )
         );
-    }
-
-    public function update_entry_queue_items($session_id, $user_id, $yespo_id = null) {
-        global $wpdb;
-
-        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
-        $session_id = sanitize_text_field($session_id);
-        $yespo_id = sanitize_text_field($yespo_id);
-        $contact_id = sanitize_text_field($user_id);
-
-        $data = [];
-        $values = [];
-
-        if (!empty($session_id)) {
-            $data[] = 'session_id = %s';
-            $values[] = $session_id;
-        }
-
-        if (!empty($yespo_id)) {
-            $data[] = 'yespo_id = %s';
-            $values[] = $yespo_id;
-        }
-
-        if (empty($data)) {
-            return false;
-        }
-
-        $where_clause = 'contact_id = %s';
-        $values[] = $contact_id;
-
-        $set_clause = implode(', ', $data);
-
-        return $wpdb->query(
-            $wpdb->prepare(
-                "UPDATE {$table_yespo_queue_items} SET {$set_clause} WHERE {$where_clause}",
-                ...$values
-            )
-        );
-
     }
 
     public function check_queue_items_for_session($session_id) {

@@ -99,6 +99,7 @@ class Yespo_Errors
     public static function add_label_to_users($users, $meta_key) {
         global $wpdb;
 
+        $meta_table = esc_sql($wpdb->usermeta);
         $values = [];
         $placeholders = [];
 
@@ -112,16 +113,18 @@ class Yespo_Errors
         if (!empty($values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
-                    INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value) 
+            $sql = "
+                    INSERT INTO {$meta_table} (user_id, meta_key, meta_value) 
                     VALUES {$placeholders_string}
                     ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
-                    ",
-                    ...$values
-                )
-            );
+                    ";
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $prepared_sql = $wpdb->prepare($sql, ...$values);
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            return $wpdb->query($prepared_sql);
+
         }
 
         return false;

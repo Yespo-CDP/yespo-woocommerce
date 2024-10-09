@@ -37,15 +37,22 @@ class Yespo_Account
 
     public function add_entry_auth_log($api_key, $response){
         global $wpdb;
-        $table_yespo_auth = $wpdb->prefix . 'yespo_auth_log';
 
-        $data = [
-            'api_key' => sanitize_text_field($api_key),
-            'response' => sanitize_text_field($response),
-            'time' => gmdate('Y-m-d H:i:s')
-        ];
+        $table_yespo_auth = esc_sql($wpdb->prefix . 'yespo_auth_log');
+        $api_key = sanitize_text_field($api_key);
+        $response = sanitize_text_field($response);
+        $time = gmdate('Y-m-d H:i:s');
 
-        $wpdb->insert($table_yespo_auth, $data);
+        return $wpdb->query(
+            $wpdb->prepare(
+            "INSERT INTO %i (api_key, response, time) 
+                VALUES (%s, %s, %s)",
+                $table_yespo_auth,
+                $api_key,
+                $response,
+                $time
+            )
+        );
 
     }
 }

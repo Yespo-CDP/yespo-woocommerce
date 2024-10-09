@@ -101,6 +101,7 @@ class Yespo_Order
     public function add_labels_to_orders($values, $meta_key, $meta_value){
         global $wpdb;
 
+        $ordermeta_table = esc_sql($wpdb->usermeta);
         $placeholders = [];
         $query_values = [];
 
@@ -227,15 +228,16 @@ class Yespo_Order
         if (!empty($query_values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
+            $sql = "
                     INSERT INTO {$table_name_order} (order_id, action, status, created_at) 
                     VALUES {$placeholders_string}
-                    ",
-                    ...$query_values
-                )
-            );
+                    ";
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $prepared_sql = $wpdb->prepare($sql, ...$query_values);
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            return $wpdb->query($prepared_sql);
         }
 
         return false;

@@ -239,16 +239,17 @@ class Yespo_Contact
         if (!empty($values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
-                        INSERT INTO {$usermeta_table} (user_id, meta_key, meta_value) 
-                        VALUES {$placeholders_string}
-                        ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
-                    "
-                    , ...$values
-                )
-            );
+            $sql = "
+				INSERT INTO {$usermeta_table} (user_id, meta_key, meta_value) 
+				VALUES {$placeholders_string}
+				ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
+			";
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $prepared_sql = $wpdb->prepare($sql, ...$values);
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            return $wpdb->query($prepared_sql);
         }
     }
 

@@ -33,6 +33,7 @@ class Enqueue extends Base {
 			return;
 		}
 
+        // phpcs:ignore WordPress.Security.NonceVerification
         if (isset($_GET['page']) && sanitize_text_field(wp_unslash($_GET['page'])) === 'yespo-cdp') {
             \add_action(AssetManager::ACTION_SETUP, array($this, 'enqueue_assets'));
         }

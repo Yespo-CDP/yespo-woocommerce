@@ -43,6 +43,7 @@ class Yespo_Account
         $response = sanitize_text_field($response);
         $time = gmdate('Y-m-d H:i:s');
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
             "INSERT INTO %i (api_key, response, time) 

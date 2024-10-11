@@ -20,6 +20,7 @@ class Yespo_Logging_Data
     public function create(string $user_id, string $contact_id, string $action){
         global $wpdb;
         $table_name = esc_sql($this->table_name);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name)
             return $this->create_log_entry_user($user_id, $contact_id, $action); //if success returns 1
     }
@@ -27,6 +28,7 @@ class Yespo_Logging_Data
     public function update_contact_log($user_id, $action, $response){
         global $wpdb;
         $table_name = esc_sql($this->table_name);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name)
             $this->update_log_entry_user($user_id, $action, $response);
     }
@@ -34,6 +36,7 @@ class Yespo_Logging_Data
     public function create_entry_order($order_id, $action = 'update', $status = 200){
         global $wpdb;
         $table_name_order = esc_sql($this->table_name_order);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name_order)) === $table_name_order)
             return $this->create_log_entry_order($order_id, $action, $status); //if success returns 1
     }
@@ -62,6 +65,7 @@ class Yespo_Logging_Data
         );
 
         try {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
                     "INSERT INTO %i (user_id, contact_id, action, yespo, log_date)
@@ -84,6 +88,7 @@ class Yespo_Logging_Data
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $wpdb->query(
             $wpdb->prepare(
                 "UPDATE %i SET yespo = %d WHERE action = %s AND user_id = %s",
@@ -109,7 +114,7 @@ class Yespo_Logging_Data
             ];
 
             try {
-
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery
                 return $wpdb->query(
                     $wpdb->prepare(
                         "
@@ -134,6 +139,7 @@ class Yespo_Logging_Data
         global $wpdb;
         $table_name_order = esc_sql($this->table_name_order);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM %i WHERE order_id = %s AND action = %s AND status = %s",

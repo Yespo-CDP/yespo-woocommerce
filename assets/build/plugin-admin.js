@@ -18,6 +18,18 @@ class YespoExportData {
         this.startExportUsersNonce = yespoVars.startExportUsersNonce;
         this.startExportOrdersNonce = yespoVars.startExportOrdersNonce;
 
+        this.yespoGetAccountYespoNameNonce = yespoVars.yespoGetAccountYespoNameNonce;
+        this.yespoCheckApiAuthorizationYespoNonce = yespoVars.yespoCheckApiAuthorizationYespoNonce;
+        this.yespoGetUsersTotalNonce = yespoVars.yespoGetUsersTotalNonce;
+        this.yespoGetUsersTotalExportNonce = yespoVars.yespoGetUsersTotalExportNonce;
+        this.yespoGetProcessExportUsersDataToEsputnikNonce = yespoVars.yespoGetProcessExportUsersDataToEsputnikNonce;
+
+        this.yespoGetOrdersTotalNonce = yespoVars.yespoGetOrdersTotalNonce;
+        this.yespoGetOrdersTotalExportNonce = yespoVars.yespoGetOrdersTotalExportNonce;
+        this.yespoGetProcessExportOrdersDataToEsputnikNonce = yespoVars.yespoGetProcessExportOrdersDataToEsputnikNonce;
+        this.yespoStopExportDataToYespoNonce = yespoVars.yespoStopExportDataToYespoNonce;
+        this.yespoResumeExportDataNonce = yespoVars.yespoResumeExportDataNonce;
+
         this.nonceApiKeyForm = yespoVars.nonceApiKeyForm;
         this.apiKeyValue = yespoVars.apiKeyValue;
         this.apiKeyText = yespoVars.apiKeyText + ' ';
@@ -40,7 +52,7 @@ class YespoExportData {
 
     // get top account name
     getAccountYespoName(){
-        this.getRequest('yespo_get_account_yespo_name',  (response) => {
+        this.getRequest('yespo_get_account_yespo_name', 'yespo_get_account_yespo_name_nonce', this.yespoGetAccountYespoNameNonce, (response) => {
             response = JSON.parse(response);
             if(document.querySelector('.panelUser') && response.username !== undefined) document.querySelector('.panelUser').innerHTML=response.username;
         });
@@ -50,7 +62,7 @@ class YespoExportData {
      * check authomatic authorization
      **/
     checkAuthorization(){
-        this.getRequest('yespo_check_api_authorization_yespo',  (response) => {
+        this.getRequest('yespo_check_api_authorization_yespo', 'yespo_check_api_authorization_yespo_nonce', this.yespoCheckApiAuthorizationYespoNonce,  (response) => {
             response = JSON.parse(response);
             if(response.success && response.data.auth && response.data.auth === 'success'){
                 this.getNumberDataExport();
@@ -369,10 +381,10 @@ class YespoExportData {
 
     getNumberDataExport(){
         Promise.all([
-            this.getRequest('yespo_get_users_total_export', (response) => {
+            this.getRequest('yespo_get_users_total_export', 'yespo_get_users_total_export_nonce', this.yespoGetUsersTotalExportNonce, (response) => {
                 this.users = JSON.parse(response);
             }),
-            this.getRequest('yespo_get_orders_total_export', (response) => {
+            this.getRequest('yespo_get_orders_total_export', 'yespo_get_orders_total_export_nonce', this.yespoGetOrdersTotalExportNonce, (response) => {
                 this.orders = JSON.parse(response);
             })
         ]).then(() => {
@@ -381,10 +393,10 @@ class YespoExportData {
         });
     }
 
-    getRequest(action, callback) {
+    getRequest(action, nonce, nonceValue, callback) {
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
-            xhr.open('GET', this.ajaxUrl + '?action=' + action, true);
+            xhr.open('GET', this.ajaxUrl + '?action=' + action + '&' + nonce + '=' + nonceValue, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     let response = xhr.responseText;
@@ -446,7 +458,7 @@ class YespoExportData {
     //STOP EXPORT
     stopExportData(){
         Promise.all([
-            this.getRequest('yespo_stop_export_data_to_yespo', (response) => {
+            this.getRequest('yespo_stop_export_data_to_yespo', 'yespo_stop_export_data_to_yespo_nonce', this.yespoStopExportDataToYespoNonce, (response) => {
                 this.percentTransfered = parseInt(response);
             })
         ]).then(() => {
@@ -490,7 +502,7 @@ class YespoExportData {
 
     resumeExportData(){
         Promise.all([
-            this.getRequest('yespo_resume_export_data', (response) => {
+            this.getRequest('yespo_resume_export_data', 'yespo_resume_export_data_nonce', this.yespoResumeExportDataNonce, (response) => {
                 this.percentTransfered = parseInt(response);
             })
         ]).then(() => {
@@ -573,6 +585,8 @@ class YespoExportData {
     processExportUsers() {
         this.checkExportStatus(
             'yespo_get_process_export_users_data_to_esputnik',
+            'yespo_get_process_export_users_data_to_esputnik_nonce',
+            this.yespoGetProcessExportUsersDataToEsputnikNonce,
             'users',
             '#total-users-export',
             'yespo_export_user_data_to_esputnik',
@@ -584,6 +598,8 @@ class YespoExportData {
     processExportOrders() {
         this.checkExportStatus(
             'yespo_get_process_export_orders_data_to_esputnik',
+            'yespo_get_process_export_orders_data_to_esputnik_nonce',
+            this.yespoGetProcessExportOrdersDataToEsputnikNonce,
             'orders',
             '#total-orders-export',
             'export_orders_data_to_esputnik',
@@ -592,8 +608,8 @@ class YespoExportData {
         );
     }
 
-    checkExportStatus(action, way, totalUnits, totalExport, progressUnits, exportedUnits) {
-        this.getProcessData(action, (response) => {
+    checkExportStatus(action, nonce, nonceValue, way, totalUnits, totalExport, progressUnits, exportedUnits) {
+        this.getProcessData(action, nonce, nonceValue,(response) => {
             response = JSON.parse(response);
             if (response.exported !== null && response.exported >= 0) {
                 this.updateProgress(Math.floor( (response.exported / response.total) * 100), 'export');
@@ -629,10 +645,10 @@ class YespoExportData {
         });
     }
 
-    getProcessData(action, callback){
+    getProcessData(action, nonce, nonceValue, callback){
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
-            xhr.open('GET', this.ajaxUrl + '?action=' + action, true);
+            xhr.open('GET', this.ajaxUrl + '?action=' + action + '&' + nonce + '=' + nonceValue, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     let response = xhr.responseText;

@@ -129,6 +129,7 @@ class Yespo_Export_Orders
         }
 
     }
+
     public function start_bulk_export_orders(){
         $status = $this->get_order_export_status_processed('active');
 
@@ -351,8 +352,7 @@ class Yespo_Export_Orders
                     SET exported = %d, status = %s, code = %s, updated_at = %s 
                     WHERE id = %d
                 ",
-                $table_name,
-                $exported, $status, $code, $updated_at, $id
+                $table_name, $exported, $status, $code, $updated_at, $id
             )
         );
     }
@@ -378,9 +378,10 @@ class Yespo_Export_Orders
         $table_posts = esc_sql($this->table_posts);
         $prefix = esc_sql($this->wpdb->prefix);
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
+        $meta_key = esc_sql($this->meta_key);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order', 'wc-checkout-draft', $this->meta_key));
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order', 'wc-checkout-draft', $meta_key));
     }
 
     public function get_orders_export_esputnik(){
@@ -497,11 +498,14 @@ class Yespo_Export_Orders
         global $wpdb;
         $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
         $table_posts = esc_sql($this->table_posts);
-        $prefix = esc_sql($this->wpdb->prefix);
+        $prefix = esc_sql($wpdb->prefix);
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
+        $meta_key = esc_sql($this->meta_key);
+        $number_for_export = absint($this->number_for_export);
+        $id_more_then = absint($this->id_more_then);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_results($wpdb->prepare("SELECT id FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND date_created_gmt < %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order', 'wc-checkout-draft', $this->meta_key, $period_start, $this->id_more_then, $this->number_for_export),OBJECT);
+        return $wpdb->get_results($wpdb->prepare("SELECT id FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND date_created_gmt < %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order', 'wc-checkout-draft', $meta_key, $period_start, $id_more_then, $number_for_export),OBJECT);
     }
 
     public function get_unexported_orders_because_error($last_exported) {
@@ -510,9 +514,12 @@ class Yespo_Export_Orders
         $table_posts = esc_sql($this->table_posts);
         $prefix = esc_sql($this->wpdb->prefix);
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
+        $meta_key = esc_sql($this->meta_key);
+        $number_for_export = absint($this->number_for_export);
+        $id_more_then = absint($this->id_more_then);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_results($wpdb->prepare("SELECT id FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND date_created_gmt >= %s AND date_created_gmt <= %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order', 'wc-checkout-draft', $this->meta_key, $last_exported, $period_start, $this->id_more_then, $this->number_for_export),OBJECT);
+        return $wpdb->get_results($wpdb->prepare("SELECT id FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND date_created_gmt >= %s AND date_created_gmt <= %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order', 'wc-checkout-draft', $meta_key, $last_exported, $period_start, $id_more_then, $number_for_export),OBJECT);
     }
 
     private function get_orders_from_database_without_metakey(){

@@ -104,6 +104,7 @@ class Yespo_Order
         $ordermeta_table = esc_sql($wpdb->usermeta);
         $placeholders = [];
         $query_values = [];
+        $post_meta = esc_sql( $wpdb->postmeta );
 
         foreach ($values as $order_id) {
             $placeholders[] = "(%d, %s, %s)";
@@ -116,7 +117,7 @@ class Yespo_Order
             $placeholders_string = implode(", ", $placeholders);
 
             // phpcs:ignore WordPress.DB
-            return $wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES {$placeholders_string} ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)",...$query_values));
+            return $wpdb->query($wpdb->prepare("INSERT INTO {$post_meta} (post_id, meta_key, meta_value) VALUES {$placeholders_string} ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)",...$query_values));
         }
         return false;
     }

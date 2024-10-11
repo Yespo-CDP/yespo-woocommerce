@@ -19,7 +19,7 @@ class Yespo_Errors
         if($error == 429 || $error == 500) {
             global $wpdb;
 
-            $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
+            $table_yespo_errors = esc_sql($wpdb->prefix . 'yespo_errors');
 
             $error_code = intval($error);
             $current_time = current_time('mysql');
@@ -44,7 +44,7 @@ class Yespo_Errors
     public static function get_error_entry(){
         global $wpdb;
 
-        $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
+        $table_yespo_errors = esc_sql($wpdb->prefix . 'yespo_errors');
 
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
@@ -67,7 +67,7 @@ class Yespo_Errors
     public static function get_error_entry_old(){
         global $wpdb;
 
-        $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
+        $table_yespo_errors = esc_sql($wpdb->prefix . 'yespo_errors');
 
 
         $time_current = current_time('mysql');

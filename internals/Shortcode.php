@@ -28,7 +28,7 @@ class Shortcode extends Base {
 	public function initialize() {
         parent::initialize();
 
-        \add_shortcode( 'foobar', array( $this, 'yespo_foobar_func' ) );
+        \add_shortcode( 'yespo_foobar', array( $this, 'yespo_foobar_func' ) );
 	}
 
 	/**

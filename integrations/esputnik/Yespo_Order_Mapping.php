@@ -249,6 +249,7 @@ class Yespo_Order_Mapping
 
     private static function get_user_main_email($billing_email){
         $args = array(
+            // phpcs:ignore WordPress.DB.SlowDBQuery
             'meta_query' => array(
                 array(
                     'key' => 'billing_email',

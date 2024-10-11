@@ -115,16 +115,8 @@ class Yespo_Order
         if (!empty($query_values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
-                    INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) 
-                    VALUES {$placeholders_string}
-                    ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
-                    ",
-                    ...$query_values
-                )
-            );
+            // phpcs:ignore WordPress.DB
+            return $wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES {$placeholders_string} ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)",...$query_values));
         }
         return false;
     }
@@ -197,9 +189,11 @@ class Yespo_Order
         $existing_post_types = array_filter($post_types, function($type) {
             return post_type_exists($type);
         });
+
         return [
             'post_type' => $existing_post_types,
             'post_status' => 'any',
+            // phpcs:ignore WordPress.DB.SlowDBQuery
             'meta_query' => array(
                 array(
                     'key' => '_billing_email',
@@ -233,10 +227,10 @@ class Yespo_Order
                     VALUES {$placeholders_string}
                     ";
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            // phpcs:ignore WordPress.DB
             $prepared_sql = $wpdb->prepare($sql, ...$query_values);
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            // phpcs:ignore WordPress.DB
             return $wpdb->query($prepared_sql);
         }
 

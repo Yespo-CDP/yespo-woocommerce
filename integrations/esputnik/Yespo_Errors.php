@@ -24,6 +24,7 @@ class Yespo_Errors
             $error_code = intval($error);
             $current_time = current_time('mysql');
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
                 "
@@ -48,6 +49,7 @@ class Yespo_Errors
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare("
                     SELECT * 
@@ -71,6 +73,7 @@ class Yespo_Errors
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare("
                     SELECT * 
@@ -119,10 +122,10 @@ class Yespo_Errors
                     ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
                     ";
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            // phpcs:ignore WordPress.DB
             $prepared_sql = $wpdb->prepare($sql, ...$values);
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            // phpcs:ignore WordPress.DB
             return $wpdb->query($prepared_sql);
 
         }

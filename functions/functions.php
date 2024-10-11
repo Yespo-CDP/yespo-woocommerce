@@ -56,6 +56,11 @@ add_action( 'admin_notices', 'yespo_error_api_key_admin_notice_function' );
 
 /*** Get profile username on Yespo ***/
 function yespo_get_account_profile_name_function(){
+
+    if ( ! isset( $_REQUEST['yespo_get_account_yespo_name_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_get_account_yespo_name_nonce'])), 'yespo_get_account_yespo_name' ) ) {
+        return;
+    }
+
     if (isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_account_yespo_name') {
         $organisationName = '';
         if ( get_option( 'yespo_options' ) !== false ) {
@@ -81,6 +86,11 @@ add_action('wp_ajax_yespo_get_account_yespo_name', 'yespo_get_account_profile_na
 
 /** check authorization **/
 function yespo_check_api_authorization_function(){
+
+    if ( ! isset( $_REQUEST['yespo_check_api_authorization_yespo_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_check_api_authorization_yespo_nonce'])), 'yespo_check_api_authorization_yespo' ) ) {
+        return;
+    }
+
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_check_api_authorization_yespo' ) {
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
@@ -155,8 +165,6 @@ function yespo_save_settings_via_form_function() {
     }
 }
 add_action('wp_ajax_yespo_check_api_key_esputnik', 'yespo_save_settings_via_form_function');
-add_action('wp_ajax_nopriv_yespo_check_api_key_esputnik', 'yespo_save_settings_via_form_function');
-
 
 /** update user profile on Yespo service **/
 function yespo_update_user_profile_function($user_id, $old_user_data) {
@@ -174,16 +182,19 @@ function yespo_update_user_profile_function($user_id, $old_user_data) {
         }
         if(!empty($user_id)) {
             $user = get_user_by('id', $user_id);
-            $request = map_deep($_REQUEST, function($value, $key) {
-                if ($key === 'email') {
-                    return sanitize_email($value);
-                } elseif ($key === 'url') {
-                    return esc_url_raw($value);
-                } elseif (is_numeric($value)) {
-                    return absint($value);
-                }
-                return sanitize_text_field($value);
-            });
+            $request = [
+                'first_name'          => sanitize_text_field(wp_unslash($_REQUEST['first_name'])) ? sanitize_text_field(wp_unslash($_REQUEST['first_name'])) : '',
+                'last_name'           => sanitize_text_field(wp_unslash($_REQUEST['last_name'])) ? sanitize_text_field(wp_unslash($_REQUEST['last_name'])) : '',
+                'email'               => is_email($_REQUEST['email'] ?? '') ? sanitize_email($_REQUEST['email']) : '',
+                'billing_address_1'   => sanitize_text_field(wp_unslash($_REQUEST['billing_address_1'])) ? sanitize_text_field(wp_unslash($_REQUEST['billing_address_1'])) : '',
+                'billing_address_2'   => sanitize_text_field(wp_unslash($_REQUEST['billing_address_2'])) ? sanitize_text_field(wp_unslash($_REQUEST['billing_address_2'])) : '',
+                'billing_city'        => sanitize_text_field(wp_unslash($_REQUEST['billing_city'])) ? sanitize_text_field(wp_unslash($_REQUEST['billing_city'])) : '',
+                'billing_postcode'    => sanitize_text_field(wp_unslash($_REQUEST['billing_postcode'])) ? sanitize_text_field(wp_unslash($_REQUEST['billing_postcode'])) : '',
+                'billing_country'     => sanitize_text_field(wp_unslash($_REQUEST['billing_country'])) ? sanitize_text_field(wp_unslash($_REQUEST['billing_country'])) : '',
+                'billing_state'       => sanitize_text_field(wp_unslash($_REQUEST['billing_state'])) ? sanitize_text_field(wp_unslash($_REQUEST['billing_state'])) : '',
+                'billing_phone'       => sanitize_text_field(wp_unslash($_REQUEST['billing_phone'])) ? sanitize_text_field(wp_unslash($_REQUEST['billing_phone'])) : ''
+            ];
+
             return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->update_woo_profile_yespo($request, $user);
         }
     } else {
@@ -213,10 +224,14 @@ function yespo_get_all_users_total_function() {
     wp_die();
 }
 add_action('wp_ajax_get_users_total', 'yespo_get_all_users_total_function');
-add_action('wp_ajax_nopriv_get_users_total', 'yespo_get_all_users_total_function');
 
 /*** Get total users number for export ***/
 function yespo_get_all_users_total_export_function() {
+
+    if ( ! isset( $_REQUEST['yespo_get_users_total_export_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_get_users_total_export_nonce'])), 'yespo_get_users_total_export' ) ) {
+        return;
+    }
+
     $user = new Yespo\Integrations\Esputnik\Yespo_Export_Users();
     $users = $user->get_users_export_count();
     if($users > 0){
@@ -234,7 +249,6 @@ function yespo_get_all_users_total_export_function() {
 
 }
 add_action('wp_ajax_yespo_get_users_total_export', 'yespo_get_all_users_total_export_function');
-add_action('wp_ajax_nopriv_yespo_get_users_total_export', 'yespo_get_all_users_total_export_function');
 
 /*** Export users to Yespo ***/
 function yespo_export_user_data_to_esputnik_function(){
@@ -250,10 +264,13 @@ function yespo_export_user_data_to_esputnik_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_export_user_data_to_esputnik', 'yespo_export_user_data_to_esputnik_function');
-add_action('wp_ajax_nopriv_yespo_export_user_data_to_esputnik', 'yespo_export_user_data_to_esputnik_function');
 
 /*** Get process status of exporting users to Yespo ***/
 function yespo_get_process_export_users_function(){
+    if ( ! isset( $_REQUEST['yespo_get_process_export_users_data_to_esputnik_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_get_process_export_users_data_to_esputnik_nonce'])), 'yespo_get_process_export_users_data_to_esputnik' ) ) {
+        return;
+    }
+
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_process_export_users_data_to_esputnik' ) {
         $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Users())->get_process_users_exported();
         if( !empty($response)) {
@@ -263,7 +280,6 @@ function yespo_get_process_export_users_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_get_process_export_users_data_to_esputnik', 'yespo_get_process_export_users_function');
-add_action('wp_ajax_nopriv_yespo_get_process_export_users_data_to_esputnik', 'yespo_get_process_export_users_function');
 
 /** remove woocommerce user **/
 function yespo_delete_woocommerce_user_function( $user_id ) {
@@ -313,11 +329,13 @@ function yespo_get_all_orders_total_function() {
     wp_die();
 }
 add_action('wp_ajax_get_orders_total', 'yespo_get_all_orders_total_function');
-add_action('wp_ajax_nopriv_get_orders_total', 'yespo_get_all_orders_total_function');
-
 
 /*** Get total orders number for export ***/
 function yespo_get_all_orders_total_export_function() {
+    if ( ! isset( $_REQUEST['yespo_get_orders_total_export_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_get_orders_total_export_nonce'])), 'yespo_get_orders_total_export' ) ) {
+        return;
+    }
+
     $order = new Yespo\Integrations\Esputnik\Yespo_Export_Orders();
     $orders = $order->get_export_orders_count();
     if ( $orders > 0 ) {
@@ -333,7 +351,6 @@ function yespo_get_all_orders_total_export_function() {
 
 }
 add_action('wp_ajax_yespo_get_orders_total_export', 'yespo_get_all_orders_total_export_function');
-add_action('wp_ajax_nopriv_yespo_get_orders_total_export', 'yespo_get_all_orders_total_export_function');
 
 /*** Export orders to Yespo ***/
 function yespo_export_order_data_function(){
@@ -351,10 +368,13 @@ function yespo_export_order_data_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_export_order_data_to_esputnik', 'yespo_export_order_data_function');
-add_action('wp_ajax_nopriv_yespo_export_order_data_to_esputnik', 'yespo_export_order_data_function');
 
 /*** Get process status of exporting orders to Yespo ***/
 function yespo_get_process_export_orders_data_function(){
+    if ( ! isset( $_REQUEST['yespo_get_process_export_orders_data_to_esputnik_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_get_process_export_orders_data_to_esputnik_nonce'])), 'yespo_get_process_export_orders_data_to_esputnik' ) ) {
+        return;
+    }
+
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_process_export_orders_data_to_esputnik' ) {
         $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Orders())->get_process_orders_exported();
         if( !empty($response)) {
@@ -370,7 +390,6 @@ function yespo_get_process_export_orders_data_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_get_process_export_orders_data_to_esputnik', 'yespo_get_process_export_orders_data_function');
-add_action('wp_ajax_nopriv_yespo_get_process_export_orders_data_to_esputnik', 'yespo_get_process_export_orders_data_function');
 
 /*** set label of creation time to order ***/
 function yespo_add_order_time($order_id) {
@@ -387,6 +406,11 @@ add_action('woocommerce_thankyou', 'yespo_add_order_time', 10, 1);
  * STOP EXPORT DATA
  */
 function yespo_stop_export_function(){
+
+    if ( ! isset( $_REQUEST['yespo_stop_export_data_to_yespo_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_stop_export_data_to_yespo_nonce'])), 'yespo_stop_export_data_to_yespo' ) ) {
+        return;
+    }
+
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_stop_export_data_to_yespo' ) {
         $exported = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_exported_number();
         $total = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_export_total();
@@ -400,12 +424,16 @@ function yespo_stop_export_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_stop_export_data_to_yespo', 'yespo_stop_export_function');
-add_action('wp_ajax_nopriv_yespo_stop_export_data_to_yespo', 'yespo_stop_export_function');
 
 /***
  * RESUME EXPORT DATA
  */
 function yespo_resume_export_function(){
+
+    if ( ! isset( $_REQUEST['yespo_resume_export_data_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_REQUEST['yespo_resume_export_data_nonce'])), 'yespo_resume_export_data' ) ) {
+        return;
+    }
+
     if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_resume_export_data' ) {
         $exported = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_exported_number();
         $total = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_export_total();
@@ -418,7 +446,6 @@ function yespo_resume_export_function(){
     wp_die();
 }
 add_action('wp_ajax_yespo_resume_export_data', 'yespo_resume_export_function');
-add_action('wp_ajax_nopriv_yespo_resume_export_data', 'yespo_resume_export_function');
 
 /***
  * CRON
@@ -451,31 +478,6 @@ function yespo_enqueue_scripts_localization() {
         wp_enqueue_script( YESPO_TEXTDOMAIN . '-settings-admin', plugins_url( 'assets/build/plugin-admin.js', YESPO_PLUGIN_ABSOLUTE ), array(), '1.0', true );
     }
 
-    wp_localize_script( YESPO_TEXTDOMAIN . '-settings-admin', 'yespoVars', array(
-        'h1' => esc_html__( 'Synchronization progress', 'yespo-cdp' ),
-        'outSideText' => esc_html__( 'Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools', 'yespo-cdp' ),
-        'h4' => esc_html__( 'The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page', 'yespo-cdp' ),
-        'resume' => esc_html__( 'The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress', 'yespo-cdp' ),
-        'error' => esc_html__( 'Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support', 'yespo-cdp' ),
-        'error401' => esc_html__( 'Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.', 'yespo-cdp' ),
-        'error555' => esc_html__( 'Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp' ),
-        'success' => esc_html__( 'Data is successfully synchronized', 'yespo-cdp' ),
-        'synhStarted' => esc_html__( 'Data synchronization has started', 'yespo-cdp' ),
-        'pluginUrl' => esc_url( YESPO_PLUGIN_URL ),
-        'pauseButton' => esc_html__( 'Pause', 'yespo-cdp' ),
-        'resumeButton' => esc_html__( 'Resume', 'yespo-cdp' ),
-        'contactSupportButton' => esc_html__( 'Contact Support', 'yespo-cdp' ),
-        'ajaxUrl' => esc_url( admin_url( 'admin-ajax.php' ) ),
-        //'nonceApiKeyForm' => wp_create_nonce( 'yespo_api_key_nonce' ),
-        'nonceApiKeyForm' => wp_nonce_field('yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false),
-        'apiKeyValue' => isset( $yespo_api_key ) ? esc_js( $yespo_api_key ) : '',
-        'apiKeyText' => esc_html__( 'The API key to connect the account can be received by the', 'yespo-cdp' ),
-        'yespoLink' => 'https://my.yespo.io/settings-ui/#/api-keys-list',
-        'yespoLinkText' => esc_html__( 'link', 'yespo-cdp' ),
-        'yespoApiKey' => esc_js(__( 'API Key', 'yespo-cdp' )),
-        'synchronize' =>  esc_js(__('Synchronize', 'yespo-cdp')),
-        'startExportUsersNonce' => wp_create_nonce('yespo_export_user_data_to_esputnik'),
-        'startExportOrdersNonce' => wp_create_nonce('yespo_export_order_data_to_esputnik')
-    ));
+    return \Yespo\Integrations\Esputnik\Yespo_Localization::localize_template();
 }
 add_action( 'admin_enqueue_scripts', 'yespo_enqueue_scripts_localization' );

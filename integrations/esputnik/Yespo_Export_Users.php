@@ -116,11 +116,6 @@ class Yespo_Export_Users
         }
     }
 
-    public function get_final_users_exported(){
-        $status = $this->get_user_export_status();
-        return $this->update_table_data($status->id, intval($status->total), $status->status, '200');
-    }
-
     public function get_process_users_exported(){
         return $this->get_user_export_status();
     }
@@ -151,11 +146,6 @@ class Yespo_Export_Users
             $this->update_table_data($status->id, intval($status->exported), 'error', $code);
             return $status;
         }
-    }
-    public function check_user_for_error(){
-        $status = $this->get_user_export_status_processed('error');
-        if($status) return true;
-        return false;
     }
 
     public function update_after_activation(){
@@ -201,7 +191,7 @@ class Yespo_Export_Users
 
     public function get_users_total_count(){
         global $wpdb;
-        $capabilities_meta_key = esc_sql($this->wpdb->prefix) . 'capabilities';
+        $capabilities_meta_key = esc_sql($wpdb->prefix . 'capabilities');
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_var(
@@ -215,22 +205,15 @@ class Yespo_Export_Users
     }
     public function get_users_export_count(){
         global $wpdb;
-        $capabilities_meta_key = esc_sql($this->wpdb->prefix . 'capabilities');
+        $capabilities_meta_key = esc_sql($wpdb->prefix . 'capabilities');
+        $user_meta = esc_sql($wpdb->usermeta);
+        $esputnikContact = esc_sql($this->esputnikContact->get_meta_key());
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-        return $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->usermeta} um
-                WHERE um.meta_key = %s
-                AND um.meta_value LIKE %s
-                AND NOT EXISTS (
-                    SELECT 1 FROM {$wpdb->usermeta} um2
-                    WHERE um2.user_id = um.user_id
-                    AND um2.meta_key = %s
-                )",
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$user_meta} um WHERE um.meta_key = %s AND um.meta_value LIKE %s AND NOT EXISTS ( SELECT 1 FROM {$user_meta} um2 WHERE um2.user_id = um.user_id AND um2.meta_key = %s)",
                 $capabilities_meta_key,
                 '%\"customer\"%',
-                $this->esputnikContact->get_meta_key()
+                $esputnikContact
             )
         );
     }
@@ -242,10 +225,15 @@ class Yespo_Export_Users
     public function get_bulk_users_object(){
         global $wpdb;
         $prefix_postmeta_capabilities = esc_sql($wpdb->prefix . 'capabilities');
+        $table_users = esc_sql($wpdb->users);
+        $user_meta = esc_sql($wpdb->usermeta);
+        $meta_key = esc_sql($this->meta_key);
+        $number_for_export = absint($this->number_for_export);
+        $id_more_then = absint($this->id_more_then);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_col($wpdb->prepare(" SELECT u.ID FROM {$wpdb->users} u INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id WHERE um.meta_key = '{$prefix_postmeta_capabilities}' AND um.meta_value LIKE %s AND u.ID > %d AND u.ID NOT IN (SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value != '') ORDER BY u.user_registered ASC LIMIT %d",
-                '%' . $wpdb->esc_like(self::CUSTOMER) . '%', $this->id_more_then, $this->meta_key, $this->number_for_export)
+        return $wpdb->get_col($wpdb->prepare(" SELECT u.ID FROM {$table_users} u INNER JOIN {$user_meta} um ON u.ID = um.user_id WHERE um.meta_key = '{$prefix_postmeta_capabilities}' AND um.meta_value LIKE %s AND u.ID > %d AND u.ID NOT IN (SELECT user_id FROM {$user_meta} WHERE meta_key = %s AND meta_value != '') ORDER BY u.user_registered ASC LIMIT %d",
+                '%' . $wpdb->esc_like(self::CUSTOMER) . '%', $id_more_then, $meta_key, $number_for_export)
         );
     }
 

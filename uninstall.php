@@ -16,7 +16,7 @@
  * - Repeat things for multisite. Once for a single site in the network, once sitewide.
  *
  * @package   Yespo
- * @author    Yespo Omnichannel CDP <vadym.gmurya@asper.pro>
+ * @author    Yespo Omnichannel CDP <yespoplugin@yespo.io>
  * @copyright 2022 Yespo
  * @license   GPL 3.0+
  * @link      https://yespo.io/

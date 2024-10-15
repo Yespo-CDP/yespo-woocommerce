@@ -4,10 +4,12 @@ namespace Yespo\Integrations\Webtracking;
 
 class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
 {
+    const CART_HASH = 'cart_hash';
+    const YESPO_OPTIONS = 'yespo_options';
     private $options;
 
     public function __construct(){
-        $this->options = get_option('yespo_options');
+        $this->options = get_option(self::YESPO_OPTIONS);
     }
 
     public function get_data(){
@@ -39,11 +41,13 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     }
 
     private function update_option($cart_hash){
-        $this->options['cart_hash'] = sanitize_text_field($cart_hash);
-        update_option('yespo_options', $this->options);
+        $this->options[self::CART_HASH] = sanitize_text_field($cart_hash);
+        update_option(self::YESPO_OPTIONS, $this->options);
     }
 
     public function get_option(){
-        if (isset($this->options['cart_hash'])) return $this->options['cart_hash'];
+        if (isset($this->options[self::CART_HASH])) return $this->options[self::CART_HASH];
+        return false;
     }
+
 }

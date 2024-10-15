@@ -184,7 +184,7 @@ class YespoTracker
         }
 
         YespoTracker.trackCartChanges();
-        YespoTracker.interceptFetch();
+        if(!document.body.classList.contains('woocommerce-checkout')) YespoTracker.interceptFetch();
         YespoTracker.emptyCart();
         YespoTracker.addProductStorage();
         YespoTracker.getProductStorage()

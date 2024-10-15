@@ -509,7 +509,7 @@ function yespo_get_cart_contents_function(){
         return;
     }
 
-    if(isset($_REQUEST['action']) && sanitize_text_field(wp_unslash($_REQUEST['action'])) === 'yespo_get_cart_contents' ) {
+    if(isset($_POST['action']) && sanitize_text_field(wp_unslash($_POST['action'])) === 'yespo_get_cart_contents' ) {
         $cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
         if ($cart) {
             wp_send_json_success(['cart' => $cart]);

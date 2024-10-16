@@ -4,24 +4,42 @@ namespace Yespo\Integrations\Webtracking;
 
 class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
 {
-    public function get_data(){
-        // TODO: Implement get_data() method.
-        if ( strpos(sanitize_text_field($_SERVER['REQUEST_URI']), 'order-received') !== false ) {
 
-            $order_id = $this->get_created_order();
+    const PURCHASED_ITEMS = 'purchased_items';
+    public function __construct() {
 
-            if (!empty($order_id) && !empty($order_id[0]->id)) {
-                $order = wc_get_order($order_id[0]->id);
-                $hash = (new Yespo_Cart_Event())->get_option();
+        add_action('woocommerce_thankyou', [$this, 'add_order_to_session'], 10, 1);
 
-                return $this->get_orders_items($order, $order_id[0]->id, $hash);
-            }
+        if (!session_id()) {
+            session_start();
         }
+    }
+
+    public function add_order_to_session($order_id) {
+        if (!empty($order_id)) {
+            $order = wc_get_order($order_id);
+            $hash = (new Yespo_Cart_Event())->get_option();
+
+            $purchased_items = $this->get_orders_items($order, $order_id, $hash);
+
+            $_SESSION[self::PURCHASED_ITEMS] = $purchased_items;
+        }
+    }
+
+    public function get_data() {
+
+        if (!empty($_SESSION[self::PURCHASED_ITEMS])) {
+            $data = $_SESSION[self::PURCHASED_ITEMS];
+
+            unset($_SESSION[self::PURCHASED_ITEMS]);
+
+            return $data;
+        }
+
         return null;
     }
 
     public function get_orders_items($order, $id, $hash){
-
         $purchased_items = [];
 
         if ($order) {
@@ -32,7 +50,6 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
             $purchased_items['GUID'] = $hash;
 
             foreach ($cart as $item) {
-
                 $quantity = $item->get_quantity();
 
                 $purchased_items['PurchasedItems'][] = array(
@@ -43,26 +60,8 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
                 );
             }
         }
+
         return $purchased_items;
     }
 
-    public function get_created_order(){
-
-        global $wpdb;
-        $table_posts = esc_sql($wpdb->prefix . 'wc_orders');
-
-        return $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT id FROM %i 
-                    WHERE type = %s 
-                    AND status != %s 
-                    ORDER BY id DESC
-                    LIMIT 1",
-                $table_posts,
-                'shop_order',
-                'wc-checkout-draft'
-            )
-        );
-
-    }
 }

@@ -145,6 +145,28 @@ class YespoTracker
         };
     }
 
+    static interceptXMLHttpRequest() {
+        const originalOpen = XMLHttpRequest.prototype.open;
+        const originalSend = XMLHttpRequest.prototype.send;
+        let hasTriggered = false;
+
+        XMLHttpRequest.prototype.open = function (method, url) {
+            if (url.includes('wc-ajax=add_to_cart') && !hasTriggered) {
+                hasTriggered = true;
+                console.log('AJAX add to cart triggered');
+                setTimeout(() => {
+                    new YespoTracker('cart');
+                    hasTriggered = false;
+                }, 2000);
+            }
+            originalOpen.apply(this, arguments);
+        };
+
+        XMLHttpRequest.prototype.send = function () {
+            originalSend.apply(this, arguments);
+        };
+    }
+
     static emptyCart(){
         document.addEventListener('click', function(event) {
             if (event.target.closest('a[href*="remove_item"]')) {
@@ -184,7 +206,10 @@ class YespoTracker
         }
 
         YespoTracker.trackCartChanges();
-        if(!document.body.classList.contains('woocommerce-checkout')) YespoTracker.interceptFetch();
+        if(!document.body.classList.contains('woocommerce-checkout')) {
+            YespoTracker.interceptFetch();
+            YespoTracker.interceptXMLHttpRequest();
+        }
         YespoTracker.emptyCart();
         YespoTracker.addProductStorage();
         YespoTracker.getProductStorage()

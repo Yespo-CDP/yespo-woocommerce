@@ -5,6 +5,7 @@ class YespoTracker
         this.ajaxUrl = trackingData.ajaxUrl;
         this.getCartContentNonce = trackingData.getCartContentNonce;
         this.action = action;
+        this.storageProductAdded = 'productAdded';
         if (trackingData.category) this.category = trackingData.category;
         if (trackingData.product) this.product = trackingData.product;
         if (trackingData.cart) this.cart = trackingData.cart;
@@ -154,6 +155,7 @@ class YespoTracker
             if (url.includes('wc-ajax=add_to_cart') && !hasTriggered) {
                 hasTriggered = true;
                 console.log('AJAX add to cart triggered');
+                sessionStorage.removeItem(this.storageProductAdded);
                 setTimeout(() => {
                     new YespoTracker('cart');
                     hasTriggered = false;
@@ -184,17 +186,17 @@ class YespoTracker
 
         if (addToCartButton) {
             addToCartButton.addEventListener('click', function(event) {
-                sessionStorage.setItem('productAdded', 'true');
+                sessionStorage.setItem(this.storageProductAdded, 'true');
                 console.log('Товар додано в сесію');
             });
         }
     }
 
     static getProductStorage(){
-        if (sessionStorage.getItem('productAdded') === 'true') {
+        if (sessionStorage.getItem(this.storageProductAdded) === 'true') {
             console.log('Товар додано в кошик зі сторінки продукту');
             new YespoTracker('cart');
-            sessionStorage.removeItem('productAdded');
+            sessionStorage.removeItem(this.storageProductAdded);
         }
     }
 

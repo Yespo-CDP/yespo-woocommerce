@@ -475,6 +475,10 @@ function yespo_export_data_cron_function(){
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
 
+function yespo_script_cron_event_function(){
+    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_script_code_cron();
+}
+add_action('yespo_script_cron_event', 'yespo_script_cron_event_function');
 /***
  * JAVASCRIPT ADMIN LOCALIZATION
  */
@@ -493,8 +497,11 @@ add_action( 'admin_enqueue_scripts', 'yespo_enqueue_scripts_localization' );
  **/
 //add tracking code and send tracking data to yespo
 function yespo_add_tracking_codes() {
-    echo (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_script_from_options();
-    do_action('yespo_after_scripts');
+    $script = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_script_from_options();
+    if($script) {
+        echo $script;
+        do_action('yespo_after_scripts');
+    }
 }
 add_action('wp_footer', 'yespo_add_tracking_codes');
 

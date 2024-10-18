@@ -566,7 +566,7 @@ class YespoExportData {
         ]).then(() => {
             this.stopExportEventListener();
             this.getNumberDataExport();
-            this.processExportUsers();
+            //this.processExportUsers();
         });
 
     }

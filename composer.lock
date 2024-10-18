@@ -80,12 +80,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/inpsyde/wp-context.git",
-                "reference": "6dbd9939146a84a73e00dc1fb9bf770fdd4458aa"
+                "reference": "1350ada72517f5d374bff9409b4ea5a02377ec1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/6dbd9939146a84a73e00dc1fb9bf770fdd4458aa",
-                "reference": "6dbd9939146a84a73e00dc1fb9bf770fdd4458aa",
+                "url": "https://api.github.com/repos/inpsyde/wp-context/zipball/1350ada72517f5d374bff9409b4ea5a02377ec1a",
+                "reference": "1350ada72517f5d374bff9409b4ea5a02377ec1a",
                 "shasum": ""
             },
             "require": {
@@ -131,9 +131,9 @@
             "description": "A single-class utility to check the running context in WordPress sites.",
             "support": {
                 "issues": "https://github.com/inpsyde/wp-context/issues",
-                "source": "https://github.com/inpsyde/wp-context/tree/main"
+                "source": "https://github.com/inpsyde/wp-context/tree/1.5.1"
             },
-            "time": "2024-10-10T08:19:44+00:00"
+            "time": "2024-10-16T10:44:18+00:00"
         },
         {
             "name": "micropackage/internationalization",

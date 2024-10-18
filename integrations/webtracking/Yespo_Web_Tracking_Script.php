@@ -16,11 +16,16 @@ class Yespo_Web_Tracking_Script
         $this->options = get_option('yespo_options');
     }
 
+    public function check_script_code_cron(){
+        if(!$this->is_script_in_options()){
+            $this->make_tracking_script();
+        }
+    }
     public function get_script_from_options(){
         if($this->is_script_in_options()) {
             return json_decode( $this->options['yespo_tracking_script'] );
         }
-        else $this->make_tracking_script();
+        //else $this->make_tracking_script();
     }
 
     public function make_tracking_script(){

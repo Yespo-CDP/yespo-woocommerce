@@ -8,6 +8,7 @@ class YespoExportData {
         this.error401 = yespoVars.error401;
         this.error555 = yespoVars.error555;
         this.success = yespoVars.success;
+        this.trackerAdded = yespoVars.trackerAdded;
         this.synhStarted = yespoVars.synhStarted;
         this.pluginUrl = yespoVars.pluginUrl;
         this.pauseButton = yespoVars.pauseButton;
@@ -17,6 +18,18 @@ class YespoExportData {
 
         this.startExportUsersNonce = yespoVars.startExportUsersNonce;
         this.startExportOrdersNonce = yespoVars.startExportOrdersNonce;
+
+        this.yespoGetAccountYespoNameNonce = yespoVars.yespoGetAccountYespoNameNonce;
+        this.yespoCheckApiAuthorizationYespoNonce = yespoVars.yespoCheckApiAuthorizationYespoNonce;
+        this.yespoGetUsersTotalNonce = yespoVars.yespoGetUsersTotalNonce;
+        this.yespoGetUsersTotalExportNonce = yespoVars.yespoGetUsersTotalExportNonce;
+        this.yespoGetProcessExportUsersDataToEsputnikNonce = yespoVars.yespoGetProcessExportUsersDataToEsputnikNonce;
+
+        this.yespoGetOrdersTotalNonce = yespoVars.yespoGetOrdersTotalNonce;
+        this.yespoGetOrdersTotalExportNonce = yespoVars.yespoGetOrdersTotalExportNonce;
+        this.yespoGetProcessExportOrdersDataToEsputnikNonce = yespoVars.yespoGetProcessExportOrdersDataToEsputnikNonce;
+        this.yespoStopExportDataToYespoNonce = yespoVars.yespoStopExportDataToYespoNonce;
+        this.yespoResumeExportDataNonce = yespoVars.yespoResumeExportDataNonce;
 
         this.nonceApiKeyForm = yespoVars.nonceApiKeyForm;
         this.apiKeyValue = yespoVars.apiKeyValue;
@@ -40,7 +53,7 @@ class YespoExportData {
 
     // get top account name
     getAccountYespoName(){
-        this.getRequest('yespo_get_account_yespo_name',  (response) => {
+        this.getRequest('yespo_get_account_yespo_name', 'yespo_get_account_yespo_name_nonce', this.yespoGetAccountYespoNameNonce, (response) => {
             response = JSON.parse(response);
             if(document.querySelector('.panelUser') && response.username !== undefined) document.querySelector('.panelUser').innerHTML=response.username;
         });
@@ -49,11 +62,24 @@ class YespoExportData {
     /**
      * check authomatic authorization
      **/
+
+    async queueProcess(tracker) {
+        try {
+            const response = await this.getNumberDataExport();
+
+            if (response === true && tracker === true) {
+                this.addSuccessMessage(this.trackerAdded);
+            }
+        } catch (error) {
+            console.error('Error in processData:', error);
+        }
+    }
+
     checkAuthorization(){
-        this.getRequest('yespo_check_api_authorization_yespo',  (response) => {
+        this.getRequest('yespo_check_api_authorization_yespo', 'yespo_check_api_authorization_yespo_nonce', this.yespoCheckApiAuthorizationYespoNonce,  (response) => {
             response = JSON.parse(response);
             if(response.success && response.data.auth && response.data.auth === 'success'){
-                this.getNumberDataExport();
+                this.queueProcess(response.data.tracker);
             } else if(response.data.auth && response.data.auth === 'incorrect') {
                 let code = 401;
                 if(parseInt(response.data.code) === 0) code = 555;
@@ -233,12 +259,27 @@ class YespoExportData {
 
         const mainContainer = document.querySelector(settingsSection);
         if (mainContainer) {
-            mainContainer.innerHTML = '';
-            mainContainer.appendChild(sectionBody);
+
+            if (mainContainer.firstChild) {
+                mainContainer.firstChild.innerHTML = '';
+                mainContainer.insertBefore(sectionBody, mainContainer.firstChild);
+
+                const authContainers = document.querySelectorAll('.sectionBodyAuth');
+
+                authContainers.forEach(authContainer => {
+                    if (authContainer.innerHTML.trim() === '') {
+                        authContainer.remove();
+                    }
+                });
+
+            } else {
+                mainContainer.innerHTML = '';
+                mainContainer.appendChild(sectionBody);
+            }
         }
     }
 
-    addSuccessMessage() {
+    addSuccessMessage(message, exportData = false) {
         const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodySuccess' });
         const formBlock = this.createElement('div', { className: 'formBlock' });
         const fieldGroup = this.createElement('div', { className: 'field-group' });
@@ -255,7 +296,7 @@ class YespoExportData {
 
         messageIconSuccess.appendChild(img);
 
-        const messageTextSuccess = this.createElement('div', { className: 'messageTextSuccess' }, this.success );
+        const messageTextSuccess = this.createElement('div', { className: 'messageTextSuccess' }, message );
 
         messageNonceSuccess.appendChild(messageIconSuccess);
         messageNonceSuccess.appendChild(messageTextSuccess);
@@ -265,8 +306,20 @@ class YespoExportData {
         sectionBody.appendChild(formBlock);
 
         const messageContainer = document.querySelector('.settingsSection');
-        if (messageContainer) {
-            messageContainer.innerHTML = '';
+        const authContainer = document.querySelector('.sectionBodyAuth');
+
+        if(authContainer && exportData){
+
+            const authContainers = document.querySelectorAll('.sectionBodyAuth');
+            authContainers.forEach(authContainer => {
+                authContainer.remove();
+            });
+
+            if (messageContainer.firstChild) {
+                messageContainer.insertBefore(sectionBody, messageContainer.firstChild);
+            }
+            else messageContainer.appendChild(sectionBody);
+        } else if (messageContainer) {
             messageContainer.appendChild(sectionBody);
         }
     }
@@ -314,7 +367,13 @@ class YespoExportData {
         const mainContainer = document.querySelector('.settingsSection');
         if (mainContainer) {
             mainContainer.innerHTML = '';
-            mainContainer.appendChild(sectionBody);
+
+            if (mainContainer.firstChild) {
+                mainContainer.insertBefore(sectionBody, mainContainer.firstChild);
+            } else {
+                mainContainer.appendChild(sectionBody);
+            }
+
         }
     }
     /*
@@ -343,6 +402,7 @@ class YespoExportData {
                         if(response.status === 'success') {
                             if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                             this.getNumberDataExport();
+                            if(response.tracker === true) this.addSuccessMessage(this.trackerAdded);
                         } else if(response.status && response.status === 'incorrect') {
                             let code = 401;
                             if(parseInt(response.code) === 0) code = 555;
@@ -368,23 +428,33 @@ class YespoExportData {
     }
 
     getNumberDataExport(){
-        Promise.all([
-            this.getRequest('yespo_get_users_total_export', (response) => {
-                this.users = JSON.parse(response);
+        return Promise.all([
+            new Promise((resolve, reject) => {
+                this.getRequest('yespo_get_users_total_export', 'yespo_get_users_total_export_nonce', this.yespoGetUsersTotalExportNonce, (response) => {
+                    this.users = JSON.parse(response);
+                    resolve();
+                });
             }),
-            this.getRequest('yespo_get_orders_total_export', (response) => {
-                this.orders = JSON.parse(response);
+            new Promise((resolve, reject) => {
+                this.getRequest('yespo_get_orders_total_export', 'yespo_get_orders_total_export_nonce', this.yespoGetOrdersTotalExportNonce, (response) => {
+                    this.orders = JSON.parse(response);
+                    resolve();
+                });
             })
         ]).then(() => {
             this.route(this.users, this.orders);
             this.stopExportEventListener();
+            return true;
+        }).catch((error) => {
+            console.error('Error in getNumberDataExport:', error);
+            return false;
         });
     }
 
-    getRequest(action, callback) {
+    getRequest(action, nonce, nonceValue, callback) {
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
-            xhr.open('GET', this.ajaxUrl + '?action=' + action, true);
+            xhr.open('GET', this.ajaxUrl + '?action=' + action + '&' + nonce + '=' + nonceValue, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     let response = xhr.responseText;
@@ -412,7 +482,7 @@ class YespoExportData {
             if(parseInt(users.export) > 0) this.startExportUsers();
             else if(parseInt(orders.export) > 0) this.startExportOrders();
         } else {
-            this. addSuccessMessage();
+            this. addSuccessMessage(this.success, true);
         }
     }
 
@@ -446,7 +516,7 @@ class YespoExportData {
     //STOP EXPORT
     stopExportData(){
         Promise.all([
-            this.getRequest('yespo_stop_export_data_to_yespo', (response) => {
+            this.getRequest('yespo_stop_export_data_to_yespo', 'yespo_stop_export_data_to_yespo_nonce', this.yespoStopExportDataToYespoNonce, (response) => {
                 this.percentTransfered = parseInt(response);
             })
         ]).then(() => {
@@ -490,7 +560,7 @@ class YespoExportData {
 
     resumeExportData(){
         Promise.all([
-            this.getRequest('yespo_resume_export_data', (response) => {
+            this.getRequest('yespo_resume_export_data', 'yespo_resume_export_data_nonce', this.yespoResumeExportDataNonce, (response) => {
                 this.percentTransfered = parseInt(response);
             })
         ]).then(() => {
@@ -573,6 +643,8 @@ class YespoExportData {
     processExportUsers() {
         this.checkExportStatus(
             'yespo_get_process_export_users_data_to_esputnik',
+            'yespo_get_process_export_users_data_to_esputnik_nonce',
+            this.yespoGetProcessExportUsersDataToEsputnikNonce,
             'users',
             '#total-users-export',
             'yespo_export_user_data_to_esputnik',
@@ -584,6 +656,8 @@ class YespoExportData {
     processExportOrders() {
         this.checkExportStatus(
             'yespo_get_process_export_orders_data_to_esputnik',
+            'yespo_get_process_export_orders_data_to_esputnik_nonce',
+            this.yespoGetProcessExportOrdersDataToEsputnikNonce,
             'orders',
             '#total-orders-export',
             'export_orders_data_to_esputnik',
@@ -592,8 +666,8 @@ class YespoExportData {
         );
     }
 
-    checkExportStatus(action, way, totalUnits, totalExport, progressUnits, exportedUnits) {
-        this.getProcessData(action, (response) => {
+    checkExportStatus(action, nonce, nonceValue, way, totalUnits, totalExport, progressUnits, exportedUnits) {
+        this.getProcessData(action, nonce, nonceValue,(response) => {
             response = JSON.parse(response);
             if (response.exported !== null && response.exported >= 0) {
                 this.updateProgress(Math.floor( (response.exported / response.total) * 100), 'export');
@@ -629,10 +703,10 @@ class YespoExportData {
         });
     }
 
-    getProcessData(action, callback){
+    getProcessData(action, nonce, nonceValue, callback){
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
-            xhr.open('GET', this.ajaxUrl + '?action=' + action, true);
+            xhr.open('GET', this.ajaxUrl + '?action=' + action + '&' + nonce + '=' + nonceValue, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     let response = xhr.responseText;
@@ -673,7 +747,7 @@ class YespoExportData {
                 }
                 if( document.querySelector('#stop-send-data') ) document.querySelector('#stop-send-data').disabled = true;
                 setTimeout(() => {
-                    this. addSuccessMessage();
+                    this. addSuccessMessage(this.success, true);
                 }, 5000);
             }
         }

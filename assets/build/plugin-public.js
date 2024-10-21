@@ -21,7 +21,10 @@ class YespoTracker
         if(this.product && this.action === null) this.sendProduct(this.product);
         if(this.cart && this.action === null) this.sendCart(this.cart);
         if(this.customerData && this.action === null) this.userData(this.customerData);
-        if(this.action === 'cart' || this.action === 'cart_empty') this.getCartData();
+        //if(this.action === 'cart' || this.action === 'cart_empty') this.getCartData();
+        if(this.action === 'cart') this.getCartData('cart');
+        if(this.action === 'cart_empty') this.getCartData('cart_empty');
+        if(this.action === 'cart_batch') this.getCartData('cart_batch');
     }
 
     userData(customerData){
@@ -55,7 +58,7 @@ class YespoTracker
 
     cartMapping(cart){
         let status = [];
-        if (cart && cart.products && this.action === 'cart') {
+        if (cart && cart.products && (this.action === 'cart' || this.action === 'cart_batch')) {
             cart.products.forEach(product => {
                 status.push({
                     'productKey': product.productKey,
@@ -92,7 +95,7 @@ class YespoTracker
         return items;
     }
 
-    getCartData(){
+    getCartData(cart){
         let xhr = new XMLHttpRequest();
         let url = this.ajaxUrl;
 
@@ -102,7 +105,7 @@ class YespoTracker
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 let response = JSON.parse(xhr.responseText);
-                this.sendCart(response.data.cart);
+                if (((response.data.cart && response.data.cart.products && response.data.cart.products.length > 0) && cart === 'cart') || cart === 'cart_empty' || cart === 'cart_batch') this.sendCart(response.data.cart);
             } else if (xhr.readyState === 4) {
                 console.log('Error fetching cart data:', xhr.status, xhr.statusText);
             }
@@ -132,7 +135,7 @@ class YespoTracker
 
                 return originalFetch.apply(this, arguments)
                     .then(response => {
-                        new YespoTracker('cart');
+                        new YespoTracker('cart_batch');
 
                         setTimeout(() => {
                             hasTriggered = false;
@@ -150,9 +153,11 @@ class YespoTracker
         const originalOpen = XMLHttpRequest.prototype.open;
         const originalSend = XMLHttpRequest.prototype.send;
         let hasTriggered = false;
+        let storaged = sessionStorage.getItem(this.storageProductAdded)
 
         XMLHttpRequest.prototype.open = function (method, url) {
-            if ( (url.includes('wc-ajax=add_to_cart') || (url.includes('wc-ajax=get_refreshed_fragments') && document.referrer === window.location.href ) ) && !hasTriggered ) {
+            if ( (url.includes('wc-ajax=add_to_cart') || url.includes('wc-ajax=get_refreshed_fragments')  ) && (storaged !== 'true')  && !hasTriggered ) {
+
                 hasTriggered = true;
                 console.log('AJAX add to cart triggered');
                 sessionStorage.removeItem(this.storageProductAdded);
@@ -181,6 +186,25 @@ class YespoTracker
         });
     }
 
+    static addProductStorage(){
+        const addToCartButton = document.querySelector('.single_add_to_cart_button');
+
+        if (addToCartButton) {
+            addToCartButton.addEventListener('click', function(event) {
+                sessionStorage.setItem(this.storageProductAdded, 'true');
+                console.log('Товар додано в сесію');
+            });
+        }
+    }
+
+    static getProductStorage(){
+        if (sessionStorage.getItem(this.storageProductAdded) === 'true') {
+            console.log('Товар додано в кошик зі сторінки продукту');
+            new YespoTracker('cart');
+            sessionStorage.removeItem(this.storageProductAdded);
+        }
+    }
+
     static init(){
         if (typeof window.trackingData !== 'undefined' && typeof eS === 'function') {
             new YespoTracker();
@@ -194,6 +218,8 @@ class YespoTracker
             YespoTracker.interceptXMLHttpRequest();
         }
         YespoTracker.emptyCart();
+        YespoTracker.addProductStorage();
+        YespoTracker.getProductStorage();
     }
 }
 

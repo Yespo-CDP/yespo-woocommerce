@@ -159,6 +159,10 @@ function yespo_uninstall() { // phpcs:ignore
         wp_clear_scheduled_hook('yespo_export_data_cron');
     }
 
+    if (wp_next_scheduled('yespo_script_cron_event')) {
+        wp_clear_scheduled_hook('yespo_script_cron_event');
+    }
+
 }
 
 yespo_uninstall_multisite();

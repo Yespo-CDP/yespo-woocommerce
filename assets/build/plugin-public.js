@@ -152,7 +152,7 @@ class YespoTracker
         let hasTriggered = false;
 
         XMLHttpRequest.prototype.open = function (method, url) {
-            if (url.includes('wc-ajax=add_to_cart') && !hasTriggered) {
+            if ( (url.includes('wc-ajax=add_to_cart') || (url.includes('wc-ajax=get_refreshed_fragments') && document.referrer === window.location.href ) ) && !hasTriggered ) {
                 hasTriggered = true;
                 console.log('AJAX add to cart triggered');
                 sessionStorage.removeItem(this.storageProductAdded);
@@ -181,25 +181,6 @@ class YespoTracker
         });
     }
 
-    static addProductStorage(){
-        const addToCartButton = document.querySelector('.single_add_to_cart_button');
-
-        if (addToCartButton) {
-            addToCartButton.addEventListener('click', function(event) {
-                sessionStorage.setItem(this.storageProductAdded, 'true');
-                console.log('Товар додано в сесію');
-            });
-        }
-    }
-
-    static getProductStorage(){
-        if (sessionStorage.getItem(this.storageProductAdded) === 'true') {
-            console.log('Товар додано в кошик зі сторінки продукту');
-            new YespoTracker('cart');
-            sessionStorage.removeItem(this.storageProductAdded);
-        }
-    }
-
     static init(){
         if (typeof window.trackingData !== 'undefined' && typeof eS === 'function') {
             new YespoTracker();
@@ -213,8 +194,6 @@ class YespoTracker
             YespoTracker.interceptXMLHttpRequest();
         }
         YespoTracker.emptyCart();
-        YespoTracker.addProductStorage();
-        YespoTracker.getProductStorage()
     }
 }
 

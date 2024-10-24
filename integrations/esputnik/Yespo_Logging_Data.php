@@ -18,17 +18,26 @@ class Yespo_Logging_Data
 
     }
     public function create(string $user_id, string $contact_id, string $action){
-        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") === $this->table_name)
+        global $wpdb;
+        $table_name = esc_sql($this->table_name);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name)
             return $this->create_log_entry_user($user_id, $contact_id, $action); //if success returns 1
     }
 
     public function update_contact_log($user_id, $action, $response){
-        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name'") === $this->table_name)
+        global $wpdb;
+        $table_name = esc_sql($this->table_name);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name)
             $this->update_log_entry_user($user_id, $action, $response);
     }
 
     public function create_entry_order($order_id, $action = 'update', $status = 200){
-        if ($this->wpdb->get_var("SHOW TABLES LIKE '$this->table_name_order'") === $this->table_name_order)
+        global $wpdb;
+        $table_name_order = esc_sql($this->table_name_order);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name_order)) === $table_name_order)
             return $this->create_log_entry_order($order_id, $action, $status); //if success returns 1
     }
 
@@ -45,6 +54,7 @@ class Yespo_Logging_Data
     /** create new log user entry in database **/
     private function create_log_entry_user(string $user_id, string $contact_id, string $action){
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
 
         $data = array(
             'user_id' => sanitize_text_field($user_id),
@@ -55,10 +65,12 @@ class Yespo_Logging_Data
         );
 
         try {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
-                    "INSERT INTO {$this->table_name} (user_id, contact_id, action, yespo, log_date)
+                    "INSERT INTO %i (user_id, contact_id, action, yespo, log_date)
                     VALUES (%s, %s, %s, %d, %s)",
+                    $table_name,
                     $data['user_id'],
                     $data['contact_id'],
                     $data['action'],
@@ -74,9 +86,13 @@ class Yespo_Logging_Data
 
     private function update_log_entry_user($user_id, $action, $response){
         global $wpdb;
+        $table_name = esc_sql($this->table_name);
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $wpdb->query(
             $wpdb->prepare(
-                "UPDATE $this->table_name SET yespo = %d WHERE action = %s AND user_id = %s",
+                "UPDATE %i SET yespo = %d WHERE action = %s AND user_id = %s",
+                $table_name,
                 sanitize_text_field($response),
                 sanitize_text_field($action),
                 sanitize_text_field($user_id)
@@ -87,6 +103,8 @@ class Yespo_Logging_Data
     /** create new log order entry in database **/
     private function create_log_entry_order(string $order_id, string $action, $status){
         global $wpdb;
+        $table_name_order = esc_sql($this->table_name_order);
+
         if(!$this->check_presence_in_database($order_id, $action, 'completed')) {
             $data = [
                 'order_id' => sanitize_text_field($order_id),
@@ -96,13 +114,14 @@ class Yespo_Logging_Data
             ];
 
             try {
-
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery
                 return $wpdb->query(
                     $wpdb->prepare(
                         "
-                        INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) 
+                        INSERT INTO %i (order_id, action, status, created_at) 
                         VALUES (%s, %s, %s, %s)
                         ",
+                        $table_name_order,
                         $data['order_id'],
                         $data['action'],
                         $data['status'],
@@ -118,10 +137,13 @@ class Yespo_Logging_Data
 
     private function check_presence_in_database(string $order_id, string $action, string $status){
         global $wpdb;
+        $table_name_order = esc_sql($this->table_name_order);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM $this->table_name_order WHERE order_id = %s AND action = %s AND status = %s",
+                "SELECT COUNT(*) FROM %i WHERE order_id = %s AND action = %s AND status = %s",
+                sanitize_text_field($table_name_order),
                 sanitize_text_field($order_id),
                 sanitize_text_field($action),
                 sanitize_text_field($status)

@@ -16,7 +16,7 @@
  * - Repeat things for multisite. Once for a single site in the network, once sitewide.
  *
  * @package   Yespo
- * @author    Yespo Omnichannel CDP <vadym.gmurya@asper.pro>
+ * @author    Yespo Omnichannel CDP <yespoplugin@yespo.io>
  * @copyright 2022 Yespo
  * @license   GPL 3.0+
  * @link      https://yespo.io/
@@ -71,17 +71,37 @@ function yespo_uninstall() { // phpcs:ignore
     $table_yespo_removed = $wpdb->prefix . 'yespo_removed_users';
     $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
 
-    $wpdb->query( "DROP TABLE IF EXISTS $contact_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $export_status_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $order_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_items" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_queue_orders" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_curl_json" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_auth_log" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_removed" );
-    $wpdb->query( "DROP TABLE IF EXISTS $table_yespo_errors" );
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$contact_log));
 
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$export_status_log));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$order_log));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$table_yespo_queue));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$table_yespo_queue_items));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$table_yespo_queue_orders));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$table_yespo_curl_json));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$table_yespo_auth_log));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$table_yespo_removed));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i",$table_yespo_errors));
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
     $wpdb->query(
         $wpdb->prepare(
             "DELETE FROM $wpdb->usermeta WHERE meta_key IN (%s, %s)",
@@ -90,6 +110,7 @@ function yespo_uninstall() { // phpcs:ignore
         )
     );
 
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
     $wpdb->query(
         $wpdb->prepare(
             "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN (%s, %s, %s, %s) AND post_id IN (

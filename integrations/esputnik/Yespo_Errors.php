@@ -19,17 +19,19 @@ class Yespo_Errors
         if($error == 429 || $error == 500) {
             global $wpdb;
 
-            $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
+            $table_yespo_errors = esc_sql($wpdb->prefix . 'yespo_errors');
 
             $error_code = intval($error);
             $current_time = current_time('mysql');
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
                 "
-                    INSERT INTO {$table_yespo_errors} (error, time) 
+                    INSERT INTO %i (error, time) 
                     VALUES (%d, %s)
                     ",
+                    $table_yespo_errors,
                     $error_code,
                     $current_time
                 )
@@ -42,18 +44,20 @@ class Yespo_Errors
     public static function get_error_entry(){
         global $wpdb;
 
-        $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
+        $table_yespo_errors = esc_sql($wpdb->prefix . 'yespo_errors');
 
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare("
                     SELECT * 
-                    FROM $table_yespo_errors
+                    FROM %i
                     WHERE time >= %s
                     LIMIT 1
                 ",
+                $table_yespo_errors,
                 $time_selection
             )
         );
@@ -63,20 +67,22 @@ class Yespo_Errors
     public static function get_error_entry_old(){
         global $wpdb;
 
-        $table_yespo_errors = $wpdb->prefix . 'yespo_errors';
+        $table_yespo_errors = esc_sql($wpdb->prefix . 'yespo_errors');
 
 
         $time_current = current_time('mysql');
         $time_selection = gmdate('Y-m-d H:i:s', strtotime($time_current) - self::WAITING_TIME);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare("
                     SELECT * 
-                    FROM $table_yespo_errors
+                    FROM %i
                     WHERE time < %s
                     ORDER BY time DESC
                     LIMIT 1
                 ",
+                $table_yespo_errors,
                 $time_selection
             )
         );
@@ -96,6 +102,7 @@ class Yespo_Errors
     public static function add_label_to_users($users, $meta_key) {
         global $wpdb;
 
+        $meta_table = esc_sql($wpdb->usermeta);
         $values = [];
         $placeholders = [];
 
@@ -109,16 +116,18 @@ class Yespo_Errors
         if (!empty($values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
-                    INSERT INTO {$wpdb->usermeta} (user_id, meta_key, meta_value) 
+            $sql = "
+                    INSERT INTO {$meta_table} (user_id, meta_key, meta_value) 
                     VALUES {$placeholders_string}
                     ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
-                    ",
-                    ...$values
-                )
-            );
+                    ";
+
+            // phpcs:ignore WordPress.DB
+            $prepared_sql = $wpdb->prepare($sql, ...$values);
+
+            // phpcs:ignore WordPress.DB
+            return $wpdb->query($prepared_sql);
+
         }
 
         return false;

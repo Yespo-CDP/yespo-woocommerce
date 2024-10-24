@@ -101,8 +101,10 @@ class Yespo_Order
     public function add_labels_to_orders($values, $meta_key, $meta_value){
         global $wpdb;
 
+        $ordermeta_table = esc_sql($wpdb->usermeta);
         $placeholders = [];
         $query_values = [];
+        $post_meta = esc_sql( $wpdb->postmeta );
 
         foreach ($values as $order_id) {
             $placeholders[] = "(%d, %s, %s)";
@@ -114,16 +116,8 @@ class Yespo_Order
         if (!empty($query_values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
-                    INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) 
-                    VALUES {$placeholders_string}
-                    ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
-                    ",
-                    ...$query_values
-                )
-            );
+            // phpcs:ignore WordPress.DB
+            return $wpdb->query($wpdb->prepare("INSERT INTO {$post_meta} (post_id, meta_key, meta_value) VALUES {$placeholders_string} ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)",...$query_values));
         }
         return false;
     }
@@ -196,9 +190,11 @@ class Yespo_Order
         $existing_post_types = array_filter($post_types, function($type) {
             return post_type_exists($type);
         });
+
         return [
             'post_type' => $existing_post_types,
             'post_status' => 'any',
+            // phpcs:ignore WordPress.DB.SlowDBQuery
             'meta_query' => array(
                 array(
                     'key' => '_billing_email',
@@ -212,6 +208,7 @@ class Yespo_Order
     private function add_log_order_entry($order_logs, $operation, $response, $time){
         global $wpdb;
 
+        $table_name_order = esc_sql($this->table_name_order);
         $placeholders = [];
         $query_values = [];
 
@@ -226,15 +223,16 @@ class Yespo_Order
         if (!empty($query_values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
-                    INSERT INTO {$this->table_name_order} (order_id, action, status, created_at) 
+            $sql = "
+                    INSERT INTO {$table_name_order} (order_id, action, status, created_at) 
                     VALUES {$placeholders_string}
-                    ",
-                    ...$query_values
-                )
-            );
+                    ";
+
+            // phpcs:ignore WordPress.DB
+            $prepared_sql = $wpdb->prepare($sql, ...$query_values);
+
+            // phpcs:ignore WordPress.DB
+            return $wpdb->query($prepared_sql);
         }
 
         return false;

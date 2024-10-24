@@ -29,16 +29,15 @@ class YespoTracker
 
     userData(customerData){
         console.log('User with next data:', customerData);
+        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': customerData.externalCustomerId, 'user_email': customerData.user_email, 'user_name': customerData.user_name, 'user_phone': customerData.user_phone } });
     }
+
     thankYouPage(purchase){
         console.log('Purchase has been sent with id:', purchase);
         const purchasedItems = this.thankYouPageMapping(purchase);
-        eS('sendEvent', 'PurchasedItems', {
-            "OrderNumber": purchase.OrderNumber,
-            "PurchasedItems": purchasedItems,
-            "GUID": purchase.GUID
-        });
+        eS('sendEvent', 'PurchasedItems', { "OrderNumber": purchase.OrderNumber, "PurchasedItems": purchasedItems, "GUID": purchase.GUID});
     }
+
     sendCategory(category){
         console.log('Category key has been sent with id:', category);
         eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
@@ -186,6 +185,7 @@ class YespoTracker
         });
     }
 
+
     static addProductStorage(){
         const addToCartButton = document.querySelector('.single_add_to_cart_button');
 
@@ -199,6 +199,7 @@ class YespoTracker
 
     static getProductStorage(){
         if (sessionStorage.getItem(this.storageProductAdded) === 'true') {
+            console.log(sessionStorage.getItem(this.storageProductAdded));
             console.log('Товар додано в кошик зі сторінки продукту');
             new YespoTracker('cart');
             sessionStorage.removeItem(this.storageProductAdded);
@@ -208,18 +209,21 @@ class YespoTracker
     static init(){
         if (typeof window.trackingData !== 'undefined' && typeof eS === 'function') {
             new YespoTracker();
+
+            YespoTracker.trackCartChanges();
+            if(!document.body.classList.contains('woocommerce-checkout')) {
+                YespoTracker.interceptXMLHttpRequest();
+                YespoTracker.interceptFetch();
+            }
+            YespoTracker.emptyCart();
+            YespoTracker.addProductStorage();
+            YespoTracker.getProductStorage();
+
         } else {
             console.log('trackingData is not defined');
         }
 
-        YespoTracker.trackCartChanges();
-        if(!document.body.classList.contains('woocommerce-checkout')) {
-            YespoTracker.interceptFetch();
-            YespoTracker.interceptXMLHttpRequest();
-        }
-        YespoTracker.emptyCart();
-        YespoTracker.addProductStorage();
-        YespoTracker.getProductStorage();
+
     }
 }
 

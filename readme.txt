@@ -27,7 +27,7 @@ When changes are made in WooCommerce (contacts: creation, update, and deletion; 
 
 We strive to empower companies [to use data](https://yespo.io/data-processing-agreement?utm_source=wordpress&utm_medium=referral&utm_campaign=woocommerce) to engage with customers, making marketing strategies more effective. Since the Yespo database integrates seamlessly with your technology stack, you can get complete information about every customer who interacts with your business. Then, use this data to automate personalized communications across 9 channels.
 
-## Yespo's [subscription](https://yespo.io/tarif-universum?utm_source=wordpress&utm_medium=referral&utm_campaign=woocommerce) \-based service includes the following features:
+## Yespo's [subscription](https://yespo.io/tarif-universum?utm_source=wordpress&utm_medium=referral&utm_campaign=woocommerce) - based service includes the following features:
 
 ### Data Collection
 

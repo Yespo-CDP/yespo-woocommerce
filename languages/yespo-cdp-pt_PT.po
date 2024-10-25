@@ -100,6 +100,10 @@ msgstr "Entre em contato com o suporte"
 msgid "Data is successfully synchronized"
 msgstr "Os dados foram sincronizados com sucesso"
 
+#: integrations/esputnik/Yespo_Localization.php:87
+msgid "Web tracking is successfully configured"
+msgstr "O rastreamento da web foi configurado com sucesso"
+
 #: backend/views/settings.php:89
 msgid "Data synchronization has started"
 msgstr "A sincronização de dados começou"

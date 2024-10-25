@@ -22,9 +22,9 @@
     "inpsyde/wp-context": "*",
     "inpsyde/assets": "*",
 
-    "wpbp/debug": "1.1.4",
-    "wpbp/i18n-notice": "dev-main@dev",
-    "wpdesk/wp-notice": "^3.2.5"
+    "wpbp/debug": "*",
+    "wpbp/i18n-notice": "*",
+    "wpdesk/wp-notice": "*"
   },
   "bin": [
     "bin/wpbp-generator"
@@ -40,7 +40,7 @@
       "Yespo\\Backend\\": "backend/",
       "Yespo\\Engine\\": "engine/",
       "Yespo\\Integrations\\Esputnik\\": "integrations/esputnik/",
-      "Yespo\\Integrations\\Webtracking\\": "integrations/webtracking/"
+	  "Yespo\\Integrations\\Webtracking\\": "integrations/webtracking/"
     }
   }
 }

@@ -4,7 +4,7 @@
  * Yespo
  *
  * @package   Yespo
- * @author    Yespo Omnichannel CDP <vadym.gmurya@asper.pro>
+ * @author    Yespo Omnichannel CDP <yespoplugin@yespo.io>
  * @copyright 2022 Yespo
  * @license   GPL 3.0+
  * @link      https://yespo.io/
@@ -20,33 +20,33 @@ use \stdClass; // phpcs:ignore
  */
 class Transient extends Base {
 
-    /**
-     * Initialize the class.
-     *
-     * @return void|bool
-     */
-    public function initialize() {
-        parent::initialize();
-    }
+	/**
+	 * Initialize the class.
+	 *
+	 * @return void|bool
+	 */
+	public function initialize() {
+		parent::initialize();
+	}
 
-    /**
-     * This method contain an example of caching a transient with an external request.
-     *
-     * @since 1.0.0
-     * @return mixed
-     */
-    public function transient_caching_example() { // phpcs:ignore
+	/**
+	 * This method contain an example of caching a transient with an external request.
+	 *
+	 * @since 1.0.0
+	 * @return mixed
+	 */
+	public function transient_caching_example() { // phpcs:ignore
         return false;
-    }
+	}
 
-    /**
-     * Print the transient content
-     *
-     * @since 1.0.0
-     * @return string
-     */
-    public function print_transient_output() {
-        return '';
-    }
+	/**
+	 * Print the transient content
+	 *
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function print_transient_output() {
+		return '';
+	}
 
 }

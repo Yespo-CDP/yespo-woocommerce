@@ -116,11 +116,6 @@ class Yespo_Export_Users
         }
     }
 
-    public function get_final_users_exported(){
-        $status = $this->get_user_export_status();
-        return $this->update_table_data($status->id, intval($status->total), $status->status, '200');
-    }
-
     public function get_process_users_exported(){
         return $this->get_user_export_status();
     }
@@ -152,11 +147,6 @@ class Yespo_Export_Users
             return $status;
         }
     }
-    public function check_user_for_error(){
-        $status = $this->get_user_export_status_processed('error');
-        if($status) return true;
-        return false;
-    }
 
     public function update_after_activation(){
         $user = $this->get_user_export_status_processed('active');
@@ -171,19 +161,15 @@ class Yespo_Export_Users
         }
     }
 
-    public function get_users_bulk_export(){
-        return Yespo_Contact_Mapping::create_bulk_export_array(
-            $this->get_users_object($this->get_bulk_users_export_args())
-        );
-    }
-
     private function get_user_export_status(){
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE export_type = %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM %i WHERE export_type = %s ORDER BY id DESC LIMIT 1",
+                $table_name,
                 'users'
             )
         );
@@ -192,31 +178,26 @@ class Yespo_Export_Users
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM %i WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
+                $table_name,
                 'users',
                 $action
             )
         );
     }
-    public function export_users_to_esputnik(){
-        $users = $this->get_users_object($this->get_users_export_args());
-        if(count($users) > 0 && isset($users[0])){
-            return (new Yespo_Contact())-> create_on_yespo(
-                (get_user_by('id', $users[0]))->user_email,
-                $users[0]
-            );
-        }
-    }
 
     public function get_users_total_count(){
         global $wpdb;
-        $capabilities_meta_key = esc_sql($this->wpdb->prefix) . 'capabilities';
+        $capabilities_meta_key = esc_sql($wpdb->prefix . 'capabilities');
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s",
+                "SELECT COUNT(*) FROM %i WHERE meta_key = %s AND meta_value LIKE %s",
+                $wpdb->usermeta,
                 $capabilities_meta_key,
                 '%"customer"%'
             )
@@ -224,21 +205,15 @@ class Yespo_Export_Users
     }
     public function get_users_export_count(){
         global $wpdb;
-        $capabilities_meta_key = esc_sql($this->wpdb->prefix) . 'capabilities';
+        $capabilities_meta_key = esc_sql($wpdb->prefix . 'capabilities');
+        $user_meta = esc_sql($wpdb->usermeta);
+        $esputnikContact = esc_sql($this->esputnikContact->get_meta_key());
 
-        return $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->usermeta} um
-                WHERE um.meta_key = %s
-                AND um.meta_value LIKE %s
-                AND NOT EXISTS (
-                    SELECT 1 FROM {$wpdb->usermeta} um2
-                    WHERE um2.user_id = um.user_id
-                    AND um2.meta_key = %s
-                )",
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$user_meta} um WHERE um.meta_key = %s AND um.meta_value LIKE %s AND NOT EXISTS ( SELECT 1 FROM {$user_meta} um2 WHERE um2.user_id = um.user_id AND um2.meta_key = %s)",
                 $capabilities_meta_key,
                 '%\"customer\"%',
-                $this->esputnikContact->get_meta_key()
+                $esputnikContact
             )
         );
     }
@@ -249,30 +224,17 @@ class Yespo_Export_Users
 
     public function get_bulk_users_object(){
         global $wpdb;
+        $prefix_postmeta_capabilities = esc_sql($wpdb->prefix . 'capabilities');
+        $table_users = esc_sql($wpdb->users);
+        $user_meta = esc_sql($wpdb->usermeta);
+        $meta_key = esc_sql($this->meta_key);
+        $number_for_export = absint($this->number_for_export);
+        $id_more_then = absint($this->id_more_then);
 
-        return $wpdb->get_col(
-            $wpdb->prepare("
-                    SELECT u.ID 
-                    FROM {$wpdb->users} u
-                    INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id
-                    WHERE um.meta_key = '{$wpdb->prefix}capabilities'
-                      AND um.meta_value LIKE %s
-                      AND u.ID > %d
-                      AND u.ID NOT IN (
-                        SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value != ''
-                      )
-                    ORDER BY u.user_registered ASC
-                    LIMIT %d
-                ",
-                '%' . $wpdb->esc_like(self::CUSTOMER) . '%',
-                $this->id_more_then,
-                $this->meta_key,
-                $this->number_for_export
-            )
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_col($wpdb->prepare(" SELECT u.ID FROM {$table_users} u INNER JOIN {$user_meta} um ON u.ID = um.user_id WHERE um.meta_key = '{$prefix_postmeta_capabilities}' AND um.meta_value LIKE %s AND u.ID > %d AND u.ID NOT IN (SELECT user_id FROM {$user_meta} WHERE meta_key = %s AND meta_value != '') ORDER BY u.user_registered ASC LIMIT %d",
+                '%' . $wpdb->esc_like(self::CUSTOMER) . '%', $id_more_then, $meta_key, $number_for_export)
         );
-
-
-
     }
 
     /**
@@ -284,9 +246,11 @@ class Yespo_Export_Users
         $table_yespo_queue = esc_sql($this->table_yespo_queue);
         $session_id = sanitize_text_field($session_id);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$table_yespo_queue} (session_id, export_status, local_status) VALUES (%s, %s, %s)",
+                "INSERT INTO %i (session_id, export_status, local_status) VALUES (%s, %s, %s)",
+                $table_yespo_queue,
                 $session_id,
                 'IMPORTING',
                 ''
@@ -320,12 +284,13 @@ class Yespo_Export_Users
 
         $set_clause = implode(', ', $data);
 
-        return $wpdb->query(
-            $wpdb->prepare(
-                "UPDATE {$table_yespo_queue} SET {$set_clause} WHERE {$where_clause}",
-                ...$values
-            )
-        );
+        $sql = "UPDATE {$table_yespo_queue} SET {$set_clause} WHERE {$where_clause}";
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $prepared_sql = $wpdb->prepare($sql, ...$values);
+
+        // phpcs:ignore WordPress.DB
+        return $wpdb->query($prepared_sql);
 
     }
 
@@ -337,63 +302,27 @@ class Yespo_Export_Users
         $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
         $contact_id = sanitize_text_field($user_id);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$table_yespo_queue_items} (session_id, contact_id, yespo_id) VALUES (%s, %s, %s)",
-                '', $contact_id, ''
+                "INSERT INTO %i (session_id, contact_id, yespo_id) VALUES (%s, %s, %s)",
+                $table_yespo_queue_items, '', $contact_id, ''
             )
         );
-    }
-
-    public function update_entry_queue_items($session_id, $user_id, $yespo_id = null) {
-        global $wpdb;
-
-        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
-        $session_id = sanitize_text_field($session_id);
-        $yespo_id = sanitize_text_field($yespo_id);
-        $contact_id = sanitize_text_field($user_id);
-
-        $data = [];
-        $values = [];
-
-        if (!empty($session_id)) {
-            $data[] = 'session_id = %s';
-            $values[] = $session_id;
-        }
-
-        if (!empty($yespo_id)) {
-            $data[] = 'yespo_id = %s';
-            $values[] = $yespo_id;
-        }
-
-        if (empty($data)) {
-            return false;
-        }
-
-        $where_clause = 'contact_id = %s';
-        $values[] = $contact_id;
-
-        $set_clause = implode(', ', $data);
-
-        return $wpdb->query(
-            $wpdb->prepare(
-                "UPDATE {$table_yespo_queue_items} SET {$set_clause} WHERE {$where_clause}",
-                ...$values
-            )
-        );
-
     }
 
     public function check_queue_items_for_session($session_id) {
         global $wpdb;
         $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) 
-                FROM {$table_yespo_queue_items} 
+                FROM %i
                 WHERE session_id = %s 
                 AND (yespo_id IS NULL OR yespo_id = '')",
+                $table_yespo_queue_items,
                 $session_id
             )
         );
@@ -410,13 +339,15 @@ class Yespo_Export_Users
         $code = sanitize_text_field($code);
         $updated_at = gmdate('Y-m-d H:i:s', time());
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
                 "
-                    UPDATE {$table_name} 
+                    UPDATE %i 
                     SET exported = %d, status = %s, code = %s, updated_at = %s 
                     WHERE id = %d
                 ",
+                $table_name,
                 $exported, $status, $code, $updated_at, $id
             )
         );
@@ -426,104 +357,27 @@ class Yespo_Export_Users
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$table_name} SET total = %d WHERE id = %d",
+                "UPDATE %i SET total = %d WHERE id = %d",
+                $table_name,
                 $total,
                 $id
             )
         );
     }
 
-    private function get_users_export_args(){
-        return [
-            'role__in'    => [self::CUSTOMER],
-            'orderby' => 'registered',
-            'order'   => 'ASC',
-            'fields'  => 'ID',
-            'meta_query' => array(
-                'relation' => 'OR',
-                array(
-                    'key'     => $this->meta_key,
-                    'compare' => 'NOT EXISTS',
-                ),
-                array(
-                    'key'     => $this->meta_key,
-                    'value'   => '',
-                    'compare' => '=',
-                ),
-            ),
-        ];
-    }
-
-    private function get_bulk_users_export_args(){
-        return [
-            'role__in'    => [self::CUSTOMER],
-            'orderby' => 'registered',
-            'order'   => 'ASC',
-            'fields'  => 'ID',
-            'number' => $this->number_for_export,
-            'meta_query' => array(
-                'relation' => 'OR',
-                array(
-                    'key'     => $this->meta_key,
-                    'compare' => 'NOT EXISTS',
-                ),
-                array(
-                    'key'     => $this->meta_key,
-                    'value'   => '',
-                    'compare' => '=',
-                ),
-            ),
-        ];
-    }
-
-
-
-    public function get_active_users_bulk_export($part){
-        return Yespo_Contact_Mapping::create_bulk_export_array(
-            $this->get_active_users_object($this->get_active_bulk_users_export_args($part))
-        );
-    }
-
-    public function get_active_users_object($args){
-        return get_users($args);
-    }
-
-    private function get_active_bulk_users_export_args($page = 1){
-        $number = $this->number_for_export;
-        $offset = ($page - 1) * $number;
-
-        return [
-            'role__in'    => [self::CUSTOMER],
-            'orderby' => 'registered',
-            'order'   => 'ASC',
-            'fields'  => 'ID',
-            'number' => $number,
-            'offset' => $offset,
-            'meta_query' => array(
-                'relation' => 'OR',
-                array(
-                    'key'     => $this->meta_key,
-                    'compare' => 'NOT EXISTS',
-                ),
-                array(
-                    'key'     => $this->meta_key,
-                    'value'   => '',
-                    'compare' => '=',
-                ),
-            ),
-        ];
-    }
-
     private function check_sessios_importing(){
         global $wpdb;
         $table_yespo_queue = esc_sql($this->table_yespo_queue);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table_yespo_queue} WHERE export_status = %s",
-            'IMPORTING'
-        )
+                "SELECT COUNT(*) FROM %i WHERE export_status = %s",
+            $table_yespo_queue,
+                'IMPORTING'
+            )
         );
 
         if ($count > 0) return true;
@@ -553,9 +407,11 @@ class Yespo_Export_Users
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM %i WHERE export_type = %s AND status != %s ORDER BY id DESC LIMIT 1",
+                $table_name,
                 'orders',
                 'completed'
             )
@@ -571,10 +427,12 @@ class Yespo_Export_Users
         $data['exported'] = absint($data['exported']);
         $data['status'] = sanitize_text_field($data['status']);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
-                "INSERT INTO {$table_name} (export_type, total, exported, status)
+                "INSERT INTO %i (export_type, total, exported, status)
         VALUES (%s, %d, %d, %s)",
+                $table_name,
                 $data['export_type'],
                 $data['total'],
                 $data['exported'],

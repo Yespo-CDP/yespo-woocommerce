@@ -105,8 +105,8 @@ function yespo_export_data_activation(){
     if (!wp_next_scheduled('yespo_export_data_cron')) {
         wp_schedule_event(time(), 'every_minute', 'yespo_export_data_cron');
     }
-
-    if (!wp_next_scheduled('yespo_script_cron_event')) {
+	
+	if (!wp_next_scheduled('yespo_script_cron_event')) {
         wp_schedule_event(time(), 'hourly', 'yespo_script_cron_event');
     }
 

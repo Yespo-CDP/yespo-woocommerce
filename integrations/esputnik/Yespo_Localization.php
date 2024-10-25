@@ -15,7 +15,7 @@ class Yespo_Localization
             'error555' => esc_html__( 'Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp' ),
             'success' => esc_html__( 'Data is successfully synchronized', 'yespo-cdp' ),
             'synhStarted' => esc_html__( 'Data synchronization has started', 'yespo-cdp' ),
-			'trackerAdded' => esc_html__( 'Web tracking is successfully configured', 'yespo-cdp' ),
+			      'trackerAdded' => esc_html__( 'Web tracking is successfully configured', 'yespo-cdp' ),
             'pluginUrl' => esc_url( YESPO_PLUGIN_URL ),
             'pauseButton' => esc_html__( 'Pause', 'yespo-cdp' ),
             'resumeButton' => esc_html__( 'Resume', 'yespo-cdp' ),

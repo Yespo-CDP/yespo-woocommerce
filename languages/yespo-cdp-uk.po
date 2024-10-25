@@ -96,9 +96,13 @@ msgstr "Вихідна активність на сервері заблоков
 msgid "Contact Support"
 msgstr "Зв`язатися зі службою підтримки"
 
-#: bfunctions/functions.php:87
+#: functions/functions.php:87
 msgid "Data is successfully synchronized"
 msgstr "Дані успішно синхронізовані"
+
+#: integrations/esputnik/Yespo_Localization.php:87
+msgid "Web tracking is successfully configured"
+msgstr "Веб-трекінг успішно налаштований"
 
 #: functions/functions.php:89
 msgid "Data synchronization has started"

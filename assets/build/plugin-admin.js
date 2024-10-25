@@ -8,6 +8,7 @@ class YespoExportData {
         this.error401 = yespoVars.error401;
         this.error555 = yespoVars.error555;
         this.success = yespoVars.success;
+        this.trackerAdded = yespoVars.trackerAdded;
         this.synhStarted = yespoVars.synhStarted;
         this.pluginUrl = yespoVars.pluginUrl;
         this.pauseButton = yespoVars.pauseButton;
@@ -61,11 +62,24 @@ class YespoExportData {
     /**
      * check authomatic authorization
      **/
+
+    async queueProcess(tracker) {
+        try {
+            const response = await this.getNumberDataExport();
+
+            if (response === true && tracker === true) {
+                this.addSuccessMessage(this.trackerAdded);
+            }
+        } catch (error) {
+            console.error('Error in processData:', error);
+        }
+    }
+
     checkAuthorization(){
         this.getRequest('yespo_check_api_authorization_yespo', 'yespo_check_api_authorization_yespo_nonce', this.yespoCheckApiAuthorizationYespoNonce,  (response) => {
             response = JSON.parse(response);
             if(response.success && response.data.auth && response.data.auth === 'success'){
-                this.getNumberDataExport();
+                this.queueProcess(response.data.tracker);
             } else if(response.data.auth && response.data.auth === 'incorrect') {
                 let code = 401;
                 if(parseInt(response.data.code) === 0) code = 555;
@@ -245,12 +259,27 @@ class YespoExportData {
 
         const mainContainer = document.querySelector(settingsSection);
         if (mainContainer) {
-            mainContainer.innerHTML = '';
-            mainContainer.appendChild(sectionBody);
+
+            if (mainContainer.firstChild) {
+                mainContainer.firstChild.innerHTML = '';
+                mainContainer.insertBefore(sectionBody, mainContainer.firstChild);
+
+                const authContainers = document.querySelectorAll('.sectionBodyAuth');
+
+                authContainers.forEach(authContainer => {
+                    if (authContainer.innerHTML.trim() === '') {
+                        authContainer.remove();
+                    }
+                });
+
+            } else {
+                mainContainer.innerHTML = '';
+                mainContainer.appendChild(sectionBody);
+            }
         }
     }
 
-    addSuccessMessage() {
+    addSuccessMessage(message, exportData = false) {
         const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodySuccess' });
         const formBlock = this.createElement('div', { className: 'formBlock' });
         const fieldGroup = this.createElement('div', { className: 'field-group' });
@@ -267,7 +296,7 @@ class YespoExportData {
 
         messageIconSuccess.appendChild(img);
 
-        const messageTextSuccess = this.createElement('div', { className: 'messageTextSuccess' }, this.success );
+        const messageTextSuccess = this.createElement('div', { className: 'messageTextSuccess' }, message );
 
         messageNonceSuccess.appendChild(messageIconSuccess);
         messageNonceSuccess.appendChild(messageTextSuccess);
@@ -277,8 +306,20 @@ class YespoExportData {
         sectionBody.appendChild(formBlock);
 
         const messageContainer = document.querySelector('.settingsSection');
-        if (messageContainer) {
-            messageContainer.innerHTML = '';
+        const authContainer = document.querySelector('.sectionBodyAuth');
+
+        if(authContainer && exportData){
+
+            const authContainers = document.querySelectorAll('.sectionBodyAuth');
+            authContainers.forEach(authContainer => {
+                authContainer.remove();
+            });
+
+            if (messageContainer.firstChild) {
+                messageContainer.insertBefore(sectionBody, messageContainer.firstChild);
+            }
+            else messageContainer.appendChild(sectionBody);
+        } else if (messageContainer) {
             messageContainer.appendChild(sectionBody);
         }
     }
@@ -326,7 +367,13 @@ class YespoExportData {
         const mainContainer = document.querySelector('.settingsSection');
         if (mainContainer) {
             mainContainer.innerHTML = '';
-            mainContainer.appendChild(sectionBody);
+
+            if (mainContainer.firstChild) {
+                mainContainer.insertBefore(sectionBody, mainContainer.firstChild);
+            } else {
+                mainContainer.appendChild(sectionBody);
+            }
+
         }
     }
     /*
@@ -355,6 +402,7 @@ class YespoExportData {
                         if(response.status === 'success') {
                             if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                             this.getNumberDataExport();
+                            if(response.tracker === true) this.addSuccessMessage(this.trackerAdded);
                         } else if(response.status && response.status === 'incorrect') {
                             let code = 401;
                             if(parseInt(response.code) === 0) code = 555;
@@ -380,16 +428,26 @@ class YespoExportData {
     }
 
     getNumberDataExport(){
-        Promise.all([
-            this.getRequest('yespo_get_users_total_export', 'yespo_get_users_total_export_nonce', this.yespoGetUsersTotalExportNonce, (response) => {
-                this.users = JSON.parse(response);
+        return Promise.all([
+            new Promise((resolve, reject) => {
+                this.getRequest('yespo_get_users_total_export', 'yespo_get_users_total_export_nonce', this.yespoGetUsersTotalExportNonce, (response) => {
+                    this.users = JSON.parse(response);
+                    resolve();
+                });
             }),
-            this.getRequest('yespo_get_orders_total_export', 'yespo_get_orders_total_export_nonce', this.yespoGetOrdersTotalExportNonce, (response) => {
-                this.orders = JSON.parse(response);
+            new Promise((resolve, reject) => {
+                this.getRequest('yespo_get_orders_total_export', 'yespo_get_orders_total_export_nonce', this.yespoGetOrdersTotalExportNonce, (response) => {
+                    this.orders = JSON.parse(response);
+                    resolve();
+                });
             })
         ]).then(() => {
             this.route(this.users, this.orders);
             this.stopExportEventListener();
+            return true;
+        }).catch((error) => {
+            console.error('Error in getNumberDataExport:', error);
+            return false;
         });
     }
 
@@ -424,7 +482,7 @@ class YespoExportData {
             if(parseInt(users.export) > 0) this.startExportUsers();
             else if(parseInt(orders.export) > 0) this.startExportOrders();
         } else {
-            this. addSuccessMessage();
+            this. addSuccessMessage(this.success, true);
         }
     }
 
@@ -508,7 +566,7 @@ class YespoExportData {
         ]).then(() => {
             this.stopExportEventListener();
             this.getNumberDataExport();
-            this.processExportUsers();
+            //this.processExportUsers();
         });
 
     }
@@ -689,7 +747,7 @@ class YespoExportData {
                 }
                 if( document.querySelector('#stop-send-data') ) document.querySelector('#stop-send-data').disabled = true;
                 setTimeout(() => {
-                    this. addSuccessMessage();
+                    this. addSuccessMessage(this.success, true);
                 }, 5000);
             }
         }

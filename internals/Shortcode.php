@@ -4,7 +4,7 @@
  * Yespo
  *
  * @package   Yespo
- * @author    Yespo Omnichannel CDP <vadym.gmurya@asper.pro>
+ * @author    Yespo Omnichannel CDP <yespoplugin@yespo.io>
  * @copyright 2022 Yespo
  * @license   GPL 3.0+
  * @link      https://yespo.io/
@@ -28,7 +28,7 @@ class Shortcode extends Base {
 	public function initialize() {
         parent::initialize();
 
-        \add_shortcode( 'foobar', array( $this, 'yespo_foobar_func' ) );
+        \add_shortcode( 'yespo_foobar', array( $this, 'yespo_foobar_func' ) );
 	}
 
 	/**

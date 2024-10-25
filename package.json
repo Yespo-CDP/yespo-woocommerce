@@ -2,7 +2,7 @@
     "name": "yespo",
     "version": "1.0.0",
     "description": "",
-    "author": "Yespo Omnichannel CDP <vadym.gmurya@asper.pro>",
+    "author": "Yespo Omnichannel CDP <yespoplugin@yespo.io>",
     "files": [
         "ajax",
         "assets",

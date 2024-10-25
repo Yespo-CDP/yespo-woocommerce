@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7e8595e2e377008c6e09e3d81fb16da0",
+    "content-hash": "1efc2311c8c5f5e78b212d4785d9a188",
     "packages": [
         {
             "name": "inpsyde/assets",
@@ -231,7 +231,7 @@
         },
         {
             "name": "wpbp/debug",
-            "version": "1.1.4",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WPBP/Debug.git",
@@ -243,6 +243,7 @@
                 "reference": "42dcbe2ab429df037f1248da568e970f9021934f",
                 "shasum": ""
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -364,7 +365,7 @@
         },
         {
             "name": "wpdesk/wp-notice",
-            "version": "3.2.5",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.wpdesk.dev/wpdesk/wp-notice",
@@ -382,6 +383,7 @@
                 "wp-coding-standards/wpcs": "^0.14.1",
                 "wpdesk/wp-codeception": "^2.7"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -414,9 +416,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "wpbp/i18n-notice": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -129,6 +129,7 @@ class Yespo_Export_Orders
         }
 
     }
+
     public function start_bulk_export_orders(){
         $status = $this->get_order_export_status_processed('active');
 
@@ -266,6 +267,7 @@ class Yespo_Export_Orders
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE export_type = %s ORDER BY id DESC LIMIT 1",
@@ -293,6 +295,7 @@ class Yespo_Export_Orders
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE export_type = %s AND status = %s ORDER BY id DESC LIMIT 1",
@@ -320,6 +323,7 @@ class Yespo_Export_Orders
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
                 "UPDATE %i SET total = %d WHERE id = %d",
@@ -340,6 +344,7 @@ class Yespo_Export_Orders
         $code = sanitize_text_field($code);
         $updated_at = gmdate('Y-m-d H:i:s', time());
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
                 "
@@ -347,8 +352,7 @@ class Yespo_Export_Orders
                     SET exported = %d, status = %s, code = %s, updated_at = %s 
                     WHERE id = %d
                 ",
-                $table_name,
-                $exported, $status, $code, $updated_at, $id
+                $table_name, $exported, $status, $code, $updated_at, $id
             )
         );
     }
@@ -357,6 +361,7 @@ class Yespo_Export_Orders
         global $wpdb;
         $table_posts = esc_sql($this->table_posts);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM %i
@@ -373,22 +378,10 @@ class Yespo_Export_Orders
         $table_posts = esc_sql($this->table_posts);
         $prefix = esc_sql($this->wpdb->prefix);
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
+        $meta_key = esc_sql($this->meta_key);
 
-        return $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM %i
-                WHERE type = %s
-                AND status != %s
-                AND ID NOT IN (
-                    SELECT post_id FROM {$prefix_postmeta_table}
-                    WHERE meta_key = %s AND meta_value = 'true'
-                )",
-                $table_posts,
-                'shop_order',
-                'wc-checkout-draft',
-                $this->meta_key
-            )
-        );
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order', 'wc-checkout-draft', $meta_key));
     }
 
     public function get_orders_export_esputnik(){
@@ -416,6 +409,7 @@ class Yespo_Export_Orders
                 'yespo_status' => 'STARTED'
             ];
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
                     "INSERT INTO %i (yespo_status) VALUES (%s)",
@@ -432,6 +426,7 @@ class Yespo_Export_Orders
         global $wpdb;
         $table_yespo_queue_orders = esc_sql($this->table_yespo_queue_orders);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $last_id = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT ID 
@@ -446,6 +441,7 @@ class Yespo_Export_Orders
 
             $data = ['yespo_status' => $wpdb->prepare('%s', $status)];
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
                     "
@@ -471,9 +467,10 @@ class Yespo_Export_Orders
         global $wpdb;
         $table_yespo_queue_orders = esc_sql($this->table_yespo_queue_orders);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $last_status = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT yespo_status 
+            "SELECT yespo_status 
                 FROM %i 
                 ORDER BY ID DESC 
                 LIMIT 1",
@@ -501,32 +498,14 @@ class Yespo_Export_Orders
         global $wpdb;
         $period_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
         $table_posts = esc_sql($this->table_posts);
-        $prefix = esc_sql($this->wpdb->prefix);
+        $prefix = esc_sql($wpdb->prefix);
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
+        $meta_key = esc_sql($this->meta_key);
+        $number_for_export = absint($this->number_for_export);
+        $id_more_then = absint($this->id_more_then);
 
-        return $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT id FROM %i
-                WHERE type = %s
-                AND status != %s
-                AND ID NOT IN (
-                    SELECT post_id FROM {$prefix_postmeta_table}
-                    WHERE meta_key = %s AND meta_value = 'true'
-                )
-                AND date_created_gmt < %s
-                AND ID > %d
-                ORDER BY ID ASC
-                LIMIT %d",
-                $table_posts,
-                'shop_order',
-                'wc-checkout-draft',
-                $this->meta_key,
-                $period_start,
-                $this->id_more_then,
-                $this->number_for_export
-            ),
-            OBJECT
-        );
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_results($wpdb->prepare("SELECT id FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND date_created_gmt < %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order', 'wc-checkout-draft', $meta_key, $period_start, $id_more_then, $number_for_export),OBJECT);
     }
 
     public function get_unexported_orders_because_error($last_exported) {
@@ -535,32 +514,12 @@ class Yespo_Export_Orders
         $table_posts = esc_sql($this->table_posts);
         $prefix = esc_sql($this->wpdb->prefix);
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
+        $meta_key = esc_sql($this->meta_key);
+        $number_for_export = absint($this->number_for_export);
+        $id_more_then = absint($this->id_more_then);
 
-        return $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT id FROM %i
-            WHERE type = %s
-            AND status != %s
-            AND ID NOT IN (
-                SELECT post_id FROM {$prefix_postmeta_table}
-                WHERE meta_key = %s AND meta_value = 'true'
-            )
-            AND date_created_gmt >= %s
-            AND date_created_gmt <= %s
-            AND ID > %d
-            ORDER BY ID ASC
-            LIMIT %d",
-                $table_posts,
-                'shop_order',
-                'wc-checkout-draft',
-                $this->meta_key,
-                $last_exported,
-                $period_start,
-                $this->id_more_then,
-                $this->number_for_export
-            ),
-            OBJECT
-        );
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_results($wpdb->prepare("SELECT id FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND date_created_gmt >= %s AND date_created_gmt <= %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order', 'wc-checkout-draft', $meta_key, $last_exported, $period_start, $id_more_then, $number_for_export),OBJECT);
     }
 
     private function get_orders_from_database_without_metakey(){
@@ -569,15 +528,8 @@ class Yespo_Export_Orders
         $prefix = esc_sql($this->wpdb->prefix);
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
 
-        return $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM %i
-            WHERE type = %s
-            AND status != %s
-            AND ID NOT IN (
-                SELECT post_id FROM {$prefix_postmeta_table}
-                WHERE meta_key = %s AND meta_value = 'true'
-            )",
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE type = %s AND status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",
                 $table_posts,
                 'shop_order',
                 'wc-checkout-draft',
@@ -590,6 +542,7 @@ class Yespo_Export_Orders
         global $wpdb;
         $table_posts = esc_sql($this->table_posts);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE type = %s AND status != %s AND date_updated_gmt BETWEEN %s AND %s",
@@ -608,9 +561,10 @@ class Yespo_Export_Orders
         $searched_time = gmdate('Y-m-d H:i:s', $current_timestamp - 360);
         $table_yespo_removed = esc_sql($this->table_yespo_removed);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $count = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM %i WHERE email = %s AND time >= %s",
+            "SELECT COUNT(*) FROM %i WHERE email = %s AND time >= %s",
                 $table_yespo_removed,
                 $email,
                 $searched_time
@@ -628,6 +582,7 @@ class Yespo_Export_Orders
         if ($json !== false) {
             $created_at = gmdate('Y-m-d H:i:s');
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
                     "INSERT INTO %i (text, created_at) VALUES (%s, %s)",
@@ -672,15 +627,8 @@ class Yespo_Export_Orders
         $table_posts = esc_sql($this->table_posts);
         $postmeta = esc_sql($this->wpdb->postmeta);
 
-        return $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT p.id 
-                FROM %i p
-                LEFT JOIN {$postmeta} pm ON p.id = pm.post_id AND pm.meta_key = 'sent_order_to_yespo'
-                WHERE p.type = %s 
-                AND p.status != %s 
-                AND p.date_updated_gmt BETWEEN %s AND %s
-                AND pm.post_id IS NULL",
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_results($wpdb->prepare("SELECT p.id FROM %i p LEFT JOIN {$postmeta} pm ON p.id = pm.post_id AND pm.meta_key = 'sent_order_to_yespo' WHERE p.type = %s AND p.status != %s AND p.date_updated_gmt BETWEEN %s AND %s AND pm.post_id IS NULL",
                 $table_posts,
                 'shop_order',
                 'wc-checkout-draft',
@@ -699,10 +647,11 @@ class Yespo_Export_Orders
         $data['exported'] = absint($data['exported']);
         $data['status'] = sanitize_text_field($data['status']);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO %i (export_type, total, exported, status)
-        VALUES (%s, %d, %d, %s)",
+                VALUES (%s, %d, %d, %s)",
                 $table_name,
                 $data['export_type'],
                 $data['total'],

@@ -239,16 +239,17 @@ class Yespo_Contact
         if (!empty($values)) {
             $placeholders_string = implode(", ", $placeholders);
 
-            return $wpdb->query(
-                $wpdb->prepare(
-                    "
-                        INSERT INTO {$usermeta_table} (user_id, meta_key, meta_value) 
-                        VALUES {$placeholders_string}
-                        ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
-                    "
-                    , ...$values
-                )
-            );
+            $sql = "
+				INSERT INTO {$usermeta_table} (user_id, meta_key, meta_value) 
+				VALUES {$placeholders_string}
+				ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)
+			";
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $prepared_sql = $wpdb->prepare($sql, ...$values);
+
+            // phpcs:ignore WordPress.DB
+            return $wpdb->query($prepared_sql);
         }
     }
 
@@ -265,32 +266,21 @@ class Yespo_Contact
 
     private function get_users_from_log() {
         global $wpdb;
-        $table_log_users = esc_sql($this->table_log_users);
+        $table_name = esc_sql($this->table_log_users);
         $log_date_start = gmdate('Y-m-d H:i:s', time() - $this->period_selection_since);
         $log_date_end = gmdate('Y-m-d H:i:s', time() - $this->period_selection_up);
 
-        $cache_key = 'users_from_log_' . md5($log_date_start . $log_date_end);
-
-        $cached_results = wp_cache_get($cache_key);
-
-        if ($cached_results !== false) {
-            return $cached_results;
-        }
-
-        $results = $wpdb->get_results(
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        return $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE action = %s AND log_date BETWEEN %s AND %s AND yespo <> %d",
-                $table_log_users,
+                $table_name,
                 'delete',
                 $log_date_start,
                 $log_date_end,
                 200
             )
         );
-
-        wp_cache_set($cache_key, $results, '', 1);
-
-        return $results;
     }
 
     private function get_latest_created_users() {
@@ -298,6 +288,8 @@ class Yespo_Contact
 
         $table_users = esc_sql($this->table_users);
         $date_threshold = gmdate('Y-m-d H:i:s', time() - $this->period_selection);
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_col(
             $wpdb->prepare(
                 "SELECT ID FROM %i WHERE user_registered > %s",
@@ -312,6 +304,7 @@ class Yespo_Contact
         $time = current_time('mysql');
         $table_yespo_removed = esc_sql($this->table_yespo_removed);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO %i (email, time) VALUES (%s, %s)",

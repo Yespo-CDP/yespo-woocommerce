@@ -1,4 +1,3 @@
-
 class YespoTracker
 {
     constructor(action = null) {

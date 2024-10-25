@@ -141,15 +141,15 @@ function yespo_save_settings_via_form_function() {
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
-                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
+				(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
             }
-            $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+			$is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
             $response_data = array(
                 'status' => 'success',
                 'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp') . '</p></div>'),
                 'total' => esc_html__("Completed successfully!", 'yespo-cdp'),
                 'username' => isset($organisationName) ? $organisationName : '',
-                'tracker' => $is_tracking
+				'tracker' => $is_tracking
             );
         } else if($result === 0){
             $response_data = array(
@@ -479,6 +479,7 @@ function yespo_script_cron_event_function(){
     (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_script_code_cron();
 }
 add_action('yespo_script_cron_event', 'yespo_script_cron_event_function');
+
 /***
  * JAVASCRIPT ADMIN LOCALIZATION
  */

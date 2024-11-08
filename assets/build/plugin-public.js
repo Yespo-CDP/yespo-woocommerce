@@ -27,30 +27,24 @@ class YespoTracker
     }
 
     userData(customerData){
-        console.log('User with next data:', customerData);
-        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': customerData.externalCustomerId, 'user_email': customerData.user_email, 'user_name': customerData.user_name, 'user_phone': customerData.user_phone } });
+        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': String(customerData[0].externalCustomerId), 'user_email': String(customerData[0].user_email), 'user_name': String(customerData[0].user_name), 'user_phone': String(customerData[0].user_phone) } });
     }
 
     thankYouPage(purchase){
-        console.log('Purchase has been sent with id:', purchase);
         const purchasedItems = this.thankYouPageMapping(purchase);
         eS('sendEvent', 'PurchasedItems', { "OrderNumber": purchase.OrderNumber, "PurchasedItems": purchasedItems, "GUID": purchase.GUID});
     }
 
     sendCategory(category){
-        console.log('Category key has been sent with id:', category);
         eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
     }
 
     sendProduct(product){
-        console.log('Product key has been sent with id:', product);
-        eS('sendEvent', 'ProductPage', { 'ProductPage': { 'productKey': product.id, 'price': product.price, 'isInStock': product.stock } });
+        eS('sendEvent', 'ProductPage', { 'ProductPage': { 'productKey': product.id, 'price': product.price, 'isInStock': parseInt(product.stock) } });
     }
 
     sendCart(cart){
         const statusCart = this.cartMapping(cart);
-        console.log('sendCart inside', statusCart);
-        console.log(cart.GUID);
         eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
     }
 
@@ -59,18 +53,18 @@ class YespoTracker
         if (cart && cart.products && (this.action === 'cart' || this.action === 'cart_batch')) {
             cart.products.forEach(product => {
                 status.push({
-                    'productKey': product.productKey,
-                    'price': product.price,
-                    'quantity': product.quantity,
-                    'currency': product.currency
+                    'productKey': String(product.productKey),
+                    'price': String(product.price),
+                    'quantity': String(product.quantity),
+                    'currency': String(product.currency)
                 });
             });
         } else {
             status.push({
-                'productKey': null,
-                'price': null,
-                'quantity': null,
-                'currency': null
+                'productKey': '',
+                'price': '',
+                'quantity': '',
+                'currency': ''
             });
         }
 
@@ -79,13 +73,13 @@ class YespoTracker
 
     thankYouPageMapping(purchase){
         let items = [];
-        if (purchase && purchase.products) {
-            purchase.products.forEach(product => {
+        if (purchase && purchase.PurchasedItems) {
+            purchase.PurchasedItems.forEach(product => {
                 items.push({
-                    'productKey': product.productKey,
-                    'price': product.price,
-                    'quantity': product.quantity,
-                    'currency': product.currency
+                    'productKey': String(product.productKey),
+                    'price': String(product.price),
+                    'quantity': String(product.quantity),
+                    'currency': String(product.currency)
                 });
             });
         }
@@ -116,7 +110,6 @@ class YespoTracker
     static trackCartChanges(){
         jQuery(document.body).on('updated_cart_totals', function(){
             if (typeof window.trackingData !== 'undefined' && typeof eS === 'function') {
-                console.log('Cart changed');
                 new YespoTracker('cart');
             }
         });
@@ -129,7 +122,6 @@ class YespoTracker
         window.fetch = function () {
             if (arguments[0].includes('/wc/store/v1/batch') && !hasTriggered) {
                 hasTriggered = true;
-                console.log('Product added to cart');
 
                 return originalFetch.apply(this, arguments)
                     .then(response => {
@@ -177,7 +169,6 @@ class YespoTracker
             if (event.target.closest('a[href*="remove_item"]')) {
                 let cartItems = document.querySelectorAll('.cart_item');
                 if (cartItems.length < 2) {
-                    console.log('Кошик порожній');
                     new YespoTracker('cart_empty');
                 }
             }
@@ -191,15 +182,12 @@ class YespoTracker
         if (addToCartButton) {
             addToCartButton.addEventListener('click', function(event) {
                 sessionStorage.setItem(this.storageProductAdded, 'true');
-                console.log('Товар додано в сесію');
             });
         }
     }
 
     static getProductStorage(){
         if (sessionStorage.getItem(this.storageProductAdded) === 'true') {
-            console.log(sessionStorage.getItem(this.storageProductAdded));
-            console.log('Товар додано в кошик зі сторінки продукту');
             new YespoTracker('cart');
             sessionStorage.removeItem(this.storageProductAdded);
         }

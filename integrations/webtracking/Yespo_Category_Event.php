@@ -10,7 +10,7 @@ class Yespo_Category_Event extends Yespo_Web_Tracking_Abstract
             $category = get_queried_object();
 
             return [
-                'categoryKey' => $category->term_id
+                'categoryKey' => $category->name
             ];
         }
         return null;

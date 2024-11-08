@@ -17,7 +17,7 @@ class Yespo_Product_Event extends Yespo_Web_Tracking_Abstract
             return [
                 'id' => $this->getId(),
                 'price' => $this->getPrice(),
-                'stock' => $this->getStock()
+                'stock' => !empty($this->getStock()) ? $this->getStock() : 0
             ];
         }
         return null;

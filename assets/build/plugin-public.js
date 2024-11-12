@@ -59,13 +59,6 @@ class YespoTracker
                     'currency': String(product.currency)
                 });
             });
-        } else {
-            status.push({
-                'productKey': '',
-                'price': '',
-                'quantity': '',
-                'currency': ''
-            });
         }
 
         return status;

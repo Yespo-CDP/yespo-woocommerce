@@ -68,9 +68,12 @@ class Yespo_Web_Tracking_Aggregator
 
         if (!is_null($purchase)) {
             $tracking_data['thankYou'] = $purchase;
+            if(!is_null($user) && empty($user['externalCustomerId'])){
+                $tracking_data['customerData'] = $user;
+            }
         }
 
-        if (!is_null($user)) {
+        if (!is_null($user) && !empty($user['externalCustomerId'])) {
             $tracking_data['customerData'] = $user;
         }
 

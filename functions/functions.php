@@ -102,7 +102,8 @@ function yespo_check_api_authorization_function(){
             if (strpos($result, 'Connection refused') !== false) $result = 0;
             if ($result === 200) {
                 (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
-                wp_send_json_success(['auth' => 'success']);
+                $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+                wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking]);
             } else if($result === 401 || $result === 0){
                 wp_send_json_error(['auth' => 'incorrect', 'code' => $result]);
             } else {
@@ -140,12 +141,15 @@ function yespo_save_settings_via_form_function() {
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
+				(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
             }
+			$is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
             $response_data = array(
                 'status' => 'success',
                 'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp') . '</p></div>'),
                 'total' => esc_html__("Completed successfully!", 'yespo-cdp'),
-                'username' => isset($organisationName) ? $organisationName : ''
+                'username' => isset($organisationName) ? $organisationName : '',
+				'tracker' => $is_tracking
             );
         } else if($result === 0){
             $response_data = array(
@@ -471,8 +475,13 @@ function yespo_export_data_cron_function(){
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
 
+function yespo_script_cron_event_function(){
+    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_script_code_cron();
+}
+add_action('yespo_script_cron_event', 'yespo_script_cron_event_function');
+
 /***
- * JAVASCRIPT LOCALIZATION
+ * JAVASCRIPT ADMIN LOCALIZATION
  */
 function yespo_enqueue_scripts_localization() {
     if (!wp_script_is(YESPO_TEXTDOMAIN . '-settings-admin', 'enqueued')) {
@@ -482,3 +491,44 @@ function yespo_enqueue_scripts_localization() {
     return \Yespo\Integrations\Esputnik\Yespo_Localization::localize_template();
 }
 add_action( 'admin_enqueue_scripts', 'yespo_enqueue_scripts_localization' );
+
+
+/**
+ * WEB TRACKING
+ **/
+//add tracking code and send tracking data to yespo
+function yespo_add_tracking_codes() {
+    $script = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_script_from_options();
+    if($script) {
+        echo $script;
+        do_action('yespo_after_scripts');
+    }
+}
+add_action('wp_footer', 'yespo_add_tracking_codes');
+
+//generate code for sending to yespo
+function yespo_enqueue_tracking_scripts() {
+    if (!wp_script_is(YESPO_TEXTDOMAIN . '-plugin-script', 'enqueued')) {
+        wp_enqueue_script( YESPO_TEXTDOMAIN . '-plugin-script', plugins_url( 'assets/build/plugin-public.js', YESPO_PLUGIN_ABSOLUTE ), array(), '1.0', true );
+    }
+
+    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Aggregator())->localize_scripts();
+}
+add_action('yespo_after_scripts', 'yespo_enqueue_tracking_scripts');
+
+
+// get cart data due ajax request
+function yespo_get_cart_contents_function(){
+    if ( ! isset( $_POST['yespo_get_cart_nonce_name'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_POST['yespo_get_cart_nonce_name'])), 'yespo_get_cart_content_nonce' ) ) {
+        return;
+    }
+
+    if(isset($_POST['action']) && sanitize_text_field(wp_unslash($_POST['action'])) === 'yespo_get_cart_contents' ) {
+        $cart = (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->get_data();
+        if ($cart) {
+            wp_send_json_success(['cart' => $cart]);
+        } else wp_send_json_error(0);
+    }
+}
+add_action('wp_ajax_yespo_get_cart_contents', 'yespo_get_cart_contents_function');
+add_action('wp_ajax_nopriv_yespo_get_cart_contents', 'yespo_get_cart_contents_function');

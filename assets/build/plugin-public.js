@@ -27,7 +27,7 @@ class YespoTracker
     }
 
     userData(customerData){
-        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': String(customerData[0].externalCustomerId), 'user_email': String(customerData[0].user_email), 'user_name': String(customerData[0].user_name), 'user_phone': String(customerData[0].user_phone) } });
+        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': String(customerData.externalCustomerId), 'user_email': String(customerData.user_email), 'user_name': String(customerData.user_name), 'user_phone': String(customerData.user_phone) } });
     }
 
     thankYouPage(purchase){

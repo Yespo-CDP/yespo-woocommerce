@@ -33,12 +33,15 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         } else {
             $order = wc_get_order($this->get_last_order_id());
 
-            $user_data = array(
-                'externalCustomerId' => '',
-                'user_email' => $order->get_billing_email(),
-                'user_name' => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
-                'user_phone' => !empty($order->get_billing_phone()) ? $order->get_billing_phone() : ''
-            );
+            if (is_object($order)){
+
+                $user_data = array(
+                    'externalCustomerId' => '',
+                    'user_email' => !empty($order->get_billing_email()) ? $order->get_billing_email() : '' ,
+                    'user_name' => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
+                    'user_phone' => !empty($order->get_billing_phone()) ? $order->get_billing_phone() : ''
+                );
+            }
 
         }
 

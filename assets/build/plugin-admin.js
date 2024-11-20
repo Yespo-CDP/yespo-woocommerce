@@ -80,7 +80,7 @@ class YespoExportData {
             response = JSON.parse(response);
             if(response.success && response.data.auth && response.data.auth === 'success'){
                 this.queueProcess(response.data.tracker);
-            } else if(response.data.auth && response.data.auth === 'incorrect') {
+            } else if(response.data && response.data.auth && response.data.auth === 'incorrect') {
                 let code = 401;
                 if(parseInt(response.data.code) === 0) code = 555;
                 this.showErrorPage('', code);

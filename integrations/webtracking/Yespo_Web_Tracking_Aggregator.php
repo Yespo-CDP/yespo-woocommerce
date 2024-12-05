@@ -24,8 +24,6 @@ class Yespo_Web_Tracking_Aggregator
         $product = $this->product->get_data();
         $purchase = $this->purchase->get_data();
         $user = $this->user->get_data();
-        //if( is_cart() ) $cart = $this->cart->get_data();
-        //else $cart = null;
 
         $tracking_data = $this->get_localization_map(
             $category,

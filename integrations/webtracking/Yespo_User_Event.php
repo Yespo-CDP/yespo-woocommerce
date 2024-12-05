@@ -5,7 +5,7 @@ namespace Yespo\Integrations\Webtracking;
 class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 {
     const USER_AUTH_LABEL = 'user_auth_label';
-    const TABLE_ORDERS = 'wc_orders';
+    const TABLE_ORDERS = 'posts';
 
     public function __construct() {
         add_action('wp_login', array($this, 'handle_user_event'), 10, 2); // user authorization
@@ -75,7 +75,7 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         // phpcs:ignore WordPress.DB
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT ID FROM %i WHERE type = %s AND status != %s ORDER BY ID DESC LIMIT 1",
+                "SELECT ID FROM %i WHERE post_type = %s AND post_status != %s ORDER BY ID DESC LIMIT 1",
                 $table_orders,
                 'shop_order',
                 'wc-checkout-draft'

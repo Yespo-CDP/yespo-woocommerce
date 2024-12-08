@@ -81,6 +81,16 @@ class Yespo_Order
                 if (!empty($values)) $this->add_labels_to_orders($values, self::ORDER_META_KEY, 'true');
                 if(isset($error_400) && count($error_400) > 0) Yespo_Errors::error_400($error_400,'orders');
 
+
+
+
+
+
+
+
+
+
+
                 //add log entries
                 if (!empty($order_logs)) {
                     $this->add_log_order_entry($order_logs, $operation, $response, gmdate('Y-m-d H:i:s', time()));

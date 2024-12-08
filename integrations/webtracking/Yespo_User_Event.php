@@ -75,9 +75,9 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         // phpcs:ignore WordPress.DB
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT ID FROM %i WHERE post_type = %s AND post_status != %s ORDER BY ID DESC LIMIT 1",
+                "SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s ORDER BY ID DESC LIMIT 1",
                 $table_orders,
-                'shop_order',
+                'shop_order%',
                 'wc-checkout-draft'
             )
         );

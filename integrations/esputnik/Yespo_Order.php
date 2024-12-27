@@ -81,16 +81,6 @@ class Yespo_Order
                 if (!empty($values)) $this->add_labels_to_orders($values, self::ORDER_META_KEY, 'true');
                 if(isset($error_400) && count($error_400) > 0) Yespo_Errors::error_400($error_400,'orders');
 
-
-
-
-
-
-
-
-
-
-
                 //add log entries
                 if (!empty($order_logs)) {
                     $this->add_log_order_entry($order_logs, $operation, $response, gmdate('Y-m-d H:i:s', time()));
@@ -248,6 +238,22 @@ class Yespo_Order
         }
 
         return false;
+    }
+
+    //add date to order in table posts
+    public function update_last_modified_time($order_id){
+        global $wpdb;
+
+        $current_gmt_time = current_time( 'mysql', true );
+
+        return $wpdb->update(
+            $wpdb->posts,
+            [ 'post_modified_gmt' => $current_gmt_time ],
+            [ 'ID' => $order_id ],
+            [ '%s' ],
+            [ '%d' ]
+        );
+
     }
 
 }

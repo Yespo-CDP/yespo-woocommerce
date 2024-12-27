@@ -532,3 +532,13 @@ function yespo_get_cart_contents_function(){
 }
 add_action('wp_ajax_yespo_get_cart_contents', 'yespo_get_cart_contents_function');
 add_action('wp_ajax_nopriv_yespo_get_cart_contents', 'yespo_get_cart_contents_function');
+
+// UPDATE ORDER LAST MODIFIED TIME
+add_action('woocommerce_update_order', function($order_id) {
+    if ( 'yes' !== get_option( 'woocommerce_db_sync_enabled', 'no' ) ) {
+        if ( ! is_numeric( $order_id ) || $order_id <= 0 ) {
+            return false;
+        }
+        (new Yespo\Integrations\Esputnik\Yespo_Order())->update_last_modified_time($order_id);
+    }
+});

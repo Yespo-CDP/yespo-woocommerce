@@ -171,7 +171,7 @@ class Yespo_Export_Orders
 
             } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3 && $this->is_response_error == null);
 
-            if($total <= $exported + $live_exported){
+            if(($total <= $exported + $live_exported) || ($this->number_for_export <= 0)){
                 $current_status = 'completed';
                 $exported = $total;
             } else $exported += $live_exported;

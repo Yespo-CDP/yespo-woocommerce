@@ -95,6 +95,9 @@ class Yespo_Export_Users
                         if(count($usersForExport) > 0 ) $this->set_exported_user_id($last_element);
                         $http_code = 200;
                     }
+                } else if(count($usersForExport) === 0){
+                    $current_status = 'completed';
+                    $exported = $total;
                 }
 
                 $error = Yespo_Errors::get_error_entry();

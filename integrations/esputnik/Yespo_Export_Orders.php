@@ -149,6 +149,11 @@ class Yespo_Export_Orders
                 $orders = $this->get_bulk_export_orders();
                 $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
 
+                if(count($orders) <= 0) {
+                    $current_status = 'completed';
+                    $exported = $total;
+                }
+
                 if(is_array($export_res) && isset($export_res['error']) && ($export_res['error'] == 429 || $export_res['error'] == 500)){
                     $this->update_entry_queue_items('FINISHED');
                     Yespo_Errors::set_error_entry($export_res['error']);
@@ -171,7 +176,7 @@ class Yespo_Export_Orders
 
             } while ( ($endTime - $startTime) <= $this->export_time && $export_quantity < 3 && $this->is_response_error == null);
 
-            if(($total <= $exported + $live_exported) || ($this->number_for_export <= 0)){
+            if(($total <= $exported + $live_exported)){
                 $current_status = 'completed';
                 $exported = $total;
             } else $exported += $live_exported;

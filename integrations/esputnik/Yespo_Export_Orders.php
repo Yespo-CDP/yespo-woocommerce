@@ -369,10 +369,12 @@ class Yespo_Export_Orders
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM %i
                  WHERE post_type LIKE %s 
-                 AND post_status != %s",
+                 AND post_status != %s
+                 AND post_parent = %d",
                 $table_posts,
                 'shop_order%',
-                'wc-checkout-draft'
+                'wc-checkout-draft',
+                0
             )
         );
     }
@@ -384,7 +386,7 @@ class Yespo_Export_Orders
         $meta_key = esc_sql($this->meta_key);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE post_type LIKE %s AND post_status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order%', 'wc-checkout-draft', $meta_key));
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key));
     }
 
     public function get_orders_export_esputnik(){
@@ -508,7 +510,7 @@ class Yespo_Export_Orders
         $id_more_then = absint($this->id_more_then);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_results($wpdb->prepare("SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND post_date_gmt < %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order%', 'wc-checkout-draft', $meta_key, $period_start, $id_more_then, $number_for_export),OBJECT);
+        return $wpdb->get_results($wpdb->prepare("SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND post_date_gmt < %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key, $period_start, $id_more_then, $number_for_export),OBJECT);
     }
 
     public function get_unexported_orders_because_error($last_exported) {
@@ -522,7 +524,7 @@ class Yespo_Export_Orders
         $id_more_then = absint($this->id_more_then);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_results($wpdb->prepare("SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND post_date_gmt >= %s AND post_date_gmt <= %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order%', 'wc-checkout-draft', $meta_key, $last_exported, $period_start, $id_more_then, $number_for_export),OBJECT);
+        return $wpdb->get_results($wpdb->prepare("SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND post_date_gmt >= %s AND post_date_gmt <= %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key, $last_exported, $period_start, $id_more_then, $number_for_export),OBJECT);
     }
 
     private function get_orders_from_database_without_metakey(){
@@ -532,10 +534,11 @@ class Yespo_Export_Orders
         $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE post_type LIKE %s AND post_status != %s AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",
+        return $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",
                 $table_posts,
                 'shop_order%',
                 'wc-checkout-draft',
+                0,
                 $this->meta_key
             )
         );
@@ -548,10 +551,11 @@ class Yespo_Export_Orders
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_modified_gmt BETWEEN %s AND %s",
+                "SELECT * FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND post_modified_gmt BETWEEN %s AND %s",
                 $table_posts,
                 'shop_order%',
                 'wc-checkout-draft',
+                0,
                 gmdate('Y-m-d H:i:s', time() - $this->period_selection_since),
                 gmdate('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
@@ -631,10 +635,11 @@ class Yespo_Export_Orders
         $postmeta = esc_sql($this->wpdb->postmeta);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_results($wpdb->prepare("SELECT p.ID FROM %i p LEFT JOIN {$postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'sent_order_to_yespo' WHERE p.post_type LIKE %s AND p.post_status != %s AND p.post_modified_gmt BETWEEN %s AND %s AND pm.post_id IS NULL",
+        return $wpdb->get_results($wpdb->prepare("SELECT p.ID FROM %i p LEFT JOIN {$postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'sent_order_to_yespo' WHERE p.post_type LIKE %s AND p.post_status != %s AND p.post_parent = %d AND p.post_modified_gmt BETWEEN %s AND %s AND pm.post_id IS NULL",
                 $table_posts,
                 'shop_order%',
                 'wc-checkout-draft',
+                0,
                 gmdate('Y-m-d H:i:s', time() - $time),
                 gmdate('Y-m-d H:i:s', time() - $this->period_selection)
             )

@@ -10,6 +10,8 @@ class YespoTracker
         if (trackingData.cart) this.cart = trackingData.cart;
         if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
         if (trackingData.customerData) this.customerData = trackingData.customerData;
+        if (trackingData.front) this.front = trackingData.front;
+        if (trackingData.notFound) this.notFound = trackingData.notFound;
 
         this.start();
     }
@@ -24,6 +26,8 @@ class YespoTracker
         if(this.action === 'cart') this.getCartData('cart');
         if(this.action === 'cart_empty') this.getCartData('cart_empty');
         if(this.action === 'cart_batch') this.getCartData('cart_batch');
+        if(this.front && this.action === null) this.sendFront(this.front);
+        if(this.notFound && this.action === null) this.sendNotFound(this.notFound);
     }
 
     userData(customerData){
@@ -37,6 +41,14 @@ class YespoTracker
 
     sendCategory(category){
         eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
+    }
+
+    sendFront(front){
+        eS('sendEvent', front.frontKey );
+    }
+
+    sendNotFound(notFound){
+        eS('sendEvent', notFound.notFoundKey );
     }
 
     sendProduct(product){

@@ -9,6 +9,8 @@ class Yespo_Web_Tracking_Aggregator
     private $cart;
     private $purchase;
     private $user;
+    private $front;
+    private $notFound;
 
     public function __construct(){
         $this->category = new Yespo_Category_Event();
@@ -16,6 +18,8 @@ class Yespo_Web_Tracking_Aggregator
         $this->cart = new Yespo_Cart_Event();
         $this->purchase = new Yespo_Purchased_Event();
         $this->user = new Yespo_User_Event();
+        $this->front = new Yespo_Front_Event();
+        $this->notFound = new Yespo_NotFound_Event();
     }
 
     public function localize_scripts(){
@@ -24,12 +28,16 @@ class Yespo_Web_Tracking_Aggregator
         $product = $this->product->get_data();
         $purchase = $this->purchase->get_data();
         $user = $this->user->get_data();
+        $front = $this->front->get_data();
+        $notFound = $this->notFound->get_data();
 
         $tracking_data = $this->get_localization_map(
             $category,
             $product,
             $purchase,
-            $user
+            $user,
+            $front,
+            $notFound
         );
 
         if (!empty($tracking_data)) {
@@ -42,7 +50,9 @@ class Yespo_Web_Tracking_Aggregator
         $category,
         $product,
         $purchase,
-        $user
+        $user,
+        $front,
+        $notFound
     ){
 
         $tracking_data = [];
@@ -73,6 +83,18 @@ class Yespo_Web_Tracking_Aggregator
 
         if (!is_null($user) && !empty($user['externalCustomerId'])) {
             $tracking_data['customerData'] = $user;
+        }
+
+        if (!is_null($front)) {
+            $tracking_data['front'] = array(
+                'frontKey' => isset($front['frontKey']) ? esc_js($front['frontKey']) : '',
+            );
+        }
+
+        if (!is_null($notFound)) {
+            $tracking_data['notFound'] = array(
+                'notFoundKey' => isset($notFound['notFoundKey']) ? esc_js($notFound['notFoundKey']) : '',
+            );
         }
 
         return $tracking_data;

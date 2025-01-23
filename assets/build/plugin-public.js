@@ -28,6 +28,8 @@ class YespoTracker
         if(this.action === 'cart_batch') this.getCartData('cart_batch');
         if(this.front && this.action === null) this.sendFront(this.front);
         if(this.notFound && this.action === null) this.sendNotFound(this.notFound);
+        //impression start
+        this.startObserver('.type-product');
     }
 
     userData(customerData){
@@ -49,6 +51,19 @@ class YespoTracker
 
     sendNotFound(notFound){
         eS('sendEvent', notFound.notFoundKey );
+    }
+
+    sendProductImpressions(elements) {
+        const impressions = this.generateImpressions(elements);
+
+        console.log('sendEvent', 'ProductImpressions', {
+            "ProductImpression": impressions,
+        });
+
+        eS('sendEvent', 'ProductImpressions', {
+            ProductImpression: impressions,
+        });
+
     }
 
     sendProduct(product){
@@ -214,9 +229,60 @@ class YespoTracker
         } else {
             console.log('trackingData is not defined');
         }
-
-
     }
+
+    /*** Observer Interaction functions ***/
+    //mapping
+    generateImpressions(elements) {
+        if (!Array.isArray(elements) || elements.length === 0) {
+            return [];
+        }
+
+        return elements.map(element => {
+            const productId = element || '';
+            const containerType = element.container_type || '';
+
+            return {
+                product_id: productId,
+                container_type: containerType,
+            };
+        });
+    }
+
+    callbackObserver(entries, observer) {
+        let products = [];
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const postClass = Array.from(entry.target.classList).find(cls => /^post-\d+$/.test(cls));
+
+                if (postClass) {
+                    const match = postClass.match(/^post-(\d+)$/);
+                    if (match) {
+                        const id = match[1];
+                        products.push(id);
+                    }
+                }
+            }
+        });
+        if (products.length > 0) this.sendProductImpressions(products);
+    }
+
+
+    //create options
+    optionsObserver() {
+        return {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.5,
+        };
+    }
+
+    startObserver(observed) {
+        const observer = new IntersectionObserver(this.callbackObserver.bind(this), this.optionsObserver());
+        const elements = document.querySelectorAll(observed);
+        elements.forEach(element => observer.observe(element));
+    }
+
 }
 
 document.addEventListener('DOMContentLoaded', YespoTracker.init);

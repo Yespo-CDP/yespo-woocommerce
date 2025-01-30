@@ -29,7 +29,7 @@ class YespoTracker
         if(this.front && this.action === null) this.sendFront(this.front);
         if(this.notFound && this.action === null) this.sendNotFound(this.notFound);
         //impression start
-        this.startObserver('.type-product');
+        //this.startObserver('.type-product');
     }
 
     userData(customerData){
@@ -55,15 +55,7 @@ class YespoTracker
 
     sendProductImpressions(elements) {
         const impressions = this.generateImpressions(elements);
-
-        console.log('sendEvent', 'ProductImpressions', {
-            "ProductImpression": impressions,
-        });
-
-        eS('sendEvent', 'ProductImpressions', {
-            ProductImpression: impressions,
-        });
-
+        eS('sendEvent', 'ProductImpressions', { ProductImpression: impressions,});
     }
 
     sendProduct(product){
@@ -71,8 +63,11 @@ class YespoTracker
     }
 
     sendCart(cart){
-        const statusCart = this.cartMapping(cart);
-        eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
+        if (typeof cart.cartPageKey === 'string' && cart.cartPageKey === 'StatusCartPage') eS('sendEvent', cart.cartPageKey);
+        else {
+            const statusCart = this.cartMapping(cart);
+            eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
+        }
     }
 
     cartMapping(cart){

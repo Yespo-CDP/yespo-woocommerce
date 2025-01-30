@@ -30,6 +30,7 @@ class Yespo_Web_Tracking_Aggregator
         $user = $this->user->get_data();
         $front = $this->front->get_data();
         $notFound = $this->notFound->get_data();
+        $cart = $this->cart->get_cart_page();
 
         $tracking_data = $this->get_localization_map(
             $category,
@@ -37,7 +38,8 @@ class Yespo_Web_Tracking_Aggregator
             $purchase,
             $user,
             $front,
-            $notFound
+            $notFound,
+            $cart
         );
 
         if (!empty($tracking_data)) {
@@ -52,7 +54,8 @@ class Yespo_Web_Tracking_Aggregator
         $purchase,
         $user,
         $front,
-        $notFound
+        $notFound,
+        $cart
     ){
 
         $tracking_data = [];
@@ -94,6 +97,12 @@ class Yespo_Web_Tracking_Aggregator
         if (!is_null($notFound)) {
             $tracking_data['notFound'] = array(
                 'notFoundKey' => isset($notFound['notFoundKey']) ? esc_js($notFound['notFoundKey']) : '',
+            );
+        }
+
+        if (!is_null($cart)) {
+            $tracking_data['cart'] = array(
+                'cartPageKey' => isset($cart['cartPageKey']) ? esc_js($cart['cartPageKey']) : '',
             );
         }
 

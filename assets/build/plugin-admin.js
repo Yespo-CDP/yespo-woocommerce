@@ -16,6 +16,10 @@ class YespoExportData {
         this.contactSupportButton = yespoVars.contactSupportButton;
         this.ajaxUrl = yespoVars.ajaxUrl;
 
+        this.getScriptButtonText = yespoVars.getScriptButtonText;
+        this.getScriptSpanText = yespoVars.getScriptSpanText;
+        this.getTrackingScriptNonce = yespoVars.getTrackingScriptNonce;
+
         this.startExportUsersNonce = yespoVars.startExportUsersNonce;
         this.startExportOrdersNonce = yespoVars.startExportOrdersNonce;
 
@@ -69,7 +73,7 @@ class YespoExportData {
 
             if (response === true && tracker === true) {
                 this.addSuccessMessage(this.trackerAdded);
-            }
+            } else this.showGetTrackingForm();
         } catch (error) {
             console.error('Error in processData:', error);
         }
@@ -90,6 +94,46 @@ class YespoExportData {
             }
         });
     }
+
+    /***
+     * Get Webtracking Script *
+     * **/
+    getWebtrackingEventListener() {
+        if(document.querySelector('#startGettingScript')) {
+            let form = document.querySelector('#startGettingScript');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                document.querySelector('#getWebtrackingScript')?.setAttribute('disabled', 'true');
+                this.getWebtrackingCode();
+                //console.log(form);
+            });
+        }
+    }
+
+    getWebtrackingCode() {
+        const nonceValue = document.querySelector('#yespo_get_tracking_script_nonce')?.value;
+        if (nonceValue) {
+            return new Promise((resolve, reject) => {
+                this.getRequest('yespo_get_webtracking_script_action', 'yespo_get_tracking_script_nonce', nonceValue, (response) => {
+                    try {
+                        response = JSON.parse(response);
+                        if (response?.status === 'success' && response?.tracker === true) {
+                            document.querySelector('.sectionBodyGetScript')?.remove();
+                            this.addSuccessMessage(this.trackerAdded);
+                        } else {
+                            document.querySelector('.sectionBodyGetScript .formBlock')?.insertAdjacentHTML('beforeend', response.message);
+                            document.querySelector('#getWebtrackingScript')?.removeAttribute('disabled');
+                        }
+                        resolve();
+                    } catch (error) {
+                        console.error('Error parsing response:', error);
+                        reject(error);
+                    }
+                });
+            });
+        }
+    }
+
     /*
     * Methods create html elements
     * */
@@ -376,6 +420,48 @@ class YespoExportData {
 
         }
     }
+
+
+    /*** GET WEB TRACKING SCRIPT FORM ***/
+    showGetTrackingForm() {
+        const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodyGetScript' });
+        const formBlock = this.createElement('div', { className: 'formBlock' });
+
+        let formId = 'startGettingScript';
+
+        const form = this.createForm(formId, 'post', '');
+
+        const nonceScriptField = this.createElement('div', { id: 'nonceScriptField' });
+        nonceScriptField.innerHTML = this.getTrackingScriptNonce;
+
+        const fieldGroup1 = this.createFieldGroup();
+        const submitButton = this.createElement('input', { type: 'submit', id: 'getWebtrackingScript', className: 'button button-primary', value: this.getScriptButtonText });
+        fieldGroup1.appendChild(submitButton);
+
+        const fieldGroup2 = this.createFieldGroup();
+        const spanEl = this.createElement("span", { className: 'api-key-text' }, this.getScriptSpanText);
+        fieldGroup2.appendChild(spanEl);
+
+        form.append(nonceScriptField, fieldGroup1, fieldGroup2);
+        formBlock.appendChild(form);
+
+        sectionBody.appendChild(formBlock);
+
+        const mainContainer = document.querySelector('.settingsSection');
+        if (mainContainer) {
+            //mainContainer.innerHTML = '';
+
+            if (mainContainer.firstChild) {
+                //mainContainer.insertBefore(sectionBody, mainContainer.firstChild.nextSibling);
+                mainContainer.appendChild(sectionBody);
+            } else {
+                mainContainer.appendChild(sectionBody);
+            }
+
+            this.getWebtrackingEventListener();// webtracking code event
+        }
+    }
+
     /*
     * Methods dealing export data
     * */
@@ -403,6 +489,7 @@ class YespoExportData {
                             if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                             this.getNumberDataExport();
                             if(response.tracker === true) this.addSuccessMessage(this.trackerAdded);
+                            else this.showGetTrackingForm();//show web tracking form
                         } else if(response.status && response.status === 'incorrect') {
                             let code = 401;
                             if(parseInt(response.code) === 0) code = 555;

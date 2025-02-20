@@ -2,6 +2,8 @@
 
 namespace Yespo\Integrations\Webtracking;
 
+use WC_Order;
+
 class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 {
     const USER_AUTH_LABEL = 'user_auth_label';
@@ -33,14 +35,17 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         } else {
             $order = wc_get_order($this->get_last_order_id());
 
-            if (is_object($order)){
+            $user_data = [
+                'externalCustomerId' => '',
+                'user_email' => '',
+                'user_name' => '',
+                'user_phone' => ''
+            ];
 
-                $user_data = array(
-                    'externalCustomerId' => '',
-                    'user_email' => !empty($order->get_billing_email()) ? $order->get_billing_email() : '' ,
-                    'user_name' => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
-                    'user_phone' => !empty($order->get_billing_phone()) ? $order->get_billing_phone() : ''
-                );
+            if ($order instanceof WC_Order) {
+                $user_data['user_email'] = $order->get_billing_email() ?: '';
+                $user_data['user_name'] = ($order->get_billing_first_name() ?: '') . ' ' . ($order->get_billing_last_name() ?: '');
+                $user_data['user_phone'] = $order->get_billing_phone() ?: '';
             }
 
         }

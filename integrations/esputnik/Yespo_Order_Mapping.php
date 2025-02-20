@@ -4,6 +4,7 @@ namespace Yespo\Integrations\Esputnik;
 
 use DateTime;
 use Exception;
+use WC_Product;
 use WP_User_Query;
 
 class Yespo_Order_Mapping
@@ -162,7 +163,7 @@ class Yespo_Order_Mapping
                 $data[$i]['cost'] = $item->get_subtotal();
                 $data[$i]['url'] = get_permalink( $data[$i]['externalItemId'] );
                 $data[$i]['imageUrl'] = self::get_product_thumbnail_url($data[$i]['externalItemId']);
-                $data[$i]['description'] = (wc_get_product( $data[$i]['externalItemId']))->get_short_description();
+                $data[$i]['description'] = ($productUnit = wc_get_product($data[$i]['externalItemId'])) ? $productUnit ->get_short_description() : '';
                 $i++;
             }
         }

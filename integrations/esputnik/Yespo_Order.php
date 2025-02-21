@@ -36,6 +36,8 @@ class Yespo_Order
                     (new Yespo_Logging_Data())->create_entry_order($order->get_id(), $operation, $response); //add entry to logfile
                     (new Yespo_Logging_Data())->create_single_contact_log($order->get_billing_email()); //add entry contact log file
                 }
+            } else if($response == 401){
+                (new Yespo_Export_Orders())->stop_export_orders();
             } else if($response == 429 || $response == 500){
                 Yespo_Errors::set_error_entry($response);
             }
@@ -236,6 +238,22 @@ class Yespo_Order
         }
 
         return false;
+    }
+
+    //add date to order in table posts
+    public function update_last_modified_time($order_id){
+        global $wpdb;
+
+        $current_gmt_time = current_time( 'mysql', true );
+
+        return $wpdb->update(
+            $wpdb->posts,
+            [ 'post_modified_gmt' => $current_gmt_time ],
+            [ 'ID' => $order_id ],
+            [ '%s' ],
+            [ '%d' ]
+        );
+
     }
 
 }

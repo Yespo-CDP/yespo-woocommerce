@@ -32,6 +32,10 @@ class Yespo_Localization
             'startExportUsersNonce' => wp_create_nonce('yespo_export_user_data_to_esputnik'),
             'startExportOrdersNonce' => wp_create_nonce('yespo_export_order_data_to_esputnik'),
 
+            'getScriptButtonText' => esc_html__( 'Configure Web Tracking', 'yespo-cdp' ),
+            'getScriptSpanText' => esc_html__( 'General script will be added to the website and web tracking events will be configured', 'yespo-cdp' ),
+            'getTrackingScriptNonce' => wp_nonce_field('yespo_get_tracking_script', 'yespo_get_tracking_script_nonce', true, false),
+
             'yespoGetAccountYespoNameNonce' => wp_create_nonce('yespo_get_account_yespo_name'),
             'yespoCheckApiAuthorizationYespoNonce' => wp_create_nonce('yespo_check_api_authorization_yespo'),
             'yespoGetUsersTotalNonce' => wp_create_nonce('get_users_total'),

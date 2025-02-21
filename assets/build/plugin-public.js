@@ -10,6 +10,8 @@ class YespoTracker
         if (trackingData.cart) this.cart = trackingData.cart;
         if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
         if (trackingData.customerData) this.customerData = trackingData.customerData;
+        if (trackingData.front) this.front = trackingData.front;
+        if (trackingData.notFound) this.notFound = trackingData.notFound;
 
         this.start();
     }
@@ -24,10 +26,14 @@ class YespoTracker
         if(this.action === 'cart') this.getCartData('cart');
         if(this.action === 'cart_empty') this.getCartData('cart_empty');
         if(this.action === 'cart_batch') this.getCartData('cart_batch');
+        if(this.front && this.action === null) this.sendFront(this.front);
+        if(this.notFound && this.action === null) this.sendNotFound(this.notFound);
+        //impression start
+        //this.startObserver('.type-product');
     }
 
     userData(customerData){
-        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': String(customerData[0].externalCustomerId), 'user_email': String(customerData[0].user_email), 'user_name': String(customerData[0].user_name), 'user_phone': String(customerData[0].user_phone) } });
+        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': String(customerData.externalCustomerId), 'user_email': String(customerData.user_email), 'user_name': String(customerData.user_name), 'user_phone': String(customerData.user_phone) } });
     }
 
     thankYouPage(purchase){
@@ -39,13 +45,29 @@ class YespoTracker
         eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
     }
 
+    sendFront(front){
+        eS('sendEvent', front.frontKey );
+    }
+
+    sendNotFound(notFound){
+        eS('sendEvent', notFound.notFoundKey );
+    }
+
+    sendProductImpressions(elements) {
+        const impressions = this.generateImpressions(elements);
+        eS('sendEvent', 'ProductImpressions', { ProductImpression: impressions,});
+    }
+
     sendProduct(product){
         eS('sendEvent', 'ProductPage', { 'ProductPage': { 'productKey': product.id, 'price': product.price, 'isInStock': parseInt(product.stock) } });
     }
 
     sendCart(cart){
-        const statusCart = this.cartMapping(cart);
-        eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
+        if (typeof cart.cartPageKey === 'string' && cart.cartPageKey === 'StatusCartPage') eS('sendEvent', cart.cartPageKey);
+        else {
+            const statusCart = this.cartMapping(cart);
+            eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
+        }
     }
 
     cartMapping(cart){
@@ -202,9 +224,60 @@ class YespoTracker
         } else {
             console.log('trackingData is not defined');
         }
-
-
     }
+
+    /*** Observer Interaction functions ***/
+    //mapping
+    generateImpressions(elements) {
+        if (!Array.isArray(elements) || elements.length === 0) {
+            return [];
+        }
+
+        return elements.map(element => {
+            const productId = element || '';
+            const containerType = element.container_type || '';
+
+            return {
+                product_id: productId,
+                container_type: containerType,
+            };
+        });
+    }
+
+    callbackObserver(entries, observer) {
+        let products = [];
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const postClass = Array.from(entry.target.classList).find(cls => /^post-\d+$/.test(cls));
+
+                if (postClass) {
+                    const match = postClass.match(/^post-(\d+)$/);
+                    if (match) {
+                        const id = match[1];
+                        products.push(id);
+                    }
+                }
+            }
+        });
+        if (products.length > 0) this.sendProductImpressions(products);
+    }
+
+
+    //create options
+    optionsObserver() {
+        return {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.5,
+        };
+    }
+
+    startObserver(observed) {
+        const observer = new IntersectionObserver(this.callbackObserver.bind(this), this.optionsObserver());
+        const elements = document.querySelectorAll(observed);
+        elements.forEach(element => observer.observe(element));
+    }
+
 }
 
 document.addEventListener('DOMContentLoaded', YespoTracker.init);

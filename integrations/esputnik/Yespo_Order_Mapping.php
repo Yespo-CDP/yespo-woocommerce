@@ -3,6 +3,8 @@
 namespace Yespo\Integrations\Esputnik;
 
 use DateTime;
+use Exception;
+use WC_Product;
 use WP_User_Query;
 
 class Yespo_Order_Mapping
@@ -25,7 +27,8 @@ class Yespo_Order_Mapping
         if($orderArray['externalCustomerId']) $data['orders'][0]['externalCustomerId'] = $orderArray['externalCustomerId'];
         $data['orders'][0]['totalCost'] = $orderArray['totalCost'];
         $data['orders'][0]['email'] = $orderArray['email'];
-        $data['orders'][0]['date'] = $orderArray['date'];
+        if ($orderArray['date']) $data['orders'][0]['date'] = $orderArray['date'];
+        else $data['orders'][0]['date'] = self::get_post_modified_gmt_formatted($order->get_id());
         $data['orders'][0]['currency'] = $orderArray['currency'];
         if(Yespo_Contact_Validation::name_validation($orderArray['firstName'])) $data['orders'][0]['firstName'] = $orderArray['firstName'];
         if(Yespo_Contact_Validation::lastname_validation($orderArray['lastName'])) $data['orders'][0]['lastName'] = $orderArray['lastName'];
@@ -77,7 +80,7 @@ class Yespo_Order_Mapping
         $data = [];
         if($orders && count($orders) > 0){
             foreach($orders as $order){
-                $data['orders'][] = self::order_bulk_woo_to_yes(wc_get_order($order->id));
+                $data['orders'][] = self::order_bulk_woo_to_yes(wc_get_order($order->ID));
             }
         }
         return $data;
@@ -85,7 +88,7 @@ class Yespo_Order_Mapping
 
     private static function order_transformation_to_array($order){
         return [
-            'externalOrderId' => sanitize_text_field($order->id),
+            'externalOrderId' => sanitize_text_field($order->ID),
             'externalCustomerId' => !empty($order) && !is_bool($order)? $order->get_user_id() : '',
             'totalCost' => sanitize_text_field($order->total),
             'status' => self::get_order_status($order->status) ? self::get_order_status($order->status) : self::INITIALIZED,
@@ -160,7 +163,7 @@ class Yespo_Order_Mapping
                 $data[$i]['cost'] = $item->get_subtotal();
                 $data[$i]['url'] = get_permalink( $data[$i]['externalItemId'] );
                 $data[$i]['imageUrl'] = self::get_product_thumbnail_url($data[$i]['externalItemId']);
-                $data[$i]['description'] = (wc_get_product( $data[$i]['externalItemId']))->get_short_description();
+                $data[$i]['description'] = ($productUnit = wc_get_product($data[$i]['externalItemId'])) ? $productUnit ->get_short_description() : '';
                 $i++;
             }
         }
@@ -283,4 +286,26 @@ class Yespo_Order_Mapping
             return $formatted_order_time;
         }
     }
+
+    private static function get_post_modified_gmt_formatted($order_id) {
+        global $wpdb;
+
+        $post_modified_gmt = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT post_modified_gmt FROM {$wpdb->posts} WHERE ID = %d",
+                $order_id
+            )
+        );
+
+        if ($post_modified_gmt) {
+            try {
+                return self::get_time_order_created($post_modified_gmt);
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
 }

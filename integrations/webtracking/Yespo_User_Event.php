@@ -2,10 +2,12 @@
 
 namespace Yespo\Integrations\Webtracking;
 
+use WC_Order;
+
 class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 {
     const USER_AUTH_LABEL = 'user_auth_label';
-    const TABLE_ORDERS = 'wc_orders';
+    const TABLE_ORDERS = 'posts';
 
     public function __construct() {
         add_action('wp_login', array($this, 'handle_user_event'), 10, 2); // user authorization
@@ -33,12 +35,18 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         } else {
             $order = wc_get_order($this->get_last_order_id());
 
-            $user_data = array(
+            $user_data = [
                 'externalCustomerId' => '',
-                'user_email' => $order->get_billing_email(),
-                'user_name' => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
-                'user_phone' => !empty($order->get_billing_phone()) ? $order->get_billing_phone() : ''
-            );
+                'user_email' => '',
+                'user_name' => '',
+                'user_phone' => ''
+            ];
+
+            if ($order instanceof WC_Order) {
+                $user_data['user_email'] = $order->get_billing_email() ?: '';
+                $user_data['user_name'] = ($order->get_billing_first_name() ?: '') . ' ' . ($order->get_billing_last_name() ?: '');
+                $user_data['user_phone'] = $order->get_billing_phone() ?: '';
+            }
 
         }
 
@@ -72,9 +80,9 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         // phpcs:ignore WordPress.DB
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT ID FROM %i WHERE type = %s AND status != %s ORDER BY ID DESC LIMIT 1",
+                "SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s ORDER BY ID DESC LIMIT 1",
                 $table_orders,
-                'shop_order',
+                'shop_order%',
                 'wc-checkout-draft'
             )
         );

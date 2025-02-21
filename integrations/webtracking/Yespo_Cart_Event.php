@@ -50,4 +50,13 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
         return false;
     }
 
+    public function get_cart_page(){
+        if (is_cart()) {
+            return [
+                'cartPageKey' => 'StatusCartPage'
+            ];
+        }
+        return null;
+    }
+
 }

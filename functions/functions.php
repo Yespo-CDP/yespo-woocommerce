@@ -141,7 +141,7 @@ function yespo_save_settings_via_form_function() {
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
-				(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
+				//(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
             }
 			$is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
             $response_data = array(
@@ -169,6 +169,55 @@ function yespo_save_settings_via_form_function() {
     }
 }
 add_action('wp_ajax_yespo_check_api_key_esputnik', 'yespo_save_settings_via_form_function');
+
+
+/** get yespo tracking code **/
+function yespo_get_yespo_tracking_code_function() {
+
+    if ( ! isset( $_GET['yespo_get_tracking_script_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_get_tracking_script_nonce'])), 'yespo_get_tracking_script' ) ) {
+        return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    if (get_option('yespo_options') !== false) {
+        $options = get_option('yespo_options', array());
+        if (isset($options['yespo_api_key'])) $yespo_api_key = sanitize_text_field($options['yespo_api_key']);
+
+        if(isset($yespo_api_key)) {
+            $accountClass = new \Yespo\Integrations\Esputnik\Yespo_Account();
+            $result = $accountClass->send_keys($options['yespo_api_key']);
+            if (strpos($result, 'Connection refused') !== false) $result = 0;
+            if ($result === 200) {
+
+                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
+
+                $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+                if ($is_tracking) {
+                    $response_data = array(
+                        'status' => 'success',
+                        'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Web script installed successfully", 'yespo-cdp') . '</p></div>'),
+                        'tracker' => $is_tracking
+                    );
+
+
+                } else {
+                    $response_data = array(
+                        'status' => 'error',
+                        'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Problem with installation web tracking script", 'yespo-cdp') . '</p></div>'),
+                        'total' => esc_html__("Completed unsuccessfully!", 'yespo-cdp'),
+                    );
+                }
+                wp_send_json($response_data);
+                exit;
+
+            }
+        }
+    }
+}
+add_action('wp_ajax_yespo_get_webtracking_script_action', 'yespo_get_yespo_tracking_code_function');
 
 /** update user profile on Yespo service **/
 function yespo_update_user_profile_function($user_id, $old_user_data) {
@@ -532,3 +581,13 @@ function yespo_get_cart_contents_function(){
 }
 add_action('wp_ajax_yespo_get_cart_contents', 'yespo_get_cart_contents_function');
 add_action('wp_ajax_nopriv_yespo_get_cart_contents', 'yespo_get_cart_contents_function');
+
+// UPDATE ORDER LAST MODIFIED TIME
+add_action('woocommerce_update_order', function($order_id) {
+    if ( 'yes' !== get_option( 'woocommerce_db_sync_enabled', 'no' ) ) {
+        if ( ! is_numeric( $order_id ) || $order_id <= 0 ) {
+            return false;
+        }
+        (new Yespo\Integrations\Esputnik\Yespo_Order())->update_last_modified_time($order_id);
+    }
+});

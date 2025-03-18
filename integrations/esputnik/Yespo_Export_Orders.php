@@ -105,7 +105,7 @@ class Yespo_Export_Orders
             if (count($orders) > 0) {
                 foreach ($orders as $order) {
                     $item = wc_get_order($order);
-                    if (!empty($item) && !is_bool($item) && method_exists($item, 'get_billing_email') && !empty($item->get_billing_email())) {
+                    if (!empty($item) && !is_bool($item) && method_exists($item, 'get_billing_email') ) {
                         if (!$this->is_email_in_removed_users($item->get_billing_email())) {
                             (new Yespo_Order())->create_order_on_yespo($item, 'update');
                         }
@@ -669,5 +669,34 @@ class Yespo_Export_Orders
         );
 
     }
+
+    // Remove json entries older than 30 days
+    public function remove_old_json_log_entries() {
+        global $wpdb;
+        $table_yespo_curl_json = esc_sql($this->table_yespo_curl_json);
+
+        return $wpdb->query(
+            "DELETE FROM {$table_yespo_curl_json} WHERE created_at < NOW() - INTERVAL 30 DAY"
+        );
+    }
+
+    public function yespo_export_data_log($property, $value, $last = false) {
+        $upload_dir = wp_upload_dir();
+        if (empty($upload_dir['basedir'])) {
+            return;
+        }
+    
+        $log_file = trailingslashit($upload_dir['basedir']) . 'yespo_log.txt';
+    
+        if (!is_writable($upload_dir['basedir'])) {
+            return;
+        }
+    
+        $log_entry = "{$property}: {$value}" . PHP_EOL;
+        if ($last) $log_entry .= '========================' . PHP_EOL . PHP_EOL;
+    
+        file_put_contents($log_file, $log_entry, FILE_APPEND | LOCK_EX);
+    }
+    
 
 }

@@ -73,7 +73,8 @@ class YespoExportData {
 
             if (response === true && tracker === true) {
                 this.addSuccessMessage(this.trackerAdded);
-            } else this.showGetTrackingForm();
+            }
+            //else this.showGetTrackingForm(); //show web tracking form
         } catch (error) {
             console.error('Error in processData:', error);
         }
@@ -489,7 +490,7 @@ class YespoExportData {
                             if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                             this.getNumberDataExport();
                             if(response.tracker === true) this.addSuccessMessage(this.trackerAdded);
-                            else this.showGetTrackingForm();//show web tracking form
+                            //else this.showGetTrackingForm(); //show web tracking form
                         } else if(response.status && response.status === 'incorrect') {
                             let code = 401;
                             if(parseInt(response.code) === 0) code = 555;

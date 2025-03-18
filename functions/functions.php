@@ -141,7 +141,7 @@ function yespo_save_settings_via_form_function() {
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
-				//(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
+				(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
             }
 			$is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
             $response_data = array(
@@ -516,6 +516,7 @@ add_filter( 'cron_schedules', 'yespo_establish_custom_cron_interval_function' );
 
 /*** START CRON JOB ***/
 function yespo_export_data_cron_function(){
+    set_time_limit(60);
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Users())->start_active_bulk_export_users();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_bulk_export_orders();
@@ -526,6 +527,7 @@ add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
 
 function yespo_script_cron_event_function(){
     (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_script_code_cron();
+    (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->remove_old_json_log_entries();
 }
 add_action('yespo_script_cron_event', 'yespo_script_cron_event_function');
 

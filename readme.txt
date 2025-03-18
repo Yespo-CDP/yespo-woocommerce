@@ -3,7 +3,7 @@ Contributors: Yespo Marketing Automation & Customer Data Platform
 Tags: marketing automation, personalization, customer segmentation, omnichannel, CDP, woocommerce, ecommerce, omnichannel marketing, web tracking, email marketing, sms, push notifications
 Requires at least: 6.5.5
 Tested up to: 6.7.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -153,6 +153,8 @@ Integration of Yespo with your WooCommerce store can be done in a few clicks:
 
 5. After clicking the **Synchronize** button, the new contacts’ and orders’ data that appear in WooCommerce will be automatically transferred to Yespo, and the web tracking configuration will be set up.
 
+6. To configure web tracking, click the dedicated button—this will install the general script and set up event tracking on your website.
+
 **NOTE:** The plugin relies on data transfer via cron jobs. Ensure you have an active cron set up: either the default WordPress cron or a server-side cron on your hosting.
 
 Explore our [manual](https://yespo.io/support/installing-plugin-woocommerce-sites) for more details.
@@ -160,6 +162,9 @@ Explore our [manual](https://yespo.io/support/installing-plugin-woocommerce-site
 If you need help with setting up the integration, please contact [Yespo support](https://yespo.io/support).
 
 == Changelog ==
+
+= 1.1.1 (2025-02-21) =
+* Made the script installation and event tracking setup for web tracking optional, allowing manual activation.
 
 = 1.1.0 (2025-02-04) =
 * Introduced new events to enhance recommendation configuration:

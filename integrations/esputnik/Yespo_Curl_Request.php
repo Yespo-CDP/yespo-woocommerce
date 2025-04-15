@@ -17,7 +17,7 @@ class Yespo_Curl_Request
         try {
             $args = [
                 'method'  => $custom_request,
-                'timeout' => 30,
+                'timeout' => 60,
                 'headers' => [
                     'Accept'        => 'application/json; charset=UTF-8',
                     'Authorization' => 'Basic ' . base64_encode(':' . $auth_data['yespo_api_key']),

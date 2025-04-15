@@ -12,6 +12,27 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
         $this->options = get_option(self::YESPO_OPTIONS);
     }
 
+    // SEND DATA TO YESPO
+    public function add_to_cart_event() {
+        $json = $this->generate_json($this->get_data());
+
+        return Yespo_Web_Tracking_Curl_Request::curl_request($json);
+    }
+
+    public function after_cart_item_quantity_update() {
+        $json = $this->generate_json($this->get_data());
+
+        return Yespo_Web_Tracking_Curl_Request::curl_request($json);
+    }
+
+    public function cart_item_removed() {
+        $json = $this->generate_json($this->get_data());
+
+        return Yespo_Web_Tracking_Curl_Request::curl_request($json);
+    }
+
+
+    // GET CART DATA
     public function get_data(){
         // TODO: Implement get_data() method.
         $cart_items = [];
@@ -20,7 +41,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
             foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
                 $product = $cart_item['data'];
                 $cart_items['products'][] = array(
-                    'productKey' => $product->get_id(),
+                    'productKey' => strval($product->get_id()),
                     'price' => $product->get_price(),
                     'quantity' => $cart_item['quantity'],
                     'currency' => get_woocommerce_currency()
@@ -31,7 +52,8 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
 
             if(empty($cart_items['GUID'])){
                 $cart_items['GUID'] = $this->get_option();
-                $this->update_option('');
+                $cart_items['empty'] = true;
+                //$this->update_option('');
             } else $this->update_option($cart_items['GUID']);
 
             return $cart_items;
@@ -50,6 +72,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
         return false;
     }
 
+    //DETECTING CART PAGE
     public function get_cart_page(){
         if (is_cart()) {
             return [
@@ -57,6 +80,35 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
             ];
         }
         return null;
+    }
+
+
+    //GENERATE JSON FOR TRANSFERING
+    public function generate_json() {
+        $cart_data = $this->get_data();
+
+        $general_info = (new Yespo_User_Event)->generate_user_array("StatusCart", '');
+        $status_cart = [
+            "GUID" => $cart_data['GUID'] ?? uniqid(),
+            "Products" => array_map(function ($product) {
+                return array_filter([
+                    "productKey" => $product['productKey'] ?? null,
+                    "price" => $product['price'] ?? null,
+                    "discount" => $product['discount'] ?? null,
+                    "quantity" => $product['quantity'] ?? null,
+                    "price_currency_code" => $product['currency'] ?? null
+                ], function ($value) {
+                    return !is_null($value);
+                });
+            }, $cart_data['products'] ?? [])
+        ];
+
+        if (isset($cart_items['empty']) && $cart_items['empty'] === true ) $this->update_option('');
+
+        return [
+            "GeneralInfo" => $general_info,
+            "StatusCart" => $status_cart
+        ];
     }
 
 }

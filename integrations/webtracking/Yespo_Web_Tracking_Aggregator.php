@@ -76,7 +76,7 @@ class Yespo_Web_Tracking_Aggregator
                 'stock' => isset($product['stock']) ? esc_js($product['stock']) : '',
             );
         }
-
+/*
         if (!is_null($purchase)) {
             $tracking_data['thankYou'] = $purchase;
             if(!is_null($user) && empty($user['externalCustomerId'])){
@@ -87,7 +87,7 @@ class Yespo_Web_Tracking_Aggregator
         if (!is_null($user) && !empty($user['externalCustomerId'])) {
             $tracking_data['customerData'] = $user;
         }
-
+*/
         if (!is_null($front)) {
             $tracking_data['front'] = array(
                 'frontKey' => isset($front['frontKey']) ? esc_js($front['frontKey']) : '',
@@ -105,6 +105,8 @@ class Yespo_Web_Tracking_Aggregator
                 'cartPageKey' => isset($cart['cartPageKey']) ? esc_js($cart['cartPageKey']) : '',
             );
         }
+
+        $tracking_data['tenantWebId'] = wp_create_nonce('yespo_send_tenant_webid');
 
         return $tracking_data;
     }

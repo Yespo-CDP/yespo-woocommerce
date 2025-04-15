@@ -570,7 +570,7 @@ class YespoExportData {
             if(parseInt(users.export) > 0) this.startExportUsers();
             else if(parseInt(orders.export) > 0) this.startExportOrders();
         } else {
-            this. addSuccessMessage(this.success, true);
+            this.addSuccessMessage(this.success, true);
         }
     }
 
@@ -835,7 +835,7 @@ class YespoExportData {
                 }
                 if( document.querySelector('#stop-send-data') ) document.querySelector('#stop-send-data').disabled = true;
                 setTimeout(() => {
-                    this. addSuccessMessage(this.success, true);
+                    this.addSuccessMessage(this.success, true);
                 }, 5000);
             }
         }

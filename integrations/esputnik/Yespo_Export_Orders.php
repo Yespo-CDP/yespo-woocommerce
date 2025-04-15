@@ -48,7 +48,7 @@ class Yespo_Export_Orders
         if(empty($status)){
             $data = [
                 'export_type' => 'orders',
-                'total' => intval( $this->get_export_orders_count() ),
+                'total' => intval( $this->get_bulk_export_orders_count() ),
                 'exported' => 0,
                 'status' => 'active'
             ];
@@ -197,7 +197,7 @@ class Yespo_Export_Orders
             } //export users if exist
         } else {
             $status = $this->get_order_export_status();
-            if(!empty($status) && ($status->status === 'completed' || $this->get_export_orders_count() < 1) && $status->code === null){
+            if(!empty($status) && ($status->status === 'completed' || $this->get_bulk_export_orders_count() < 1) && $status->code === null){
                 $this->update_table_data($status->id, intval($status->total), $status->status);
 
                 $newUser = new Yespo_Export_Users;
@@ -314,7 +314,7 @@ class Yespo_Export_Orders
         if(empty($order)) $order = $this->get_order_export_status_processed('stopped');
         if(!empty($order) && ($order->status == 'stopped' || $order->status == 'active') ){
             $exportEntry = intval($order->total) - intval($order->exported);
-            $export = $this->get_export_orders_count();
+            $export = $this->get_bulk_export_orders_count();
             if($exportEntry != $export){
                 $newTotal = intval($order->total) + ($export - $exportEntry);
                 $this->update_table_total($order->id, $newTotal);
@@ -387,6 +387,19 @@ class Yespo_Export_Orders
 
         // phpcs:ignore WordPress.DB
         return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key));
+    }
+
+    public function get_bulk_export_orders_count(){
+        global $wpdb;
+        $period_start = gmdate('Y-m-d H:i:s', time() - absint($this->period_selection));
+        $table_posts = esc_sql($this->table_posts);
+        $prefix = esc_sql($wpdb->prefix);
+        $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
+        $meta_key = esc_sql($this->meta_key);
+        $id_more_then = absint($this->id_more_then);
+
+        // phpcs:ignore WordPress.DB
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(ID) FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND post_date_gmt < %s AND ID > %d", $table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key, $period_start, $id_more_then));
     }
 
     public function get_orders_export_esputnik(){

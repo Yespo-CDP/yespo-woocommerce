@@ -141,15 +141,15 @@ function yespo_save_settings_via_form_function() {
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
-				(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
+                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
             }
-			$is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+            $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
             $response_data = array(
                 'status' => 'success',
                 'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp') . '</p></div>'),
                 'total' => esc_html__("Completed successfully!", 'yespo-cdp'),
                 'username' => isset($organisationName) ? $organisationName : '',
-				'tracker' => $is_tracking
+                'tracker' => $is_tracking
             );
         } else if($result === 0){
             $response_data = array(
@@ -593,3 +593,81 @@ add_action('woocommerce_update_order', function($order_id) {
         (new Yespo\Integrations\Esputnik\Yespo_Order())->update_last_modified_time($order_id);
     }
 });
+
+
+/**** BACKEND TRACKING CODE ****/
+// Getting and saving webid from frontend
+function yespo_save_webid_to_session() {
+    if ( ! isset( $_POST['yespo_tenant_webid_nonce_name'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_POST['yespo_tenant_webid_nonce_name'])), 'yespo_send_tenant_webid' ) ) {
+        return;
+    }
+
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $response = [];
+
+    foreach (['webId', 'tenantId', 'orgId'] as $key) {
+        if (!empty($_POST[$key])) {
+            $_SESSION[$key] = sanitize_text_field($_POST[$key]);
+            $response[$key] = "$key saved in session";
+        } else {
+            $response[$key] = "$key not transferred";
+        }
+    }
+
+    wp_send_json((isset($_SESSION['webId']) || isset($_SESSION['tenantId'])) ? wp_send_json_success($response) : wp_send_json_error($response));
+}
+add_action('wp_ajax_save_webid', 'yespo_save_webid_to_session');
+add_action('wp_ajax_nopriv_save_webid', 'yespo_save_webid_to_session');
+
+// user events
+function yespo_handle_user_event_function($user_id_or_login, $user = null) {
+    (new Yespo\Integrations\Webtracking\Yespo_User_Event())->handle_user_event($user_id_or_login, $user);
+}
+add_action('wp_login', 'yespo_handle_user_event_function', 10, 2); // user authorization
+
+function yespo_update_user_event_function($user_id_or_login, $user = null) {
+
+    if (get_transient('yespo_user_event_triggered')) return;
+
+    set_transient('yespo_user_event_triggered', true, 3);
+
+    if (is_numeric($user_id_or_login)) {
+        $user_data = get_userdata($user_id_or_login);
+        if ($user_data) {
+            $user_login = $user_data->user_login;
+        } else return;
+    } else $user_login = $user_id_or_login;
+
+    (new Yespo\Integrations\Webtracking\Yespo_User_Event())->handle_user_event($user_login, $user);
+}
+add_action('profile_update', 'yespo_update_user_event_function', 10, 2); // user update profile
+
+//cart events
+function yespo_add_to_cart_event_function($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data) {
+    if (get_transient('yespo_add_to_cart_event_triggered')) return;
+    set_transient('yespo_add_to_cart_event_triggered', true, 3);
+    (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->add_to_cart_event();
+}
+add_action('woocommerce_add_to_cart', 'yespo_add_to_cart_event_function', 10, 6);
+
+function yespo_update_cart_event_function($cart_item_key, $quantity, $old_quantity, $cart ) {
+    if (get_transient('yespo_update_cart_event_triggered')) return;
+    set_transient('yespo_update_cart_event_triggered', true, 3);
+    (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->after_cart_item_quantity_update();
+}
+add_action('woocommerce_after_cart_item_quantity_update', 'yespo_update_cart_event_function', 10, 4);
+
+function yespo_remove_cart_items_event_function($cart_item_key, $quantity ) {
+    (new Yespo\Integrations\Webtracking\Yespo_Cart_Event())->cart_item_removed();
+}
+add_action('woocommerce_cart_item_removed', 'yespo_remove_cart_items_event_function', 10, 2);
+
+//purchased items
+function yespo_send_purchased_data_function($order_id) {
+    (new Yespo\Integrations\Webtracking\Yespo_User_Event())->after_order_complete($order_id);
+    (new Yespo\Integrations\Webtracking\Yespo_Purchased_Event())->send_order_to_yespo($order_id);
+}
+add_action('woocommerce_thankyou', 'yespo_send_purchased_data_function', 10, 1);

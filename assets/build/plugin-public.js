@@ -8,38 +8,33 @@ class YespoTracker
         if (trackingData.category) this.category = trackingData.category;
         if (trackingData.product) this.product = trackingData.product;
         if (trackingData.cart) this.cart = trackingData.cart;
-        if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
-        if (trackingData.customerData) this.customerData = trackingData.customerData;
+        //if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
+        //if (trackingData.customerData) this.customerData = trackingData.customerData;
         if (trackingData.front) this.front = trackingData.front;
         if (trackingData.notFound) this.notFound = trackingData.notFound;
+        if (trackingData.tenantWebId) this.tenantWebIdNonce = trackingData.tenantWebId;
 
         this.start();
     }
 
     start(){
-        if(this.thankYou && this.action === null) this.thankYouPage(this.thankYou);
+        //if(this.thankYou && this.action === null) this.thankYouPage(this.thankYou);
         if(this.category && this.action === null) this.sendCategory(this.category);
         if(this.product && this.action === null) this.sendProduct(this.product);
         if(this.cart && this.action === null) this.sendCart(this.cart);
-        if(this.customerData && this.action === null) this.userData(this.customerData);
+        //if(this.customerData && this.action === null) this.userData(this.customerData);
         //if(this.action === 'cart' || this.action === 'cart_empty') this.getCartData();
-        if(this.action === 'cart') this.getCartData('cart');
-        if(this.action === 'cart_empty') this.getCartData('cart_empty');
-        if(this.action === 'cart_batch') this.getCartData('cart_batch');
+        //if(this.action === 'cart') this.getCartData('cart');
+        //if(this.action === 'cart_empty') this.getCartData('cart_empty');
+        //if(this.action === 'cart_batch') this.getCartData('cart_batch');
         if(this.front && this.action === null) this.sendFront(this.front);
         if(this.notFound && this.action === null) this.sendNotFound(this.notFound);
         //impression start
         //this.startObserver('.type-product');
+        //this.checkWebIdOnLoad();
+        this.actionTenantIdWebId();
     }
 
-    userData(customerData){
-        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': String(customerData.externalCustomerId), 'user_email': String(customerData.user_email), 'user_name': String(customerData.user_name), 'user_phone': String(customerData.user_phone) } });
-    }
-
-    thankYouPage(purchase){
-        const purchasedItems = this.thankYouPageMapping(purchase);
-        eS('sendEvent', 'PurchasedItems', { "OrderNumber": purchase.OrderNumber, "PurchasedItems": purchasedItems, "GUID": purchase.GUID});
-    }
 
     sendCategory(category){
         eS('sendEvent', 'CategoryPage', { "CategoryPage": { "categoryKey": category.categoryKey } });
@@ -64,10 +59,6 @@ class YespoTracker
 
     sendCart(cart){
         if (typeof cart.cartPageKey === 'string' && cart.cartPageKey === 'StatusCartPage') eS('sendEvent', cart.cartPageKey);
-        else {
-            const statusCart = this.cartMapping(cart);
-            eS('sendEvent', 'StatusCart', { 'StatusCart': statusCart, 'GUID': cart.GUID });
-        }
     }
 
     cartMapping(cart){
@@ -224,6 +215,63 @@ class YespoTracker
         } else {
             console.log('trackingData is not defined');
         }
+    }
+
+    //send wedId to backend
+    checkWebIdOnLoad(webId, tenantId, orgId) {
+
+        if (!webId || typeof webId !== "string" || webId.trim() === "") {
+            console.warn("webId is empty or invalid, skipping request.");
+            return;
+        }
+
+        if (!tenantId  || typeof tenantId !== "string" || tenantId .trim() === "") {
+            console.warn("tenantId is empty or invalid, skipping request.");
+            return;
+        }
+
+        fetch(this.ajaxUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                action: 'save_webid',
+                webId: webId,
+                tenantId: tenantId,
+                orgId: orgId,
+                yespo_tenant_webid_nonce_name: this.tenantWebIdNonce
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => console.log('Answer of WordPress server:', data))
+            .catch(error => console.error('Error sending webId:', error));
+    }
+
+    actionTenantIdWebId() {
+        const observeConfig = { childList: true, subtree: true };
+        const observer = new MutationObserver(() => {
+            if (window._esConfig) {
+                observer.disconnect();
+                const tenantId = window._esConfig?.tenantId || "";
+                const orgId = window._esConfig?.orgId || "";
+                let webId = "";
+
+                try {
+                    const match = document.cookie.match(new RegExp('(?:^|; )' + 'sc' + '=([^;]*)'));
+                    webId = match ? decodeURIComponent(match[1]) : null;
+                } catch (error) {
+                    console.error("Failed to parse document.cookie:", error);
+                }
+
+                this.checkWebIdOnLoad(webId, tenantId, orgId);
+            }
+        });
+
+        observer.observe(document, observeConfig);
     }
 
     /*** Observer Interaction functions ***/

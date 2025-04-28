@@ -110,6 +110,10 @@ function yespo_export_data_activation(){
         wp_schedule_event(time(), 'hourly', 'yespo_script_cron_event');
     }
 
+    if (!wp_next_scheduled('yespo_remove_old_logs')) {
+        wp_schedule_event(time(), 'daily', 'yespo_remove_old_logs');
+    }
+
 }
 
 yespo_export_data_activation();

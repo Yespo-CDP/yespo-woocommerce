@@ -14,8 +14,11 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
             $hash = (new Yespo_Cart_Event())->get_option();
 
             $json = $this->generate_json($order, $order_id, $hash);
+            $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
 
-            return Yespo_Web_Tracking_Curl_Request::curl_request($json);
+            (new Yespo_Logger())->write_to_file('PurchasedItems', $json, $response);
+
+            return true;
         }
     }
 

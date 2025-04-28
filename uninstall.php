@@ -135,6 +135,37 @@ function yespo_uninstall() { // phpcs:ignore
         wp_clear_scheduled_hook('yespo_script_cron_event');
     }
 
+    if (wp_next_scheduled('yespo_remove_old_logs')) {
+        wp_clear_scheduled_hook('yespo_remove_old_logs');
+    }
+
+    delete_directory_recursive(); //remove webtracking log file
+
 }
 
 yespo_uninstall_multisite();
+
+
+function delete_directory_recursive() {
+    $dir = ABSPATH . 'wp-content/uploads/yespo-cdp/';
+    if (!file_exists($dir)) {
+        return;
+    }
+
+    if (!is_dir($dir)) {
+        return;
+    }
+
+    $items = array_diff(scandir($dir), ['.', '..']);
+
+    foreach ($items as $item) {
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+        if (is_dir($path)) {
+            delete_directory_recursive($path);
+        } else {
+            unlink($path);
+        }
+    }
+
+    rmdir($dir);
+}

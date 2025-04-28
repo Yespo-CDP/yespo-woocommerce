@@ -38,7 +38,9 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         Yespo_Web_Tracking_Curl_Request::curl_request($user_json);
 
         $webcontact = $this->get_webcontact_data($user_data);
-        Yespo_Web_Tracking_Curl_Request::curl_request($webcontact);
+        $response = Yespo_Web_Tracking_Curl_Request::curl_request($webcontact);
+
+        (new Yespo_Logger())->write_to_file('CustomerData', $webcontact, $response);
 
         $user = get_user_by('login', $user_id_or_login);
         if ($user) {
@@ -60,7 +62,9 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         Yespo_Web_Tracking_Curl_Request::curl_request($user_json);
         $webcontact = $this->get_webcontact_data($user_data);
 
-        Yespo_Web_Tracking_Curl_Request::curl_request($webcontact);
+        $response = Yespo_Web_Tracking_Curl_Request::curl_request($webcontact);
+
+        (new Yespo_Logger())->write_to_file('CustomerData', $webcontact, $response);
 
         return true;
     }

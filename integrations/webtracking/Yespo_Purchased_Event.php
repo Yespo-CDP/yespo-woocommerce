@@ -37,9 +37,13 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
 
             foreach ($cart as $item) {
                 $quantity = $item->get_quantity();
+                $product_id = $item->get_product_id();
+
+                $variation_id = method_exists($item, 'get_variation_id') ? $item->get_variation_id() : 0;
+                $final_product_id = ($variation_id > 0) ? $variation_id : $product_id;
 
                 $purchased_items['PurchasedItems'][] = array(
-                    'productKey' => $item->get_product_id(),
+                    'productKey' => $final_product_id,
                     'price' => $item->get_subtotal() / $quantity,
                     'quantity' => $quantity,
                     'currency' => $currency

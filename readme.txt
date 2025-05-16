@@ -3,7 +3,7 @@ Contributors: Yespo Marketing Automation & Customer Data Platform
 Tags: marketing automation, personalization, customer segmentation, omnichannel, CDP, woocommerce, ecommerce, omnichannel marketing, web tracking, email marketing, sms, push notifications
 Requires at least: 6.5.5
 Tested up to: 6.7.1
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -138,33 +138,34 @@ You retain ownership of your data: if a customer’s personal data is deleted in
 
 == Installation ==
 
-
 Integration of Yespo with your WooCommerce store can be done in a few clicks:
 
 1. Install and activate the Yespo plugin.
 
 2. A Yespo section will appear in the WordPress admin panel; go to it to authorize and start data synchronization.
 
-3. Enter the Full access API key and click the Synchronize button. You can copy the API key from your [Yespo account](https://my.yespo.io/settings-ui/#/api-keys-list).
+3. Enter the Full access API key and click the **Synchronize** button. You can copy the API key from your [Yespo account](https://my.yespo.io/settings-ui/#/api-keys-list).
 
-3.1 Yespo plugin supports multisite configurations for WooCommerce stores in WordPress. For correct data handling, each WooCommerce store must be connected to a separate Yespo account.
+4. After clicking the **Synchronize** button, the new contacts’ and orders’ data that appear in WooCommerce will be automatically transferred to Yespo. If there is no data for synchronization yet, historical data transfer will not occur.
 
-4. If there is no data for synchronization yet, historical data transfer will not occur.
-
-5. After clicking the **Synchronize** button, the new contacts’ and orders’ data that appear in WooCommerce will be automatically transferred to Yespo
-
-6. To configure web tracking, click the dedicated button—this will install the general script and set up event tracking on your website.
+5. To configure web tracking, click the dedicated button—this will install the general script and set up event tracking on your website.
 
 **NOTE:**
 
 * The plugin relies on data transfer via cron jobs. Ensure you have an active cron set up: either the default WordPress cron or a server-side cron on your hosting.
-* f you're using any caching plugins, make sure to install updates through the WordPress repository and clear your cache afterward to ensure all changes are properly applied.
+* Yespo plugin supports multisite configurations for WooCommerce stores in WordPress. For correct data handling, each WooCommerce store must be connected to a separate Yespo account.
+
+* If you're using any caching plugins, make sure to install updates through the WordPress repository and clear your cache afterward to ensure all changes are properly applied.
 
 Explore our [manual](https://yespo.io/support/installing-plugin-woocommerce-sites) for more details.
 
 If you need help with setting up the integration, please contact [Yespo support](https://yespo.io/support).
 
+
 == Changelog ==
+
+= 1.1.3 (2025-05-16) =
+* Improved support for variable products in StatusCart, PurchasedItems events, and order data export.
 
 = 1.1.2 (2025-04-14) =
 * Resolved export-related bugs that were blocking the completion of historical data transmission and interrupting real-time data flow. Moved the emission of StatusCart, PurchasedItems, and CustomerData events to the backend.

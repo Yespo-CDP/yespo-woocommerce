@@ -156,7 +156,10 @@ class Yespo_Order_Mapping
         $i = 0;
         if (!empty($order) && !is_bool($order) && method_exists($order, 'get_items')) {
             foreach ($order->get_items() as $item_id => $item) {
-                $data[$i]['externalItemId'] = $item->get_product_id();
+                $variation_id = method_exists($item, 'get_variation_id') ? $item->get_variation_id() : 0;
+                $final_product_id = $variation_id ? $variation_id : $item->get_product_id();
+
+                $data[$i]['externalItemId'] = $final_product_id;
                 $data[$i]['name'] = $item->get_name();
                 $data[$i]['category'] = self::get_product_category($data[$i]['externalItemId']);
                 $data[$i]['quantity'] = $item->get_quantity();

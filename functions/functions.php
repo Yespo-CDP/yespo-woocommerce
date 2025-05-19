@@ -531,6 +531,11 @@ function yespo_script_cron_event_function(){
 }
 add_action('yespo_script_cron_event', 'yespo_script_cron_event_function');
 
+function yespo_remove_old_logs_function(){
+    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->remove_old_logs(); //ones per day
+}
+add_action('yespo_remove_old_logs', 'yespo_remove_old_logs_function');
+
 /***
  * JAVASCRIPT ADMIN LOCALIZATION
  */

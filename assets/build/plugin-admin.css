@@ -1,5 +1,8 @@
 /*:root{--my-plugin_color-primary:#00a0d2}#dashboard_right_now a.demo-count:before{content:""}*/
-
+/* center icon position in menu */
+#toplevel_page_yespo-cdp img {
+    padding-top:4px !important;
+}
 #wpcontent{
     padding-left:0px;
 }

@@ -614,9 +614,19 @@ function yespo_save_webid_to_session() {
     $response = [];
 
     foreach (['webId', 'tenantId', 'orgId'] as $key) {
-        if (!empty($_POST[$key])) {
-            $_SESSION[$key] = sanitize_text_field($_POST[$key]);
-            $response[$key] = "$key saved in session";
+        if (isset($_POST[$key])) {
+            $value = trim(sanitize_text_field($_POST[$key]));
+
+            if ($value !== '' && $value !== 'null' && $value !== 'undefined') {
+                if (!isset($_SESSION[$key])) {
+                    $_SESSION[$key] = $value;
+                    $response[$key] = "$key saved in session";
+                } else {
+                    $response[$key] = "$key already set in session, not overwritten";
+                }
+            } else {
+                $response[$key] = "$key ignored due to invalid value";
+            }
         } else {
             $response[$key] = "$key not transferred";
         }

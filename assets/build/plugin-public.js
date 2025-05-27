@@ -221,13 +221,15 @@ class YespoTracker
     checkWebIdOnLoad(webId, tenantId, orgId) {
 
         if (!webId || typeof webId !== "string" || webId.trim() === "") {
-            console.warn("webId is empty or invalid, skipping request.");
-            return;
+            console.warn("webId is empty or invalid.");
         }
 
         if (!tenantId  || typeof tenantId !== "string" || tenantId .trim() === "") {
-            console.warn("tenantId is empty or invalid, skipping request.");
-            return;
+            console.warn("tenantId is empty or invalid.");
+        }
+
+        if (!orgId) {
+            console.warn("orgId is empty or invalid.");
         }
 
         fetch(this.ajaxUrl, {
@@ -261,8 +263,15 @@ class YespoTracker
                 let webId = "";
 
                 try {
-                    const match = document.cookie.match(new RegExp('(?:^|; )' + 'sc' + '=([^;]*)'));
-                    webId = match ? decodeURIComponent(match[1]) : null;
+
+                    let esState = JSON.parse(localStorage.getItem("esState") || "{}");
+                    let customerId = esState?.customerId?.trim();
+
+                    webId = customerId && customerId.length > 0 ? customerId : (() => {
+                        const match = document.cookie.match(/(?:^|; )sc=([^;]*)/);
+                        return match ? decodeURIComponent(match[1]) : null;
+                    })();
+
                 } catch (error) {
                     console.error("Failed to parse document.cookie:", error);
                 }

@@ -107,3 +107,7 @@ msgstr "Уеб проследяването е успешно конфигури
 #: backend/views/settings.php:89
 msgid "Data synchronization has started"
 msgstr "Синхронизация на данни е започнала"
+
+#: integrations/esputnik/Yespo_Localization.php:19
+msgid "Web push is successfully configured. Notifications can be managed from your Yespo account."
+msgstr "Уеб пуш известията са успешно конфигурирани. Можете да ги управлявате от своя Yespo акаунт."

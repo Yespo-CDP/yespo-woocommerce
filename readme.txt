@@ -3,7 +3,7 @@ Contributors: Yespo Marketing Automation & Customer Data Platform
 Tags: marketing automation, personalization, customer segmentation, omnichannel, CDP, woocommerce, ecommerce, omnichannel marketing, web tracking, email marketing, sms, push notifications
 Requires at least: 6.5.5
 Tested up to: 6.7.1
-Stable tag: 1.1.3
+Stable tag: 1.1.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -146,9 +146,7 @@ Integration of Yespo with your WooCommerce store can be done in a few clicks:
 
 3. Enter the Full access API key and click the **Synchronize** button. You can copy the API key from your [Yespo account](https://my.yespo.io/settings-ui/#/api-keys-list).
 
-4. After clicking the **Synchronize** button, the new contacts’ and orders’ data that appear in WooCommerce will be automatically transferred to Yespo. If there is no data for synchronization yet, historical data transfer will not occur.
-
-5. To configure web tracking, click the dedicated button—this will install the general script and set up event tracking on your website.
+4. After clicking the **Synchronize** button, the new contacts’ and orders’ data that appear in WooCommerce will be automatically transferred to Yespo. The on-site event tracking configuration will also be completed. To ensure proper operation, make sure to [add the product feed](https://docs.yespo.io/docs/importing-product-feed) to Yespo.
 
 **NOTE:**
 
@@ -161,8 +159,71 @@ Explore our [manual](https://yespo.io/support/installing-plugin-woocommerce-site
 
 If you need help with setting up the integration, please contact [Yespo support](https://yespo.io/support).
 
+== Frequently Asked Questions ==
+
+= Why are WordPress and WooCommerce hooks important for the Yespo plugin? =
+
+For the Yespo WooCommerce plugin to connect with your store and perform its functions correctly (like tracking additions to the cart, updating customer information, or processing orders), it relies on specific communication points within WordPress and WooCommerce. These communication points are called "hooks."
+
+= Which hooks does the Yespo plugin need? =
+
+Our plugin requires a set of standard WordPress hooks and some specific WooCommerce hooks to operate effectively.
+
+* **Standard WordPress hooks needed:**
+  * `admin_notices` (Used for displaying important messages in your admin area)
+  * `profile_update` (Helps to stay updated when user profiles change)
+  * `delete_user` (Allows to react when a user is deleted)
+  * `wp_privacy_personal_data_erased` (Ensures notifications for data erasure requests, helping with privacy compliance)
+  * `admin_enqueue_scripts` (Used to load necessary scripts for the plugin's admin interface)
+  * `wp_footer` (Allows to add necessary tracking or functionality to the front-end of your site)
+  * `wp_login` (Helps performing actions during user login)
+  * `cron_schedules` (Allows to schedule background tasks for optimal performance)
+* **WooCommerce hooks needed:**
+  * `woocommerce_add_to_cart` (Essential to know when a product is added to the cart)
+  * `woocommerce_after_cart_item_quantity_update` (Provides information when item quantities in the cart change)
+  * `woocommerce_cart_item_removed` (Informs the system when an item is removed from the cart)
+  * `woocommerce_thankyou` (Crucial for tracking of successful orders and provides post-purchase experiences)
+
+You can learn more about these hooks [here](https://docs.yespo.io/docs/installing-plugin-woocommerce-sites#wordpress--woocommerce-hooks).
+
+= What if these hooks are missing or not working? =
+
+* **WordPress hooks:** These are fundamental parts of WordPress and must be are almost always available. If they seem to be missing or not working, it's usually because:
+  * Another plugin or your active theme is unintentionally interfering with them.
+  * Custom code has been added to your site that prevents these standard hooks from working correctly (e.g., using `remove_action` or `remove_filter`).
+* **WooCommerce hooks:** These are core to how WooCommerce functions and are provided by the WooCommerce plugin itself. Similar to WordPress hooks, issues usually arise if:
+  * Your theme or another plugin is conflicting with WooCommerce's standard operations.
+  * Custom code is interfering with these essential WooCommerce signals.
+  * The essential hooks were accidentally deactivated.
+
+If Yespo isn't working as expected, a missing or blocked hook could be the reason. This might mean certain data isn't being tracked, or features aren't triggering correctly.
+
+= How can I check if the necessary hooks are available? =
+
+While WordPress and WooCommerce hooks are generally present by default, conflicts can occur. Here’s what you can do:
+
+1. **Standard troubleshooting:**
+   * **Temporarily switch to a default WordPress theme** (like Twenty Twenty-Four or Storefront) and see if the issue Yespo is experiencing resolves. If it does, your theme is likely the cause.
+   * **Temporarily deactivate other plugins one by one** (except WooCommerce and Yespo) to see if a specific plugin is causing a conflict.
+2. **Using Diagnostic Plugins (Recommended for a clearer view):**
+   * You can use helpful third-party plugins to see which hooks are active on your site. Plugins like **Query Monitor** or **WP Hooks Finder** can provide a list of active hooks. You can then check if the ones required by Yespo (listed above) are present. *Please use these tools carefully and consider deactivating them after troubleshooting, as they add some overhead.*
+3. **Consult Your Developer (If applicable):**
+   * If you have a developer who manages your website, they can help investigate if any custom code or specific theme/plugin configurations are affecting these hooks. Searching through theme and plugin code for these hook names is a technical step best suited for a developer.
+
+= What if I find a missing or conflicting hook? =
+
+If you suspect a theme or another plugin is causing the issue, we recommend reaching out to the support team for that theme or plugin for assistance. If you've identified custom code that's interfering, you or your developer will need to adjust it to ensure it doesn't block required hooks.
+
+If you've tried these steps and are still having trouble, please contact our Yespo support team, and we'll do our best to assist you\!
 
 == Changelog ==
+
+= 1.1.5 (2025-06-24) =
+* Added web push configuration
+
+= 1.1.4 (2025-05-27) =
+* Improved logging
+* Added support for retrieving web tracking events data from multiple sources
 
 = 1.1.3 (2025-05-16) =
 * Improved support for variable products in StatusCart, PurchasedItems events, and order data export.

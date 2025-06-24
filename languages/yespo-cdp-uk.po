@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: TODO 1.0.0\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/plugins/yespo\n"
 "POT-Creation-Date: 2020-05-21 19:28+0200\n"
-"PO-Revision-Date: 2024-08-23 13:19+0300\n"
+"PO-Revision-Date: 2025-06-13 12:51+0300\n"
 "Last-Translator: \n"
 "Language-Team: LANGUAGE <translations@example.com >\n"
 "Language: uk_UA\n"
@@ -91,7 +91,6 @@ msgstr "Невалідний API ключ. Видаліть плагін і по
 msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
 msgstr "Вихідна активність на сервері заблокована. Будь ласка, зв`яжіться з вашим провайдером для вирішення цієї проблеми. Синхронізація даних буде автоматично відновлена без втрати даних після вирішення проблеми."
 
-
 #: functions/functions.php:86
 msgid "Contact Support"
 msgstr "Зв`язатися зі службою підтримки"
@@ -108,3 +107,6 @@ msgstr "Веб-трекінг успішно налаштований"
 msgid "Data synchronization has started"
 msgstr "Синхронізація даних розпочалася"
 
+#: integrations/esputnik/Yespo_Localization.php:19
+msgid "Web push is successfully configured. Notifications can be managed from your Yespo account."
+msgstr "Веб-пуш успішно налаштовано. Керувати сповіщеннями можна в обліковому записі Yespo."

@@ -9,6 +9,7 @@ class YespoExportData {
         this.error555 = yespoVars.error555;
         this.success = yespoVars.success;
         this.trackerAdded = yespoVars.trackerAdded;
+        this.webPushAdded = yespoVars.webPushAdded;
         this.synhStarted = yespoVars.synhStarted;
         this.pluginUrl = yespoVars.pluginUrl;
         this.pauseButton = yespoVars.pauseButton;
@@ -67,12 +68,15 @@ class YespoExportData {
      * check authomatic authorization
      **/
 
-    async queueProcess(tracker) {
+    async queueProcess(tracker, webpush) {
         try {
             const response = await this.getNumberDataExport();
 
             if (response === true && tracker === true) {
                 this.addSuccessMessage(this.trackerAdded);
+            }
+            if (response === true && webpush === true) {
+                this.addSuccessMessage(this.webPushAdded);
             }
             //else this.showGetTrackingForm(); //show web tracking form
         } catch (error) {
@@ -84,7 +88,7 @@ class YespoExportData {
         this.getRequest('yespo_check_api_authorization_yespo', 'yespo_check_api_authorization_yespo_nonce', this.yespoCheckApiAuthorizationYespoNonce,  (response) => {
             response = JSON.parse(response);
             if(response.success && response.data.auth && response.data.auth === 'success'){
-                this.queueProcess(response.data.tracker);
+                this.queueProcess(response.data.tracker, response.data.webpush);
             } else if(response.data && response.data.auth && response.data.auth === 'incorrect') {
                 let code = 401;
                 if(parseInt(response.data.code) === 0) code = 555;
@@ -490,6 +494,7 @@ class YespoExportData {
                             if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                             this.getNumberDataExport();
                             if(response.tracker === true) this.addSuccessMessage(this.trackerAdded);
+                            if(response.webpush === true) this.addSuccessMessage(this.webPushAdded);
                             //else this.showGetTrackingForm(); //show web tracking form
                         } else if(response.status && response.status === 'incorrect') {
                             let code = 401;

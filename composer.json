@@ -40,7 +40,8 @@
       "Yespo\\Backend\\": "backend/",
       "Yespo\\Engine\\": "engine/",
       "Yespo\\Integrations\\Esputnik\\": "integrations/esputnik/",
-	  "Yespo\\Integrations\\Webtracking\\": "integrations/webtracking/"
+	  "Yespo\\Integrations\\Webtracking\\": "integrations/webtracking/",
+      "Yespo\\Integrations\\Webpush\\": "integrations/webpush/"
     }
   }
 }

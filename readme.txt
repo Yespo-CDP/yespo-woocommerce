@@ -3,7 +3,7 @@ Contributors: Yespo Marketing Automation & Customer Data Platform
 Tags: marketing automation, personalization, customer segmentation, omnichannel, CDP, woocommerce, ecommerce, omnichannel marketing, web tracking, email marketing, sms, push notifications
 Requires at least: 6.5.5
 Tested up to: 6.7.1
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -217,6 +217,9 @@ If you suspect a theme or another plugin is causing the issue, we recommend reac
 If you've tried these steps and are still having trouble, please contact our Yespo support team, and we'll do our best to assist you\!
 
 == Changelog ==
+
+= 1.1.5 (2025-06-24) =
+* Added web push configuration
 
 = 1.1.4 (2025-05-27) =
 * Improved logging

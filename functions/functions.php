@@ -103,7 +103,9 @@ function yespo_check_api_authorization_function(){
             if ($result === 200) {
                 (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
                 $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
-                wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking]);
+                $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
+                if(!$is_webpush) (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); // webpush
+                wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking, 'webpush' => $is_webpush]);
             } else if($result === 401 || $result === 0){
                 wp_send_json_error(['auth' => 'incorrect', 'code' => $result]);
             } else {
@@ -142,14 +144,17 @@ function yespo_save_settings_via_form_function() {
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
                 (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
+                (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); //webpush
             }
             $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+            $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
             $response_data = array(
                 'status' => 'success',
                 'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp') . '</p></div>'),
                 'total' => esc_html__("Completed successfully!", 'yespo-cdp'),
                 'username' => isset($organisationName) ? $organisationName : '',
-                'tracker' => $is_tracking
+                'tracker' => $is_tracking,
+                'webpush' => $is_webpush //webpush
             );
         } else if($result === 0){
             $response_data = array(
@@ -686,3 +691,15 @@ function yespo_send_purchased_data_function($order_id) {
     (new Yespo\Integrations\Webtracking\Yespo_Purchased_Event())->send_order_to_yespo($order_id);
 }
 add_action('woocommerce_thankyou', 'yespo_send_purchased_data_function', 10, 1);
+
+
+/**
+ * WEB PUSH
+ **/
+function yespo_add_webpush_codes() {
+    $script = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->get_script_from_options();
+    if($script) {
+        echo $script;
+    }
+}
+add_action('wp_head', 'yespo_add_webpush_codes');

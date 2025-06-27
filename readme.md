@@ -483,7 +483,7 @@ class YespoAdmin {
 Found a bug? Help us fix it by providing detailed information.
 
 #### Before Reporting
-- Check if the issue already exists in [GitHub Issues](https://github.com/yespo/yespo-cdp/issues)
+- Check if the issue already exists in [GitHub Issues](https://github.com/ardas/yespo-cdp/issues)
 - Make sure you're using the latest version
 - Try to reproduce the issue consistently
 - Check WordPress and WooCommerce compatibility
@@ -583,9 +583,9 @@ Each template includes specific sections to help us understand and address your 
 
 ### 📞 Support Channels
 
-- **🐛 Found a bug?** → [Create a Bug Report](https://github.com/yespo/yespo-cdp/issues/new?template=bug_report.md)
-- **💡 Have a feature idea?** → [Submit a Feature Request](https://github.com/yespo/yespo-cdp/issues/new?template=feature_request.md)
-- **❓ Need help?** → [Ask a Question](https://github.com/yespo/yespo-cdp/issues/new?template=question.md)
+- **🐛 Found a bug?** → [Create a Bug Report](https://github.com/ardas/yespo-cdp/issues/new?template=bug_report.md)
+- **💡 Have a feature idea?** → [Submit a Feature Request](https://github.com/ardas/yespo-cdp/issues/new?template=feature_request.md)
+- **❓ Need help?** → [Ask a Question](https://github.com/ardas/yespo-cdp/issues/new?template=question.md)
 - **📚 Check documentation** → [yespo.io/support](https://yespo.io/support)
 - **📧 Direct support** → support@yespo.io
 - **🔒 Security issues** → support@yespo.io

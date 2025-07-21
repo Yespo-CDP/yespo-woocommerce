@@ -53,7 +53,6 @@ class Yespo_Export_Users
     public function start_active_bulk_export_users() {
         $status = $this->get_user_export_status_processed('active');
         $error = Yespo_Errors::get_error_entry();
-        //$this->update_after_activation();
 
         if (
             !empty($status) &&

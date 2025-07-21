@@ -105,6 +105,8 @@ function yespo_check_api_authorization_function(){
                 $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
                 $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
                 if(!$is_webpush) (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); // webpush
+                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->add_tenant_id_to_options(); // tenant
+
                 wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking, 'webpush' => $is_webpush]);
             } else if($result === 401 || $result === 0){
                 wp_send_json_error(['auth' => 'incorrect', 'code' => $result]);
@@ -618,7 +620,7 @@ function yespo_save_webid_to_session() {
 
     $response = [];
 
-    foreach (['webId', 'tenantId', 'orgId'] as $key) {
+    foreach (['webId', 'orgId'] as $key) {
         if (isset($_POST[$key])) {
             $value = trim(sanitize_text_field($_POST[$key]));
 
@@ -637,7 +639,7 @@ function yespo_save_webid_to_session() {
         }
     }
 
-    wp_send_json((isset($_SESSION['webId']) || isset($_SESSION['tenantId'])) ? wp_send_json_success($response) : wp_send_json_error($response));
+    wp_send_json((isset($_SESSION['webId']) || isset($_SESSION['orgId'])) ? wp_send_json_success($response) : wp_send_json_error($response));
 }
 add_action('wp_ajax_save_webid', 'yespo_save_webid_to_session');
 add_action('wp_ajax_nopriv_save_webid', 'yespo_save_webid_to_session');

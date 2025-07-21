@@ -138,11 +138,7 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
     }
 
     public function get_tenantId(){
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        return $_SESSION['tenantId'] ?? null;
+        return (new Yespo_Web_Tracking_Script())->get_tenant_id_from_options();
     }
 
     public function get_webId(){
@@ -161,7 +157,7 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         return $_SESSION['orgId'] ?? null;
     }
 
-    // jsn genertion
+    // json generation
     public function generate_user_info($eventName, $user_data, $webId, $tenantId){
         return array_filter([
             "eventName" => $eventName,

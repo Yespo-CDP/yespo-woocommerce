@@ -2,12 +2,9 @@
 
 namespace Yespo\Integrations\Webtracking;
 
-use WC_Order;
-
 class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 {
     const USER_AUTH_LABEL = 'user_auth_label';
-    const TABLE_ORDERS = 'posts';
 
     public function __construct() {}
 
@@ -111,16 +108,6 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
     private function add_label_to_user($user_id){
         return update_user_meta($user_id, self::USER_AUTH_LABEL, 'true');
     }
-
-    private function get_last_order_id(){
-        global $wpdb;
-        $table_orders = esc_sql($wpdb->prefix . self::TABLE_ORDERS);
-
-        // phpcs:ignore WordPress.DB
-        return $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s ORDER BY ID DESC LIMIT 1", $table_orders, 'shop_order%', 'wc-checkout-draft'));
-    }
-
-
 
     public function generate_user_json($eventName, $user_data){
         return [

@@ -4,8 +4,6 @@ namespace Yespo\Integrations\Esputnik;
 
 use DateTime;
 use Exception;
-use WC_Product;
-use WP_User_Query;
 
 class Yespo_Order_Mapping
 {
@@ -207,10 +205,6 @@ class Yespo_Order_Mapping
         }
     }
 
-    private static function get_user_id($email){
-        return (new \Yespo\Integrations\Esputnik\Yespo_Contact())->get_user_id_by_email($email);
-    }
-
     /* phone */
     private static function get_phone_number($order){
         $phone = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_phone') && !empty($order->get_billing_phone())) ? $order->get_billing_phone() : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_phone') && !empty($order->get_shipping_phone()) ? $order->get_shipping_phone() : '');
@@ -230,55 +224,6 @@ class Yespo_Order_Mapping
         }
 
         return false;
-    }
-
-    /* email */
-    private static function get_email($order){
-        $email = (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_email') && !empty($order->get_billing_email())) ? $order->get_billing_email() : '';
-        if(!empty($email)){
-            $validated_email = self::email_validation(trim(sanitize_email(self::get_user_main_email($email))));
-            if($validated_email) return $validated_email;
-        }
-        return '';
-    }
-
-    private static function email_validation($email){
-        if(preg_match('/\.$/', $email) || strlen($email) > 50) return '';
-        if(!preg_match('/^[a-zA-Z0-9.+_@-]+$/', $email)) return '';
-        $new_array = explode("@", $email);
-        if(count($new_array) > 2) return '';
-        $domen = explode(".", $new_array[1]);
-        if(count($domen) < 2 || strlen(end($domen)) < 2 || in_array('', $domen, true)) return '';
-
-        return $email;
-    }
-
-    private static function get_user_main_email($billing_email){
-        $args = array(
-            // phpcs:ignore WordPress.DB.SlowDBQuery
-            'meta_query' => array(
-                array(
-                    'key' => 'billing_email',
-                    'value' => $billing_email,
-                    'compare' => '='
-                )
-            )
-        );
-
-        $user_query = new WP_User_Query($args);
-        $users = $user_query->get_results();
-
-        $emails = [];
-
-        if (!empty($users)) {
-            foreach ($users as $user) {
-                $emails[] = $user->user_email;
-            }
-        }
-        $new_mail = $billing_email;
-        if (count($emails) > 0 && $new_mail != $emails[0]) $new_mail = $emails[0];
-
-        return $new_mail;
     }
 
     private static function get_time_order_created($order_time_created){

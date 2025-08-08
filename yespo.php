@@ -73,8 +73,6 @@ $yespo_libraries = require YESPO_PLUGIN_ROOT . 'vendor/autoload.php'; //phpcs:ig
 require_once YESPO_PLUGIN_ROOT . 'functions/functions.php';
 require_once YESPO_PLUGIN_ROOT . 'functions/debug.php';
 
-// Add your new plugin on the wiki: https://github.com/WPBP/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate
-
 $requirements = new \Micropackage\Requirements\Requirements(
     'Yespo',
     array(

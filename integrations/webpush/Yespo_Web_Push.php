@@ -8,7 +8,6 @@ class Yespo_Web_Push
 {
     const SERVICE_WORKER_NAME = 'push-yespo-sw.js';
     const YESPO_UPLOADS_DIRECTORY = '/yespo-cdp/';
-    //const SCRIPT_DIRECTORY_PATH = '/wp-content/uploads/yespo-cdp/';
     const METHOD_POST = 'POST';
     const METHOD_GET = 'GET';
     const POST_WEBPUSH_YESPO_URL = 'https://yespo.io/api/v1/site/webpush/domains';
@@ -132,10 +131,6 @@ class Yespo_Web_Push
             ]
         ];
 
-    }
-
-    private function get_site_url(){
-        return wp_parse_url(home_url(), PHP_URL_HOST);
     }
 
     private function get_full_site_url() {

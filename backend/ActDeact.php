@@ -265,7 +265,6 @@ class ActDeact extends Base {
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             user_id varchar(255) NOT NULL,
-            contact_id varchar(255) NOT NULL,
             action varchar(255) NOT NULL,
             yespo INT NULL,
             log_date datetime NOT NULL,
@@ -317,7 +316,6 @@ class ActDeact extends Base {
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             session_id varchar(255) default NULL,
             contact_id varchar(255) NOT NULL,
-            yespo_id varchar(255) default NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
         dbDelta($sqlQueueItems);

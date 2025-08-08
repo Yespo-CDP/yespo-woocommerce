@@ -110,7 +110,6 @@ class YespoExportData {
                 event.preventDefault();
                 document.querySelector('#getWebtrackingScript')?.setAttribute('disabled', 'true');
                 this.getWebtrackingCode();
-                //console.log(form);
             });
         }
     }
@@ -454,10 +453,8 @@ class YespoExportData {
 
         const mainContainer = document.querySelector('.settingsSection');
         if (mainContainer) {
-            //mainContainer.innerHTML = '';
 
             if (mainContainer.firstChild) {
-                //mainContainer.insertBefore(sectionBody, mainContainer.firstChild.nextSibling);
                 mainContainer.appendChild(sectionBody);
             } else {
                 mainContainer.appendChild(sectionBody);
@@ -510,14 +507,6 @@ class YespoExportData {
                 }
             }
         };
-    }
-
-    transformationTotalResponse(response){
-        let result = JSON.parse(response);
-        if(result && result.export){
-            return result.export;
-        }
-        return 0;
     }
 
     getNumberDataExport(){
@@ -659,7 +648,6 @@ class YespoExportData {
         ]).then(() => {
             this.stopExportEventListener();
             this.getNumberDataExport();
-            //this.processExportUsers();
         });
 
     }
@@ -738,11 +726,7 @@ class YespoExportData {
             'yespo_get_process_export_users_data_to_esputnik',
             'yespo_get_process_export_users_data_to_esputnik_nonce',
             this.yespoGetProcessExportUsersDataToEsputnikNonce,
-            'users',
-            '#total-users-export',
-            'yespo_export_user_data_to_esputnik',
-            '#progressContainerUsers',
-            '#exported-users'
+            'users'
         );
     }
 
@@ -751,15 +735,11 @@ class YespoExportData {
             'yespo_get_process_export_orders_data_to_esputnik',
             'yespo_get_process_export_orders_data_to_esputnik_nonce',
             this.yespoGetProcessExportOrdersDataToEsputnikNonce,
-            'orders',
-            '#total-orders-export',
-            'export_orders_data_to_esputnik',
-            '#progressContainerOrders',
-            '#exported-orders'
+            'orders'
         );
     }
 
-    checkExportStatus(action, nonce, nonceValue, way, totalUnits, totalExport, progressUnits, exportedUnits) {
+    checkExportStatus(action, nonce, nonceValue, way) {
         this.getProcessData(action, nonce, nonceValue,(response) => {
             response = JSON.parse(response);
             if (response.exported !== null && response.exported >= 0) {

@@ -2,8 +2,6 @@
 
 namespace Yespo\Integrations\Esputnik;
 
-use WP_Query;
-
 class Yespo_Export_Orders
 {
     private $period_selection = 300;
@@ -30,7 +28,6 @@ class Yespo_Export_Orders
         global $wpdb;
         $this->meta_key = (new Yespo_Order())->get_meta_key();
         $this->wpdb = $wpdb;
-        //$this->table_posts = $this->wpdb->prefix . 'wc_orders';
         $this->table_posts = $this->wpdb->prefix . 'posts';
         $this->table_name = $this->wpdb->prefix . 'yespo_export_status_log';
         $this->table_yespo_queue_orders = $this->wpdb->prefix . 'yespo_queue_orders';
@@ -60,38 +57,6 @@ class Yespo_Export_Orders
             }
         }
         else return false;
-    }
-
-    public function start_export_orders() {
-        $status = $this->get_order_export_status_processed('active');
-        if(!empty($status) && $status->status == 'active'){
-            $total = intval($status->total);
-            $exported = intval($status->exported);
-            $current_status = $status->status;
-            $live_exported = 0;
-
-            if($total - $exported < $this->number_for_export) $this->number_for_export = $total - $exported;
-
-            for($i = 0; $i < $this->number_for_export; $i++){
-
-                $result = $this->export_orders_to_esputnik();
-                if($result){
-                    $live_exported += 1;
-                }
-            }
-
-            if(($total <= $exported + $live_exported) || $this->get_export_orders_count() < 1){
-                $current_status = 'completed';
-                $exported = $total;
-            } else $exported += $live_exported;
-
-            $this->update_table_data($status->id, $exported, $current_status);
-        } else {
-            $status = $this->get_order_export_status();
-            if(!empty($status) && $status->status === 'completed' && $status->code === null){
-                $this->update_table_data($status->id, intval($status->total), $status->status);
-            }
-        }
     }
 
     public function schedule_export_orders(){
@@ -223,20 +188,6 @@ class Yespo_Export_Orders
                     }
                 }
             }
-        }
-    }
-
-    public function get_final_orders_exported(){
-        $status = $this->get_order_export_status();
-        return $this->update_table_data($status->id, intval($status->total), $status->status, '200');
-    }
-
-    public function export_orders_to_esputnik(){
-        $orders = $this->get_orders_export_esputnik();
-        if(count($orders) > 0 && isset($orders[0])){
-            return (new Yespo_Order())->create_order_on_yespo(
-                wc_get_order($orders[0])
-            );
         }
     }
 
@@ -402,17 +353,6 @@ class Yespo_Export_Orders
         return $wpdb->get_var($wpdb->prepare("SELECT COUNT(ID) FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND post_date_gmt < %s AND ID > %d", $table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key, $period_start, $id_more_then));
     }
 
-    public function get_orders_export_esputnik(){
-        $orders = $this->get_orders_from_database_without_metakey();
-        $order_ids = [];
-        if($orders && count($orders) > 0){
-            foreach ($orders as $order) {
-                $order_ids[] = $order->id;
-            }
-        }
-        return $order_ids;
-    }
-
     /**
      * entry to yespo queue orders
      **/
@@ -538,23 +478,6 @@ class Yespo_Export_Orders
 
         // phpcs:ignore WordPress.DB
         return $wpdb->get_results($wpdb->prepare("SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true' ) AND post_date_gmt >= %s AND post_date_gmt <= %s AND ID > %d ORDER BY ID ASC LIMIT %d",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key, $last_exported, $period_start, $id_more_then, $number_for_export),OBJECT);
-    }
-
-    private function get_orders_from_database_without_metakey(){
-        global $wpdb;
-        $table_posts = esc_sql($this->table_posts);
-        $prefix = esc_sql($this->wpdb->prefix);
-        $prefix_postmeta_table = esc_sql($prefix . 'postmeta');
-
-        // phpcs:ignore WordPress.DB
-        return $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",
-                $table_posts,
-                'shop_order%',
-                'wc-checkout-draft',
-                0,
-                $this->meta_key
-            )
-        );
     }
 
     private function get_orders_from_db($time){
@@ -693,23 +616,5 @@ class Yespo_Export_Orders
         );
     }
 
-    public function yespo_export_data_log($property, $value, $last = false) {
-        $upload_dir = wp_upload_dir();
-        if (empty($upload_dir['basedir'])) {
-            return;
-        }
-    
-        $log_file = trailingslashit($upload_dir['basedir']) . 'yespo_log.txt';
-    
-        if (!is_writable($upload_dir['basedir'])) {
-            return;
-        }
-    
-        $log_entry = "{$property}: {$value}" . PHP_EOL;
-        if ($last) $log_entry .= '========================' . PHP_EOL . PHP_EOL;
-    
-        file_put_contents($log_file, $log_entry, FILE_APPEND | LOCK_EX);
-    }
-    
 
 }

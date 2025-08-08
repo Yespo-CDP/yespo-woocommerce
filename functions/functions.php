@@ -106,6 +106,7 @@ function yespo_check_api_authorization_function(){
                 $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
                 if(!$is_webpush) (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); // webpush
                 (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->add_tenant_id_to_options(); // tenant
+                (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->remove_contact_log_column(); //update tables
 
                 wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking, 'webpush' => $is_webpush]);
             } else if($result === 401 || $result === 0){
@@ -369,7 +370,6 @@ function yespo_clean_user_data_after_data_erased_function( $erased ){
             if($user && $user->ID){
                 (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->create(
                     $user->ID,
-                    (new \Yespo\Integrations\Esputnik\Yespo_Contact())->get_user_metafield_id($user->ID),
                     'delete');
             }
 
@@ -705,3 +705,19 @@ function yespo_add_webpush_codes() {
     }
 }
 add_action('wp_head', 'yespo_add_webpush_codes');
+
+
+
+/**
+ * Events after plugin update
+ **/
+function yespo_cdp_plugin_updated($upgrader_object, $options) {
+    if ($options['action'] === 'update' && $options['type'] === 'plugin') {
+        $target_plugin = 'yespo-cdp/yespo.php';
+
+        if (!empty($options['plugins']) && in_array($target_plugin, $options['plugins'])) {
+            (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->remove_contact_log_column();
+        }
+    }
+}
+add_action('upgrader_process_complete', 'yespo_cdp_plugin_updated', 10, 2);

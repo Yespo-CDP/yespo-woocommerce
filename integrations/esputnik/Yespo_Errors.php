@@ -89,16 +89,6 @@ class Yespo_Errors
 
     }
 
-    public static function unblock_bulk_error(){
-        $exportOrders = new Yespo_Export_Orders();
-        $status = $exportOrders->get_order_export_status_processed('error');
-        if(!empty($status) && $status->status == 'error'){
-            $exportOrders->update_table_data($status->id, intval($status->exported), 'active', 200);
-            return $status;
-        }
-    }
-
-
     public static function add_label_to_users($users, $meta_key) {
         global $wpdb;
 

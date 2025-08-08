@@ -219,10 +219,6 @@ class Yespo_Export_Users
             )
         );
     }
-    public function get_users_object($args){
-        return get_users($args);
-    }
-
 
     public function get_bulk_users_object(){
         global $wpdb;
@@ -299,6 +295,22 @@ class Yespo_Export_Users
     /**
      * entry to yespo queue items
      **/
+
+    public function add_entry_queue_items($user_id){
+        global $wpdb;
+        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
+        $contact_id = sanitize_text_field($user_id);
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO %i (session_id, contact_id) VALUES (%s, %s)",
+                $table_yespo_queue_items, '', $contact_id
+            )
+        );
+    }
+
+/*
     public function add_entry_queue_items($user_id){
         global $wpdb;
         $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
@@ -312,7 +324,24 @@ class Yespo_Export_Users
             )
         );
     }
+*/
+    public function check_queue_items_for_session($session_id) {
+        global $wpdb;
+        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) 
+             FROM %i
+             WHERE session_id = %s",
+                $table_yespo_queue_items,
+                $session_id
+            )
+        );
+        return $count == 0;
+    }
+/*
     public function check_queue_items_for_session($session_id) {
         global $wpdb;
         $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
@@ -330,7 +359,7 @@ class Yespo_Export_Users
         );
         return $count == 0;
     }
-
+*/
     private function update_table_data($id, $exported, $status, $code = null){
         global $wpdb;
         $table_name = esc_sql($this->table_name);

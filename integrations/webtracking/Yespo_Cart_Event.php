@@ -14,7 +14,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
 
     // SEND DATA TO YESPO
     public function add_to_cart_event() {
-        $json = $this->generate_json($this->get_data());
+        $json = $this->generate_json();
         $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
 
         (new Yespo_Logger())->write_to_file('StatusCart', $json, $response);
@@ -23,7 +23,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     }
 
     public function after_cart_item_quantity_update() {
-        $json = $this->generate_json($this->get_data());
+        $json = $this->generate_json();
         $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
 
         (new Yespo_Logger())->write_to_file('StatusCart', $json, $response);
@@ -32,7 +32,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     }
 
     public function cart_item_removed() {
-        $json = $this->generate_json($this->get_data());
+        $json = $this->generate_json();
         $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
 
         (new Yespo_Logger())->write_to_file('StatusCart', $json, $response);

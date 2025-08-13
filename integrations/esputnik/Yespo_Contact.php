@@ -5,8 +5,6 @@ namespace Yespo\Integrations\Esputnik;
 
 class Yespo_Contact
 {
-    const CUSTOMER = 'customer';
-    const SUBSCRIBER = 'subscriber';
     private $period_selection_since = 7200;
     private $period_selection_up = 600;
     private $period_selection = 300;
@@ -33,30 +31,13 @@ class Yespo_Contact
     }
 
     public function update_on_yespo($user){
-        if ($this->check_user_role($user)) {
-            return $this->process_on_yespo(Yespo_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
-        }
+        return $this->process_on_yespo(Yespo_Contact_Mapping::woo_to_yes($user), 'update', $user->ID);
     }
 
     public function update_woo_profile_yespo($request, $user){
-        if ($this->check_user_role($user)) {
-            return $this->process_on_yespo(Yespo_Contact_Mapping::update_woo_to_yes($request, $user->ID), 'update', $user->ID);
-        }
+        return $this->process_on_yespo(Yespo_Contact_Mapping::update_woo_to_yes($request, $user->ID), 'update', $user->ID);
     }
 
-    /*
-    public function get_yespo_user_id($id){
-        $url = "https://yespo.io/api/v1/contacts?externalCustomerId=" . $id ."&startindex=1&maxrows=500";
-        $result = $this->process_on_yespo($url, 'add_meta_key');
-        if($result){
-            $response = json_decode($result);
-            if($response[0]->id) {
-                update_user_meta($id, self::USER_META_KEY, $response[0]->id);
-                return $response[0]->id;
-            }
-        }
-    }
-*/
     //method export bulk
     public function export_bulk_users($data){
         if(!empty($data)){
@@ -81,7 +62,7 @@ class Yespo_Contact
     }
 
     public function remove_user_phone_on_yespo($email){
-        if ($this->check_user_role( get_user_by('email', $email) ) || !email_exists($email)) {
+        if (is_email($email)) {
             return $this->process_on_yespo(Yespo_Contact_Mapping::clean_user_phone_data($email), 'clean');
         }
     }
@@ -148,32 +129,6 @@ class Yespo_Contact
     public function get_meta_key(){
         return self::USER_META_KEY;
     }
-
-    public function get_user_id_by_email($email){
-        if ($user = get_user_by('email', $email)) {
-            return $user->ID;
-        }
-        return false;
-    }
-
-    public function check_user_role($user){
-        if (isset($user->roles) &&
-            is_array($user->roles) &&
-            !empty($user->roles) &&
-            in_array($user->roles[0], $this->get_user_type_allowed())
-        ) return true;
-    }
-
-    private function get_user_type_allowed(){
-        return [
-            self::CUSTOMER
-        ];
-    }
-
-    public function get_user_metafield_id($user_id){
-        return get_user_meta($user_id, self::USER_META_KEY, true);
-    }
-
 
     public function add_esputnik_id_to_userprofile($user_id, $external_id){
         if (empty(get_user_meta($user_id, self::USER_META_KEY, true))) update_user_meta($user_id, self::USER_META_KEY, $external_id);

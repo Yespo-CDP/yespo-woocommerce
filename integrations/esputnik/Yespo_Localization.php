@@ -22,7 +22,6 @@ class Yespo_Localization
             'resumeButton' => esc_html__( 'Resume', 'yespo-cdp' ),
             'contactSupportButton' => esc_html__( 'Contact Support', 'yespo-cdp' ),
             'ajaxUrl' => esc_url( admin_url( 'admin-ajax.php' ) ),
-            //'nonceApiKeyForm' => wp_create_nonce( 'yespo_api_key_nonce' ),
             'nonceApiKeyForm' => wp_nonce_field('yespo_plugin_settings_save', 'yespo_plugin_settings_nonce', true, false),
             'apiKeyValue' => isset( $yespo_api_key ) ? esc_js( $yespo_api_key ) : '',
             'apiKeyText' => esc_html__( 'The API key to connect the account can be received by the', 'yespo-cdp' ),

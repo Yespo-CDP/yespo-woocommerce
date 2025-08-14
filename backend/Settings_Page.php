@@ -71,37 +71,6 @@ class Settings_Page extends Base {
             90
         );
 
-/*
-        add_submenu_page(
-            YESPO_TEXTDOMAIN,
-            __('Settings', YESPO_TEXTDOMAIN),
-            __('Settings', YESPO_TEXTDOMAIN),
-            'manage_options',
-            'yespo_settings',
-            array($this, 'display_plugin_settings_page')
-        );
-*/
-        /*
-        add_filter('parent_file', function($parent_file) {
-            global $submenu_file;
-            global $current_screen;
-
-            if ($current_screen->base === 'toplevel_page_' . YESPO_TEXTDOMAIN) {
-                $submenu_file = 'yespo_settings';
-            }
-
-            return $parent_file;
-        });
-        */
-/*
-        add_action('admin_menu', function() {
-            global $submenu;
-
-            if (isset($submenu[YESPO_TEXTDOMAIN])) {
-                unset($submenu[YESPO_TEXTDOMAIN][0]);
-            }
-        }, 999);
-*/
     }
 
     /**
@@ -111,7 +80,6 @@ class Settings_Page extends Base {
      * @return void
      */
     public function display_plugin_admin_page() {
-        //include_once YESPO_PLUGIN_ROOT . 'backend/views/admin.php';
         include_once YESPO_PLUGIN_ROOT . 'backend/views/settings.php';
     }
 
@@ -129,7 +97,6 @@ class Settings_Page extends Base {
     public function add_action_links( array $links ) {
         return \array_merge(
             array(
-                //'settings' => '<a href="' . \admin_url( 'admin.php?page=' . YESPO_TEXTDOMAIN . '_settings' ) . '">' . \__( 'Settings', YESPO_TEXTDOMAIN ) . '</a>',
                 'settings' => '<a href="' . \admin_url( 'admin.php?page=' . 'yespo-cdp' ) . '">' . \__( 'Settings', 'yespo-cdp' ) . '</a>',
             ),
             $links

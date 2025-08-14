@@ -2,12 +2,9 @@
 
 namespace Yespo\Integrations\Webtracking;
 
-use WC_Order;
-
 class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 {
     const USER_AUTH_LABEL = 'user_auth_label';
-    const TABLE_ORDERS = 'posts';
 
     public function __construct() {}
 
@@ -112,16 +109,6 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         return update_user_meta($user_id, self::USER_AUTH_LABEL, 'true');
     }
 
-    private function get_last_order_id(){
-        global $wpdb;
-        $table_orders = esc_sql($wpdb->prefix . self::TABLE_ORDERS);
-
-        // phpcs:ignore WordPress.DB
-        return $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM %i WHERE post_type LIKE %s AND post_status != %s ORDER BY ID DESC LIMIT 1", $table_orders, 'shop_order%', 'wc-checkout-draft'));
-    }
-
-
-
     public function generate_user_json($eventName, $user_data){
         return [
             "GeneralInfo" => $this->generate_user_array($eventName, $user_data)
@@ -138,11 +125,7 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
     }
 
     public function get_tenantId(){
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        return $_SESSION['tenantId'] ?? null;
+        return (new Yespo_Web_Tracking_Script())->get_tenant_id_from_options();
     }
 
     public function get_webId(){
@@ -161,7 +144,7 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         return $_SESSION['orgId'] ?? null;
     }
 
-    // jsn genertion
+    // json generation
     public function generate_user_info($eventName, $user_data, $webId, $tenantId){
         return array_filter([
             "eventName" => $eventName,

@@ -8,8 +8,7 @@ class YespoTracker
         if (trackingData.category) this.category = trackingData.category;
         if (trackingData.product) this.product = trackingData.product;
         if (trackingData.cart) this.cart = trackingData.cart;
-        //if (trackingData.thankYou) this.thankYou = trackingData.thankYou;
-        //if (trackingData.customerData) this.customerData = trackingData.customerData;
+
         if (trackingData.front) this.front = trackingData.front;
         if (trackingData.notFound) this.notFound = trackingData.notFound;
         if (trackingData.tenantWebId) this.tenantWebIdNonce = trackingData.tenantWebId;
@@ -18,20 +17,14 @@ class YespoTracker
     }
 
     start(){
-        //if(this.thankYou && this.action === null) this.thankYouPage(this.thankYou);
+
         if(this.category && this.action === null) this.sendCategory(this.category);
         if(this.product && this.action === null) this.sendProduct(this.product);
         if(this.cart && this.action === null) this.sendCart(this.cart);
-        //if(this.customerData && this.action === null) this.userData(this.customerData);
-        //if(this.action === 'cart' || this.action === 'cart_empty') this.getCartData();
-        //if(this.action === 'cart') this.getCartData('cart');
-        //if(this.action === 'cart_empty') this.getCartData('cart_empty');
-        //if(this.action === 'cart_batch') this.getCartData('cart_batch');
+
         if(this.front && this.action === null) this.sendFront(this.front);
         if(this.notFound && this.action === null) this.sendNotFound(this.notFound);
-        //impression start
-        //this.startObserver('.type-product');
-        //this.checkWebIdOnLoad();
+
         this.actionTenantIdWebId();
     }
 
@@ -218,14 +211,10 @@ class YespoTracker
     }
 
     //send wedId to backend
-    checkWebIdOnLoad(webId, tenantId, orgId) {
+    checkWebIdOnLoad(webId, orgId) {
 
         if (!webId || typeof webId !== "string" || webId.trim() === "") {
             console.warn("webId is empty or invalid.");
-        }
-
-        if (!tenantId  || typeof tenantId !== "string" || tenantId .trim() === "") {
-            console.warn("tenantId is empty or invalid.");
         }
 
         if (!orgId) {
@@ -238,7 +227,6 @@ class YespoTracker
             body: new URLSearchParams({
                 action: 'save_webid',
                 webId: webId,
-                tenantId: tenantId,
                 orgId: orgId,
                 yespo_tenant_webid_nonce_name: this.tenantWebIdNonce
             })
@@ -258,7 +246,6 @@ class YespoTracker
         const observer = new MutationObserver(() => {
             if (window._esConfig) {
                 observer.disconnect();
-                const tenantId = window._esConfig?.tenantId || "";
                 const orgId = window._esConfig?.orgId || "";
                 let webId = "";
 
@@ -276,7 +263,7 @@ class YespoTracker
                     console.error("Failed to parse document.cookie:", error);
                 }
 
-                this.checkWebIdOnLoad(webId, tenantId, orgId);
+                this.checkWebIdOnLoad(webId, orgId);
             }
         });
 

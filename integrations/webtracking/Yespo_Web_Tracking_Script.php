@@ -25,15 +25,23 @@ class Yespo_Web_Tracking_Script
         if($this->is_script_in_options()) {
             return json_decode( $this->options['yespo_tracking_script'] );
         }
-        //else $this->make_tracking_script();
+
+    }
+
+    public function get_tenant_id_from_options(){
+        if($this->is_tenant_in_options()) {
+            return $this->options['yespo_tenant_id'];
+        }
+
     }
 
     public function make_tracking_script(){
         if(!$this->get_label_domain_from_options()) {
             $this->add_label_domain_options('true');
-            if ($this->send_domain_to_yespo()) {
-                $this->add_script_to_options();
-            }
+
+            $this->add_script_to_options();
+            $this->add_tenant_id_to_options();
+
         }
     }
 
@@ -70,8 +78,41 @@ class Yespo_Web_Tracking_Script
         }
     }
 
+    public function add_tenant_id_to_options(){
+        if (!$this->is_tenant_in_options()) {
+            $response = $this->send_domain_to_yespo();
+
+            if (!empty($response)) {
+                $data = json_decode($response, true);
+
+                if (json_last_error() === JSON_ERROR_NONE && is_array($data) && !empty($data['siteId'])) {
+                    $tenantId = $data['siteId'];
+
+                    (new Yespo_Logger())->write_to_file('Response post curl', $tenantId, 'got tenantId');
+
+                    $this->options['yespo_tenant_id'] = $tenantId;
+                    update_option('yespo_options', $this->options);
+                } else {
+                    $error_msg = json_last_error() !== JSON_ERROR_NONE
+                        ? 'JSON decode error: ' . json_last_error_msg()
+                        : 'Missing or invalid siteId';
+                    (new Yespo_Logger())->write_to_file('Response post curl', $error_msg, 'error');
+                }
+            } else {
+                (new Yespo_Logger())->write_to_file('Response post curl', 'Empty response from send_domain_to_yespo', 'error');
+            }
+
+        }
+
+    }
+
     public function is_script_in_options(){
         if (isset($this->options['yespo_tracking_script'])) return true;
+        return false;
+    }
+
+    public function is_tenant_in_options(){
+        if (isset($this->options['yespo_tenant_id'])) return true;
         return false;
     }
 
@@ -98,52 +139,55 @@ class Yespo_Web_Tracking_Script
     ){
         try {
 
-            $headers = [
-                'Accept'        => 'application/json; charset=UTF-8',
-                'Authorization' => 'Basic ' . base64_encode(':' . $auth_data['yespo_api_key']),
-                'Content-Type'  => 'application/json',
-            ];
+            if (!empty($auth_data['yespo_api_key'])) {
 
-            if ($custom_request === 'GET') {
                 $headers = [
-                    'Accept'        => 'text/plain',
+                    'Accept' => 'application/json; charset=UTF-8',
                     'Authorization' => 'Basic ' . base64_encode(':' . $auth_data['yespo_api_key']),
+                    'Content-Type' => 'application/json',
                 ];
-            }
 
-            $args = [
-                'method'  => $custom_request,
-                'timeout' => 30,
-                'headers' => $headers,
-                'body'    => !empty($data) ? wp_json_encode($data) : '',
-            ];
-
-            $response = wp_remote_request($url, $args);
-
-            if (is_wp_error($response)) {
-                return 'Error: ' . $response->get_error_message();
-            }
-
-            $http_code = wp_remote_retrieve_response_code($response);
-            $response_body = wp_remote_retrieve_body($response);
-
-            if ($custom_request === 'POST') {
-                if (($http_code === 200) || ($http_code === 201) || ($http_code === 400 && $response_body === "Domain already exists")) {
-                    return true;
+                if ($custom_request === 'GET') {
+                    $headers = [
+                        'Accept' => 'text/plain',
+                        'Authorization' => 'Basic ' . base64_encode(':' . $auth_data['yespo_api_key']),
+                    ];
                 }
 
-                return false;
-            }
+                $args = [
+                    'method' => $custom_request,
+                    'timeout' => 30,
+                    'headers' => $headers,
+                    'body' => !empty($data) ? wp_json_encode($data) : '',
+                ];
 
-            if ($custom_request === 'GET') {
-                if ($http_code === 200) {
-                    return wp_json_encode($response_body);
+                $response = wp_remote_request($url, $args);
+
+                if (is_wp_error($response)) {
+                    return 'Error: ' . $response->get_error_message();
                 }
 
-                return false;
-            }
+                $http_code = wp_remote_retrieve_response_code($response);
+                $response_body = wp_remote_retrieve_body($response);
 
-            return $response_body;
+                if ($custom_request === 'POST') {
+                    if (($http_code === 200) || ($http_code === 201) || ($http_code === 400 && $response_body === "Domain already exists")) {
+                        return $response_body;
+                    }
+
+                    return false;
+                }
+
+                if ($custom_request === 'GET') {
+                    if ($http_code === 200) {
+                        return wp_json_encode($response_body);
+                    }
+
+                    return false;
+                }
+
+                return $response_body;
+            }
 
         } catch (Exception $e) {
             return 'Error: ' . $e->getMessage();

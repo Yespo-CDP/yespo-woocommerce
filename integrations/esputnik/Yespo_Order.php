@@ -55,9 +55,7 @@ class Yespo_Order
             return __( 'Empty user authorization data', 'yespo-cdp' );
         }
 
-        //(new Yespo_Export_Orders())->add_json_log_entry($orders);// add log entry to DB
-
-        if($orders['orders'] > 0) {
+        if (isset($orders['orders']) && $orders['orders'] > 0){
             $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders, 'orders');
 
             (new Yespo_Export_Orders())->add_entry_queue_items();
@@ -91,7 +89,6 @@ class Yespo_Order
             } else if($response === 401){
                 (new Yespo_Export_Orders())->error_export_orders('401');
             } else if($response === 0 || strpos($response, 'Connection refused') !== false){
-                //(new Yespo_Export_Orders())->error_export_orders('555');
                 return ['error'=> 0];
             } else if($response == 429 || $response == 500){
                 return ['error'=> $response];
@@ -124,20 +121,6 @@ class Yespo_Order
         return false;
     }
 
-    private function find_orders_by_user_email($email){
-        $customer_orders = wc_get_orders( array(
-            'limit'    => -1,
-            'orderby'  => 'date',
-            'order'    => 'DESC',
-            'customer' => sanitize_email($email),
-        ) );
-        $orders = [];
-        foreach( $customer_orders as $order ) {
-            $orders[] = $order->get_id();
-        }
-        return array_unique($orders);
-    }
-
     public function get_meta_key(){
         return self::ORDER_META_KEY;
     }
@@ -155,56 +138,6 @@ class Yespo_Order
                 $order->save();
             }
         }
-    }
-
-    public function add_label_deleted_customer($email){
-        if(!empty($email)) {
-            $orders = $this->get_orders_by_email($email);
-
-            if ($orders) {
-                foreach ($orders as $order) {
-                    $order->update_meta_data('yespo_customer_removed', 'deleted');
-                    $order->save();
-                }
-            }
-        }
-    }
-
-    public function get_orders_by_email($email){
-        $query = new WP_Query($this->args_get_orders_by_email($email));
-
-        if ($query->have_posts()) {
-            $orders = array();
-            while ($query->have_posts()) {
-                $query->the_post();
-                $order_id = get_the_ID();
-                $orders[] = wc_get_order($order_id);
-            }
-            wp_reset_postdata();
-            return $orders;
-        } else {
-            return null;
-        }
-    }
-    private function args_get_orders_by_email($email){
-        $post_types = ['shop_order', 'shop_order_placehold'];
-
-        $existing_post_types = array_filter($post_types, function($type) {
-            return post_type_exists($type);
-        });
-
-        return [
-            'post_type' => $existing_post_types,
-            'post_status' => 'any',
-            // phpcs:ignore WordPress.DB.SlowDBQuery
-            'meta_query' => array(
-                array(
-                    'key' => '_billing_email',
-                    'value' => $email,
-                    'compare' => '='
-                )
-            )
-        ];
     }
 
     private function add_log_order_entry($order_logs, $operation, $response, $time){

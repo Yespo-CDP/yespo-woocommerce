@@ -7,8 +7,6 @@ class Yespo_Web_Tracking_Aggregator
     private $category;
     private $product;
     private $cart;
-    private $purchase;
-    private $user;
     private $front;
     private $notFound;
 
@@ -16,8 +14,6 @@ class Yespo_Web_Tracking_Aggregator
         $this->category = new Yespo_Category_Event();
         $this->product = new Yespo_Product_Event();
         $this->cart = new Yespo_Cart_Event();
-        $this->purchase = new Yespo_Purchased_Event();
-        $this->user = new Yespo_User_Event();
         $this->front = new Yespo_Front_Event();
         $this->notFound = new Yespo_NotFound_Event();
     }
@@ -26,8 +22,6 @@ class Yespo_Web_Tracking_Aggregator
 
         $category = $this->category->get_data();
         $product = $this->product->get_data();
-        $purchase = $this->purchase->get_data();
-        $user = $this->user->get_data();
         $front = $this->front->get_data();
         $notFound = $this->notFound->get_data();
         $cart = $this->cart->get_cart_page();
@@ -35,8 +29,6 @@ class Yespo_Web_Tracking_Aggregator
         $tracking_data = $this->get_localization_map(
             $category,
             $product,
-            $purchase,
-            $user,
             $front,
             $notFound,
             $cart
@@ -51,8 +43,6 @@ class Yespo_Web_Tracking_Aggregator
     private function get_localization_map(
         $category,
         $product,
-        $purchase,
-        $user,
         $front,
         $notFound,
         $cart
@@ -76,18 +66,7 @@ class Yespo_Web_Tracking_Aggregator
                 'stock' => isset($product['stock']) ? esc_js($product['stock']) : '',
             );
         }
-/*
-        if (!is_null($purchase)) {
-            $tracking_data['thankYou'] = $purchase;
-            if(!is_null($user) && empty($user['externalCustomerId'])){
-                $tracking_data['customerData'] = $user;
-            }
-        }
 
-        if (!is_null($user) && !empty($user['externalCustomerId'])) {
-            $tracking_data['customerData'] = $user;
-        }
-*/
         if (!is_null($front)) {
             $tracking_data['front'] = array(
                 'frontKey' => isset($front['frontKey']) ? esc_js($front['frontKey']) : '',

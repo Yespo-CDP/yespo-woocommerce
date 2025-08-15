@@ -53,7 +53,9 @@ Logs user-related actions (creation, updates, deletion).
 CREATE TABLE {prefix}yespo_contact_log (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
+    contact_id VARCHAR(255),
     action VARCHAR(50),
+    yespo VARCHAR(255),
     log_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -230,21 +232,39 @@ After receiving a positive response (code 200), the plugin initializes data expo
 
 ### Progress Bar Functionality
 
-The progress bar shows overall export progress for both contacts and orders, updating in real-time.
+The progress bar shows overall export progress for both contacts and orders, updating in real-time based on the number of exported entities.
 
 #### User Export Initiation:
 - If user count > 0, `route` method initiates export task creation
 - `startExportUsers()` sends POST request
-- `add_users_export_task()` (`Yespo_Export_Users`) creates record in `yespo_export_status_log`
+- `add_users_export_task()` (`Yespo_Export_Users`) creates record in `yespo_export_status_log` with:
+  - User count for export
+  - Number of exported users
+  - Status: 'active'
+  - Export type: 'users'
 
 #### Progress Updates:
-- `checkExportStatus()` (`YespoExportData`) polls every 5 seconds
-- `get_process_users_exported()` (`Yespo_Export_Users`) retrieves current data
-- `updateProgress()` (`YespoExportData`) updates progress bar
+- `checkExportStatus()` (`YespoExportData`) polls backend every 5 seconds for current data
+- `get_process_users_exported()` (`Yespo_Export_Users`) retrieves actual data from `yespo_export_status_log`
+- Data is returned to frontend and passed to `updateProgress()` (`YespoExportData`) which updates the progress bar
 
 #### Export Control:
-- **Stop**: `stopExportData()` → `stop_export_users()` → status = 'stopped'
-- **Resume**: `resumeExportData()` → `resume_export_users()` → status = 'active'
+- **Stop**: `stopExportData()` → `stop_export_users()` → changes status to 'stopped' in `yespo_export_status_log`
+- **Resume**: `resumeExportData()` → `resume_export_users()` → changes status to 'active' in `yespo_export_status_log`
+
+#### Order Export Process:
+- If users are exported or absent for export, and orders are available: `startExportOrders()` sends POST request
+- `add_orders_export_task()` (`Yespo_Export_Orders`) creates record in `yespo_export_status_log` with:
+  - Order count for export
+  - Number of exported orders  
+  - Status: 'active'
+  - Export type: 'orders'
+- `processExportOrders()` activates `checkExportStatus()` every 5 seconds
+- If all orders exported: `startExportUsers()` checks for remaining contacts
+
+#### Export Completion:
+- If export completed or no data to export: `addSuccessMessage()` (`YespoExportData`) displays completion message
+- Error handling: `showErrorPage()` shows messages for 401 errors or blocked activity
 
 ### Current Data Export
 
@@ -405,6 +425,15 @@ If user reinstalls the plugin, all configuration starts fresh without data dupli
 | `woocommerce_add_to_cart` | After item added to cart | StatusCart event |
 | `woocommerce_after_cart_item_quantity_update` | After cart quantity update | StatusCart event |
 | `woocommerce_cart_item_removed` | After item removed from cart | StatusCart event |
+| `woocommerce_update_order` | After order update | Order status change tracking |
+
+### WordPress Tables Used
+
+| Table | Description | Usage |
+|-------|-------------|--------|
+| `wp_posts` | Main content table storing all post types | Retrieve order data for export to Yespo |
+| `wp_users` | Stores all registered users data | Retrieve user data for export to Yespo |
+| `wp_options` | Stores global site settings, plugins, themes configuration | Store API key, web tracking and web push scripts |
 
 ### WordPress Functions Used
 
@@ -417,13 +446,19 @@ If user reinstalls the plugin, all configuration starts fresh without data dupli
 | `esc_url` | Escape URLs | URL escaping |
 | `esc_sql` | Escape for SQL | SQL injection prevention |
 | `wp_create_nonce` | Create CSRF tokens | Form protection |
+| `wp_nonce_field` | Output nonce field in forms | Form CSRF protection display |
 | `wp_enqueue_script` | Enqueue JavaScript | Plugin script inclusion |
 | `wp_send_json` | Send JSON responses | AJAX response handling |
+| `wp_send_json_success` | Send successful JSON response | Successful backend responses |
+| `wp_send_json_error` | Send error JSON response | Error backend responses |
+| `wp_kses_post` | Clean HTML content | Safe message passing to frontend |
 | `get_option` | Get option values | Retrieve stored settings |
 | `update_option` | Update option values | Store settings |
 | `sanitize_text_field` | Sanitize text | Input cleaning |
 | `update_user_meta` | Update user metadata | User marking |
 | `get_user_by` | Get user object | User retrieval |
+| `wp_upload_dir` | Get upload directory info | Web push file and tracking log interaction |
+| `wp_parse_url` | Parse URLs safely | Web push file and tracking log interaction |
 | `wp_json_encode` | Encode to JSON | Data transformation for Yespo |
 
 ### Global Objects Used
@@ -579,9 +614,9 @@ yespo-cdp/
 
 | Path | Description |
 |------|-------------|
-| `/wp-content/plugins` | Plugin installation directory |
-| `/wp-content/uploads` | Web push file and tracking logs storage |
-| `admin-ajax.php` | AJAX request handling |
+| `/wp-content/plugins` | Plugin installation directory where plugin files are stored |
+| `/wp-content/uploads` | Web push file and tracking logs storage directory |
+| `admin-ajax.php` | WordPress AJAX handler for frontend and backend communication |
 
 ---
 

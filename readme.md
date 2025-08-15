@@ -19,15 +19,13 @@ A WordPress plugin that integrates WooCommerce with the Yespo Customer Data Plat
 
 - [🚀 Quick Start for Developers](#-quick-start-for-developers)
 - [🏗️ Architecture & Development](#%EF%B8%8F-architecture--development)
-  - [Database Schema](#database-schema)
-  - [Cron Jobs](#cron-jobs)
-  - [AJAX Endpoints](#ajax-endpoints)
-  - [Core Components](#core-components)
 - [🤝 Contributing](#-contributing)
 - [📦 Installation](#-installation)
 - [✨ Features Overview](#-features-overview)
 - [📝 Changelog](#-changelog)
 - [🆘 Support](#-support)
+
+> 📋 **Need detailed technical docs?** See [DEVELOPMENT.md](DEVELOPMENT.md) for comprehensive database schema, API flows, hooks reference, and implementation details.
 
 ## Overview
 
@@ -87,123 +85,31 @@ wp plugin status yespo-cdp
 
 ## 🏗️ Architecture & Development
 
-### Project Structure
+### Quick Overview
 
-```
-yespo-cdp/
-├── ajax/               # AJAX handlers
-├── assets/             # Frontend assets (CSS, JS, images)
-├── backend/            # Admin panel functionality
-│   ├── views/          # Admin templates
-│   └── ActDeact.php    # Activation/deactivation hooks
-├── engine/             # Core plugin engine
-├── frontend/           # Frontend functionality
-├── functions/          # WordPress hooks and functions
-├── integrations/       # External service integrations
-│   ├── esputnik/       # Yespo API integration
-│   └── webtracking/    # Web tracking functionality
-├── internals/          # Internal plugin components
-├── languages/          # Translation files
-├── rest/               # REST API endpoints
-└── templates/          # Frontend templates
-```
+The plugin consists of:
+- **Backend**: Admin interface, data export, API integration
+- **Frontend**: Web tracking, event collection, user interface
+- **Database**: 10 custom tables for logging and queue management
+- **Cron Jobs**: Automated data synchronization and cleanup
+- **AJAX Endpoints**: Real-time communication between frontend and backend
 
-### Database Schema
+### Key Technical Details
 
-The plugin creates the following tables on activation (all prefixed with your WordPress table prefix):
-
-- **`yespo_contact_log`**: Tracks user-related actions (contact create/update/delete)
-  - Fields: `id`, `user_id`, `contact_id`, `action`, `yespo`, `log_date`
-- **`yespo_order_log`**: Tracks exported orders and responses
-  - Fields: `id`, `order_id`, `action`, `status`, `created_at`, `updated_at`
-- **`yespo_export_status_log`**: Export session state for users/orders
-  - Fields: `id`, `export_type` (`users`|`orders`), `total`, `exported`, `status`, `code`, `updated_at`
-- **`yespo_queue`**: Bulk users export queue sessions
-  - Fields: `id`, `session_id`, `export_status` (`STARTED`|`FINISHED`), `local_status`
-- **`yespo_queue_items`**: Exported contacts in a session
-  - Fields: `id`, `session_id`, `contact_id`, `yespo_id`
-- **`yespo_auth_log`**: API key authorization attempts
-  - Fields: `id`, `api_key`, `response`, `time`
-- **`yespo_errors`**: Export errors
-  - Fields: `id`, `error`, `time`
-
-**User/Order Meta:**
-- Users: `yespo_contact_id`, `yespo_bad_request`
-- Orders: `sent_order_to_yespo`, `yespo_order_time`, `yespo_customer_removed`, `yespo_bad_request`
-
-**Options:**
-- `yespo_options`: Stores API key, tracking scripts, export pointers
-- `yespo-version`: Plugin version tracking
-
-### Cron Jobs
-
-- **`yespo_export_data_cron`** (every minute):
-  - Bulk export of users and orders
-  - Resumes failed orders
-  - Removes users after GDPR erase
-- **`yespo_script_cron_event`** (hourly):
-  - Validates/refreshes tracking script
-  - Removes old export JSON logs
-
-### AJAX Endpoints
-
-**API & Authorization:**
-- `yespo_check_api_authorization_yespo`: Validate API key
-- `yespo_check_api_key_esputnik`: Save API key via settings
-- `yespo_get_account_yespo_name`: Fetch Yespo account name
-
-**Data Export:**
-- `yespo_export_user_data_to_esputnik`: Enqueue users export
-- `yespo_get_process_export_users_data_to_esputnik`: Users export progress
-- `yespo_export_order_data_to_esputnik`: Enqueue orders export
-- `yespo_get_process_export_orders_data_to_esputnik`: Orders export progress
-- `yespo_stop_export_data_to_yespo`: Pause export
-- `yespo_resume_export_data`: Resume export
-
-**Web Tracking:**
-- `yespo_get_webtracking_script_action`: Fetch tracking script
-- `yespo_get_cart_contents`: Current cart snapshot for tracking
-- `save_webid`: Store tracking identifiers in session
-
-### Core Components
-
-**Main Plugin Files:**
-- `backend/ActDeact.php`: Activation/deactivation, DB creation, upgrade procedures
-- `functions/functions.php`: WordPress hooks, AJAX handlers, cron functions
-- `engine/Initialize.php`: Bootstraps all plugin components
-
-**Yespo API Integration (`integrations/esputnik/`):**
-- **`Yespo_Account`**: API key verification, profile name fetch, auth logging
-- **`Yespo_Contact` / `Yespo_Contact_Mapping`**: Contact CRUD, bulk users export payloads
-- **`Yespo_Order` / `Yespo_Order_Mapping`**: Order meta handling, mapping, bulk orders export
-- **`Yespo_Export_Users` / `Yespo_Export_Orders` / `Yespo_Export_Service`**: Export orchestration, queue management, progress tracking
-- **`Yespo_Logging_Data`**: Contact action logging
-- **`Yespo_Localization`**: Admin JS localization
-
-**Web Tracking (`integrations/webtracking/`):**
-- **`Yespo_Web_Tracking_Script`**: Retrieve/store tracking code, cron verification
-- **`Yespo_Web_Tracking_Aggregator`**: Localize and enqueue client scripts
-- **Event Classes**: Track user behavior, cart events, purchases, page views
-
-### Data Flow Overview
-
-**Authorization**: API key verified via `Yespo_Account::send_keys()` → account name cached → tracking script retrieval enabled
-
-**Historical Export**:
-- **Users**: Cron → select up to 2000 users → map → send → handle response → update progress
-- **Orders**: Cron → select up to 1000 orders → map → send → log JSON payloads
-
-**Real-time Updates**:
-- User changes → update Yespo profile
-- Order changes → schedule export via cron
-- GDPR deletes → queue removal via cron
+- **Database Tables**: 10 custom tables for comprehensive logging and export management
+- **Export Batches**: 2000 users / 1000 orders per batch with response handling
+- **Cron Schedule**: Every minute for exports, hourly for script validation
+- **Event Tracking**: 9 different web events (PageView, ProductPage, StatusCart, etc.)
+- **API Integration**: Full CRUD operations with Yespo platform
 
 ### Troubleshooting
 
-- **401 Invalid API key**: Re-enter a valid key; the plugin will not sync until corrected
-- **0 Outgoing activity blocked**: Hosting blocks outbound requests; contact your provider
-- **429/500 from Yespo**: Exports pause for 5 minutes and resume automatically
-- **No cron activity**: Ensure WP-Cron is enabled or configure a system cron
+- **401 Invalid API key**: Re-enter a valid key; sync stops until corrected
+- **0 Outgoing blocked**: Contact hosting provider about outbound requests
+- **429/500 from Yespo**: Automatic 5-minute pause and resume
+- **No cron activity**: Ensure WP-Cron is enabled or configure system cron
+
+📚 **For comprehensive technical documentation, see [DEVELOPMENT.md](DEVELOPMENT.md)** - includes detailed database schema, data flows, hooks, authentication process, and complete API reference.
 
 ## 🤝 Contributing
 

@@ -25,7 +25,10 @@ A WordPress plugin that integrates WooCommerce with the Yespo Customer Data Plat
 - [📝 Changelog](#-changelog)
 - [🆘 Support](#-support)
 
-> 📋 **Need detailed technical docs?** See [DEVELOPMENT.md](DEVELOPMENT.md) for comprehensive database schema, API flows, hooks reference, and implementation details.
+### 📚 Additional Documentation
+
+- **[FEATURES.md](FEATURES.md)** - Comprehensive feature descriptions, web tracking events, segmentation capabilities, and marketing automation details
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Technical documentation: database schema, API flows, hooks reference, and implementation details
 
 ## Overview
 
@@ -178,32 +181,24 @@ Before submitting a PR, test:
 ## ✨ Features Overview
 
 ### Core Integration Features
-- **Customer Data Sync**: Automatic contact synchronization (registration, orders, profile updates)
+- **Customer Data Sync**: Automatic synchronization of contacts and orders
 - **Order Tracking**: Real-time order data transfer (creation, status updates, historical data)
+- **Web Tracking**: Track user behavior, cart events, and purchases  
 - **GDPR Compliance**: Automatic data removal when customers are deleted from WooCommerce
 
-### Web Tracking Events
-The plugin tracks these key ecommerce events:
-- **PageView**: Basic page tracking (required for other events)
-- **ProductPage**: Product view tracking for recommendations
-- **CategoryPage**: Category browsing behavior
-- **CustomerData**: User identification after registration/login
-- **StatusCart**: Shopping cart state changes
-- **PurchasedItems**: Completed order tracking
-- **MainPage**: Homepage visits
-- **NotFound**: 404 page tracking
-- **ProductImpression**: Recommendation block impressions
-
-### Marketing Automation Features
-- **Customer Segmentation**: Advanced segmentation based on behavior and purchase data
-- **Personalization**: Product recommendations using 200+ algorithms
+### Marketing Automation Capabilities
+- **Customer Segmentation**: Advanced behavioral and predictive segmentation
+- **Product Recommendations**: 200+ algorithms, generates ~20% of store sales
 - **Omnichannel Campaigns**: Email, SMS, push notifications, widgets across 9 channels
 - **Trigger Workflows**: Automated campaigns (abandoned cart, purchase follow-up, etc.)
+- **Multilingual Support**: Automatically determine language based on user's browser
 
-### Data Protection
-- **GDPR Compliant**: Automatic data synchronization with privacy regulations
-- **ISO Certified**: Security management system certified under ISO/IEC 27001:2022
+### Data Protection & Compliance
+- **GDPR Compliant**: Full compliance with privacy regulations
+- **ISO Certified**: Information security management system certified under ISO/IEC 27001:2022
 - **Data Ownership**: You retain full ownership; deletions in WooCommerce sync to Yespo
+
+📋 **For comprehensive feature details, see [FEATURES.md](FEATURES.md)** - includes detailed descriptions of web tracking events, segmentation capabilities, personalization options, and compliance information.
 
 ## 📝 Changelog
 

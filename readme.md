@@ -273,28 +273,23 @@ This project uses **Git Flow** workflow:
 1. **Fork the Repository**
    ```bash
    # Fork on GitHub, then clone your fork
-   git clone git@github.com:ardas/yespo-cdp.git
+   git clone --branch develop https://github.com/ardas/yespo-cdp.git
    cd yespo-cdp
-   # Switch to development branch
-   git checkout develop
    ```
 
 2. **Set Up Development Environment**
    ```bash
    # Install PHP dependencies
    composer install
-   
-   # Install Node.js dependencies
-   npm install
-   
-   # Build assets
-   npm run build
+      
+   # Update autoload
+   composer dumpautoload -o
    ```
 
 3. **Configure WordPress Environment**
    - Set up a local WordPress installation
    - Install and activate WooCommerce
-   - Install the plugin in development mode
+   - Install the plugin Yespo CDP
    - Configure your Yespo API credentials
 
 ### 📝 Making Changes
@@ -332,14 +327,7 @@ refactor(export): improve user data export performance
    - Update documentation if needed
    - Add tests for new functionality
 
-3. **Validate Your Changes**
-   ```bash
-   npm run lint        # Check code style
-   npm run build       # Ensure project builds correctly
-   composer test       # Run PHP tests (if available)
-   ```
-
-4. **Submit Pull Request to `develop`**
+3. **Submit Pull Request to `develop`**
    - Push to your fork: `git push origin feature/your-feature-name`
    - Create a Pull Request **targeting the `develop` branch** with:
      - **Clear title** describing the change
@@ -367,6 +355,7 @@ yespo-cdp/
 ├── functions/          # WordPress hooks and functions
 ├── integrations/       # External service integrations
 │   ├── esputnik/       # Yespo API integration
+│   ├── webpush/        # Yespo WebPush integration
 │   └── webtracking/    # Web tracking functionality
 ├── internals/          # Internal plugin components
 ├── languages/          # Translation files
@@ -446,10 +435,11 @@ $wpdb->prepare("INSERT INTO %i (api_key, response, time) VALUES (%s, %s, %s)", .
 #### File Organization
 ```
 assets/
-├── src/                # Source files
-│   ├── styles/         # SCSS files
-│   └── scripts/        # JavaScript files
-└── build/              # Compiled assets
+├── build/                # Source files
+│   ├── plugin-admin.css  # CSS file
+│   ├── plugin-admin.js   # JavaScript file administration functionality
+│   └── plugin-public.js  # JavaScript file for webtracking functionality
+└── images/               # Images, icons
 ```
 
 #### Code Style
@@ -609,12 +599,6 @@ Before submitting a PR, ensure you've tested:
 ```bash
 # Run PHP linting
 composer lint
-
-# Run JavaScript linting
-npm run lint
-
-# Build assets
-npm run build
 
 # Run tests (if available)
 composer test

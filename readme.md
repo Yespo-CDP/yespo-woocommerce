@@ -401,6 +401,8 @@ Before you begin, you'll need the following:
 * Setup test store with PHP 7.4  
 * Download and install Yespo CDP plugin from Wordpress repository to your test store
 
+Ensure these [hooks](https://docs.yespo.io/docs/installing-plugin-woocommerce-sites#hooks-tables-functions-and-other-wordpress-and-woocommerce-components) are active.
+
 1. **Fork the Repository**
    ```bash
    # Fork on GitHub, then clone your fork
@@ -734,8 +736,10 @@ composer lint
 # Run tests (if available)
 composer test
 ```
-
 ---
+## Contributing
+
+We welcome contributions to the Yespo CDP WooCommerce Plugin\! Whether you're fixing bugs, improving documentation, or adding new features, your contributions are appreciated.
 
 Thank you for contributing to Yespo CDP WooCommerce Plugin! 🙏
 

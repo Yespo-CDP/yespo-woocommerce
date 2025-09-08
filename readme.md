@@ -393,6 +393,14 @@ This project uses **Git Flow** workflow:
 
 ### 🚀 Quick Start
 
+## Prerequisites
+
+Before you begin, you'll need the following:
+
+* Wordpress: version 6.5.5 Download it if you haven't already.  
+* Setup test store with PHP 7.4  
+* Download and install Yespo CDP plugin from Wordpress repository to your test store
+
 1. **Fork the Repository**
    ```bash
    # Fork on GitHub, then clone your fork

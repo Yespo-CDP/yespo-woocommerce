@@ -298,7 +298,7 @@ The progress bar displays the overall export progress across all data — both c
 2. The event is logged into the table yespo\_contact\_log using the method create() of the class Yespo\_Logging\_Data  
 3.  After being processed by the cron job, the user is deleted using delete\_from\_yespo() of the class Yespo\_Contact via DELETE [https://yespo.io/api/v1/contact?externalCustomerId={ID}\&erase=true](https://yespo.io/api/v1/contact?externalCustomerId={ID}&erase=true). This occurs within 15–20 minutes
 
-### Export of real-time order data
+### Real-time orders data export
 
 1. The method schedule\_export\_orders() of the class Yespo\_Export\_Orders selects the IDs of orders that were modified more than 5 minutes ago  
 2. If there are errors — the export is stopped  
@@ -401,7 +401,9 @@ Before you begin, you'll need the following:
 * Setup test store with PHP 7.4  
 * Download and install Yespo CDP plugin from Wordpress repository to your test store
 
-Ensure these [hooks](https://docs.yespo.io/docs/installing-plugin-woocommerce-sites#hooks-tables-functions-and-other-wordpress-and-woocommerce-components) are active.
+Ensure the presence of these [hooks](https://docs.yespo.io/docs/installing-plugin-woocommerce-sites#hooks-tables-functions-and-other-wordpress-and-woocommerce-components), tables, and functions.
+
+## Local Development Setup
 
 1. **Fork the Repository**
    ```bash
@@ -425,7 +427,7 @@ Ensure these [hooks](https://docs.yespo.io/docs/installing-plugin-woocommerce-si
    - Install the plugin Yespo CDP
    - Configure your Yespo API credentials
 
-### 📝 Making Changes
+### 📝 Contributing
 
 #### Branch Naming
 - `feature/description` - for new features
@@ -736,11 +738,3 @@ composer lint
 # Run tests (if available)
 composer test
 ```
----
-## Contributing
-
-We welcome contributions to the Yespo CDP WooCommerce Plugin\! Whether you're fixing bugs, improving documentation, or adding new features, your contributions are appreciated.
-
-Thank you for contributing to Yespo CDP WooCommerce Plugin! 🙏
-
-Your contributions help make Yespo better for everyone. Whether you're reporting bugs, suggesting features, or contributing code, every bit helps! 💙

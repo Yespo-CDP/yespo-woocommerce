@@ -401,7 +401,7 @@ Before you begin, you'll need the following:
 * Setup test store with PHP 7.4  
 * Download and install Yespo CDP plugin from Wordpress repository to your test store
 
-Ensure the presence of these [hooks](https://docs.yespo.io/docs/installing-plugin-woocommerce-sites#hooks-tables-functions-and-other-wordpress-and-woocommerce-components), tables, and functions.
+Ensure the presence of these [hooks, tables, and functions](https://docs.yespo.io/docs/installing-plugin-woocommerce-sites#hooks-tables-functions-and-other-wordpress-and-woocommerce-components).
 
 ## Local Development Setup
 

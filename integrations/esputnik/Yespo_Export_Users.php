@@ -4,7 +4,6 @@ namespace Yespo\Integrations\Esputnik;
 
 class Yespo_Export_Users
 {
-    const CUSTOMER = 'customer';
     const SUBSCRIBER = 'subscriber';
     private $number_for_export = 2000;
     private $export_time = 7.5;
@@ -53,7 +52,6 @@ class Yespo_Export_Users
     public function start_active_bulk_export_users() {
         $status = $this->get_user_export_status_processed('active');
         $error = Yespo_Errors::get_error_entry();
-        //$this->update_after_activation();
 
         if (
             !empty($status) &&
@@ -199,10 +197,9 @@ class Yespo_Export_Users
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         return $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM %i WHERE meta_key = %s AND meta_value LIKE %s",
+                "SELECT COUNT(*) FROM %i WHERE meta_key = %s",
                 $wpdb->usermeta,
-                $capabilities_meta_key,
-                '%"customer"%'
+                $capabilities_meta_key
             )
         );
     }
@@ -213,17 +210,12 @@ class Yespo_Export_Users
         $esputnikContact = esc_sql($this->esputnikContact->get_meta_key());
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$user_meta} um WHERE um.meta_key = %s AND um.meta_value LIKE %s AND NOT EXISTS ( SELECT 1 FROM {$user_meta} um2 WHERE um2.user_id = um.user_id AND um2.meta_key = %s)",
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$user_meta} um WHERE um.meta_key = %s AND NOT EXISTS ( SELECT 1 FROM {$user_meta} um2 WHERE um2.user_id = um.user_id AND um2.meta_key = %s)",
                 $capabilities_meta_key,
-                '%\"customer\"%',
                 $esputnikContact
             )
         );
     }
-    public function get_users_object($args){
-        return get_users($args);
-    }
-
 
     public function get_bulk_users_object(){
         global $wpdb;
@@ -235,8 +227,8 @@ class Yespo_Export_Users
         $id_more_then = absint($this->id_more_then);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_col($wpdb->prepare(" SELECT u.ID FROM {$table_users} u INNER JOIN {$user_meta} um ON u.ID = um.user_id WHERE um.meta_key = '{$prefix_postmeta_capabilities}' AND um.meta_value LIKE %s AND u.ID > %d AND u.ID NOT IN (SELECT user_id FROM {$user_meta} WHERE meta_key = %s AND meta_value != '') ORDER BY u.user_registered ASC LIMIT %d",
-                '%' . $wpdb->esc_like(self::CUSTOMER) . '%', $id_more_then, $meta_key, $number_for_export)
+        return $wpdb->get_col($wpdb->prepare(" SELECT u.ID FROM {$table_users} u INNER JOIN {$user_meta} um ON u.ID = um.user_id WHERE um.meta_key = '{$prefix_postmeta_capabilities}' AND u.ID > %d AND u.ID NOT IN (SELECT user_id FROM {$user_meta} WHERE meta_key = %s AND meta_value != '') ORDER BY u.user_registered ASC LIMIT %d",
+                $id_more_then, $meta_key, $number_for_export)
         );
     }
 
@@ -300,6 +292,22 @@ class Yespo_Export_Users
     /**
      * entry to yespo queue items
      **/
+
+    public function add_entry_queue_items($user_id){
+        global $wpdb;
+        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
+        $contact_id = sanitize_text_field($user_id);
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        return $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO %i (session_id, contact_id) VALUES (%s, %s)",
+                $table_yespo_queue_items, '', $contact_id
+            )
+        );
+    }
+
+/*
     public function add_entry_queue_items($user_id){
         global $wpdb;
         $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
@@ -313,7 +321,24 @@ class Yespo_Export_Users
             )
         );
     }
+*/
+    public function check_queue_items_for_session($session_id) {
+        global $wpdb;
+        $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) 
+             FROM %i
+             WHERE session_id = %s",
+                $table_yespo_queue_items,
+                $session_id
+            )
+        );
+        return $count == 0;
+    }
+/*
     public function check_queue_items_for_session($session_id) {
         global $wpdb;
         $table_yespo_queue_items = esc_sql($this->table_yespo_queue_items);
@@ -331,7 +356,7 @@ class Yespo_Export_Users
         );
         return $count == 0;
     }
-
+*/
     private function update_table_data($id, $exported, $status, $code = null){
         global $wpdb;
         $table_name = esc_sql($this->table_name);

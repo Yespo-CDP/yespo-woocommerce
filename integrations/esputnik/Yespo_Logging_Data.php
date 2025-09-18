@@ -17,12 +17,12 @@ class Yespo_Logging_Data
         $this->table_name_order = $this->wpdb->prefix . 'yespo_order_log';
 
     }
-    public function create(string $user_id, string $contact_id, string $action){
+    public function create(string $user_id, string $action){
         global $wpdb;
         $table_name = esc_sql($this->table_name);
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name)
-            return $this->create_log_entry_user($user_id, $contact_id, $action); //if success returns 1
+            return $this->create_log_entry_user($user_id, $action); //if success returns 1
     }
 
     public function update_contact_log($user_id, $action, $response){
@@ -45,20 +45,36 @@ class Yespo_Logging_Data
         if(!empty($email)){
             $user = get_user_by('email', $email);
             if($user && $user->ID){
-                $yespo_contact_id = (new Yespo_Contact())->get_yespo_user_id($user->ID);
-                if(!empty($yespo_contact_id)) return $this->create_log_entry_user($user->ID, $yespo_contact_id, 'update');
+                if(!empty($yespo_contact_id)) return $this->create_log_entry_user($user->ID, 'update');
             }
         }
     }
 
+    //remove contact_id column
+    public function remove_contact_log_column(){
+        global $wpdb;
+        $table_name_contact_id = esc_sql($this->table_name);
+
+        $column_exists_contact_id = $wpdb->get_results("SHOW COLUMNS FROM $table_name_contact_id LIKE 'contact_id'");
+        if (!empty($column_exists_contact_id)) {
+            $wpdb->query("ALTER TABLE $table_name_contact_id  DROP COLUMN contact_id");
+        }
+
+        $table_name_yespo_queue_items = esc_sql($wpdb->prefix . 'yespo_queue_items');
+        $column_exists_yespo_queue_items = $wpdb->get_results("SHOW COLUMNS FROM $table_name_yespo_queue_items LIKE 'yespo_id'");
+        if (!empty($column_exists_yespo_queue_items)) {
+            $wpdb->query("ALTER TABLE $table_name_yespo_queue_items  DROP COLUMN yespo_id");
+        }
+
+    }
+
     /** create new log user entry in database **/
-    private function create_log_entry_user(string $user_id, string $contact_id, string $action){
+    private function create_log_entry_user(string $user_id, string $action){
         global $wpdb;
         $table_name = esc_sql($this->table_name);
 
         $data = array(
             'user_id' => sanitize_text_field($user_id),
-            'contact_id' => sanitize_text_field($contact_id),
             'action' => sanitize_text_field($action),
             'yespo' => 1,
             'log_date' => gmdate('Y-m-d H:i:s', time())
@@ -68,11 +84,10 @@ class Yespo_Logging_Data
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery
             return $wpdb->query(
                 $wpdb->prepare(
-                    "INSERT INTO %i (user_id, contact_id, action, yespo, log_date)
+                    "INSERT INTO %i (user_id, action, yespo, log_date)
                     VALUES (%s, %s, %s, %d, %s)",
                     $table_name,
                     $data['user_id'],
-                    $data['contact_id'],
                     $data['action'],
                     $data['yespo'],
                     $data['log_date']

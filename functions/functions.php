@@ -103,7 +103,12 @@ function yespo_check_api_authorization_function(){
             if ($result === 200) {
                 (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
                 $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
-                wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking]);
+                $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
+                if(!$is_webpush) (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); // webpush
+                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->add_tenant_id_to_options(); // tenant
+                (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->remove_contact_log_column(); //update tables
+
+                wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking, 'webpush' => $is_webpush]);
             } else if($result === 401 || $result === 0){
                 wp_send_json_error(['auth' => 'incorrect', 'code' => $result]);
             } else {
@@ -142,14 +147,17 @@ function yespo_save_settings_via_form_function() {
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
                 (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
+                (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); //webpush
             }
             $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+            $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
             $response_data = array(
                 'status' => 'success',
                 'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp') . '</p></div>'),
                 'total' => esc_html__("Completed successfully!", 'yespo-cdp'),
                 'username' => isset($organisationName) ? $organisationName : '',
-                'tracker' => $is_tracking
+                'tracker' => $is_tracking,
+                'webpush' => $is_webpush //webpush
             );
         } else if($result === 0){
             $response_data = array(
@@ -362,7 +370,6 @@ function yespo_clean_user_data_after_data_erased_function( $erased ){
             if($user && $user->ID){
                 (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->create(
                     $user->ID,
-                    (new \Yespo\Integrations\Esputnik\Yespo_Contact())->get_user_metafield_id($user->ID),
                     'delete');
             }
 
@@ -531,6 +538,11 @@ function yespo_script_cron_event_function(){
 }
 add_action('yespo_script_cron_event', 'yespo_script_cron_event_function');
 
+function yespo_remove_old_logs_function(){
+    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->remove_old_logs(); //ones per day
+}
+add_action('yespo_remove_old_logs', 'yespo_remove_old_logs_function');
+
 /***
  * JAVASCRIPT ADMIN LOCALIZATION
  */
@@ -608,16 +620,26 @@ function yespo_save_webid_to_session() {
 
     $response = [];
 
-    foreach (['webId', 'tenantId', 'orgId'] as $key) {
-        if (!empty($_POST[$key])) {
-            $_SESSION[$key] = sanitize_text_field($_POST[$key]);
-            $response[$key] = "$key saved in session";
+    foreach (['webId', 'orgId'] as $key) {
+        if (isset($_POST[$key])) {
+            $value = trim(sanitize_text_field($_POST[$key]));
+
+            if ($value !== '' && $value !== 'null' && $value !== 'undefined') {
+                if (!isset($_SESSION[$key])) {
+                    $_SESSION[$key] = $value;
+                    $response[$key] = "$key saved in session";
+                } else {
+                    $response[$key] = "$key already set in session, not overwritten";
+                }
+            } else {
+                $response[$key] = "$key ignored due to invalid value";
+            }
         } else {
             $response[$key] = "$key not transferred";
         }
     }
 
-    wp_send_json((isset($_SESSION['webId']) || isset($_SESSION['tenantId'])) ? wp_send_json_success($response) : wp_send_json_error($response));
+    wp_send_json((isset($_SESSION['webId']) || isset($_SESSION['orgId'])) ? wp_send_json_success($response) : wp_send_json_error($response));
 }
 add_action('wp_ajax_save_webid', 'yespo_save_webid_to_session');
 add_action('wp_ajax_nopriv_save_webid', 'yespo_save_webid_to_session');
@@ -671,3 +693,31 @@ function yespo_send_purchased_data_function($order_id) {
     (new Yespo\Integrations\Webtracking\Yespo_Purchased_Event())->send_order_to_yespo($order_id);
 }
 add_action('woocommerce_thankyou', 'yespo_send_purchased_data_function', 10, 1);
+
+
+/**
+ * WEB PUSH
+ **/
+function yespo_add_webpush_codes() {
+    $script = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->get_script_from_options();
+    if($script) {
+        echo $script;
+    }
+}
+add_action('wp_head', 'yespo_add_webpush_codes');
+
+
+
+/**
+ * Events after plugin update
+ **/
+function yespo_cdp_plugin_updated($upgrader_object, $options) {
+    if ($options['action'] === 'update' && $options['type'] === 'plugin') {
+        $target_plugin = 'yespo-cdp/yespo.php';
+
+        if (!empty($options['plugins']) && in_array($target_plugin, $options['plugins'])) {
+            (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->remove_contact_log_column();
+        }
+    }
+}
+add_action('upgrader_process_complete', 'yespo_cdp_plugin_updated', 10, 2);

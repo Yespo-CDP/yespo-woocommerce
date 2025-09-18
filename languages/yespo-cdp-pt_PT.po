@@ -107,3 +107,7 @@ msgstr "O rastreamento da web foi configurado com sucesso"
 #: backend/views/settings.php:89
 msgid "Data synchronization has started"
 msgstr "A sincronização de dados começou"
+
+#: integrations/esputnik/Yespo_Localization.php:19
+msgid "Web push is successfully configured. Notifications can be managed from your Yespo account."
+msgstr "As notificações web push foram configuradas com sucesso. Pode geri-las a partir da sua conta Yespo."

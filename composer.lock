@@ -372,19 +372,20 @@
             "source": {
                 "type": "git",
                 "url": "https://gitlab.wpdesk.dev/wpdesk/wp-notice",
-                "reference": "a59008f6f5cdccc598cb7063f52da78c8199cb1d"
+                "reference": "06ba55d621da8c151836a14b4988bd8728e4e979"
             },
             "require": {
-                "php": ">=7.0.8",
+                "php": ">=7.4",
                 "wpdesk/wp-builder": "^1.0|^2.0"
             },
             "require-dev": {
                 "10up/wp_mock": "*",
                 "mockery/mockery": "*",
+                "phpunit/phpunit": "^8",
                 "squizlabs/php_codesniffer": "^3.0.2",
                 "wimg/php-compatibility": "^8",
                 "wp-coding-standards/wpcs": "^0.14.1",
-                "wpdesk/wp-codeception": "^2.7"
+                "wpdesk/wp-codeception": "^2"
             },
             "default-branch": true,
             "type": "library",
@@ -413,7 +414,7 @@
                 "notice",
                 "wordpress"
             ],
-            "time": "2024-07-23T13:33:41+00:00"
+            "time": "2025-05-16T14:19:12+00:00"
         }
     ],
     "packages-dev": [],

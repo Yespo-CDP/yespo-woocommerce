@@ -8,7 +8,7 @@
  *
  * Plugin Name:     Yespo CDP for eCommerce: Marketing Automation, Omnichannel, Email Marketing, Product Recommendations, Web Tracking & Personalization
  * Description:     CDP for WooCommerce: boost conversion and retention with omnichannel campaigns (email, SMS, push notifications, widgets) and product recommendations!
- * Version:         1.1.2
+ * Version:         1.1.6
  * Author:          Yespo
  * Author URI:      https://yespo.io/
  * License:         GPLv2 or later
@@ -24,7 +24,7 @@ if ( !defined( 'ABSPATH' ) ) {
     die( 'We\'re sorry, but you can not directly access this file.' );
 }
 
-define( 'YESPO_VERSION', '1.1.2' );
+define( 'YESPO_VERSION', '1.1.6' );
 define( 'YESPO_TEXTDOMAIN', 'yespo-cdp' );
 define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-cdp' );
 define( 'YESPO_NAME', 'Yespo' );
@@ -73,8 +73,6 @@ $yespo_libraries = require YESPO_PLUGIN_ROOT . 'vendor/autoload.php'; //phpcs:ig
 require_once YESPO_PLUGIN_ROOT . 'functions/functions.php';
 require_once YESPO_PLUGIN_ROOT . 'functions/debug.php';
 
-// Add your new plugin on the wiki: https://github.com/WPBP/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate
-
 $requirements = new \Micropackage\Requirements\Requirements(
     'Yespo',
     array(
@@ -108,6 +106,10 @@ function yespo_export_data_activation(){
 
     if (!wp_next_scheduled('yespo_script_cron_event')) {
         wp_schedule_event(time(), 'hourly', 'yespo_script_cron_event');
+    }
+
+    if (!wp_next_scheduled('yespo_remove_old_logs')) {
+        wp_schedule_event(time(), 'daily', 'yespo_remove_old_logs');
     }
 
 }

@@ -18,8 +18,12 @@ class Yespo_Web_Push_Curl_Request
             }
 
             $args = self::prepare_request_args($method, $data);
-
             $response = wp_remote_request($url, $args);
+
+            $status_code = wp_remote_retrieve_response_code($response);
+            if (in_array($status_code, [400, 404, 500])) {
+                return $status_code;
+            }
 
             return self::handle_response($method, $response);
         } catch (Exception $e) {

@@ -102,13 +102,54 @@ function yespo_check_api_authorization_function(){
             if (strpos($result, 'Connection refused') !== false) $result = 0;
             if ($result === 200) {
                 (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
-                $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+
+                /* webtracking */
+                $is_webtracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+                $display_webtracking_form = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_form_500();
+                $webtracking_label_400 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_400();
+                $webtracking_label_500 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_500();
+
+                if((!$is_webtracking && $display_webtracking_form) || (!$is_webtracking && $webtracking_label_400) ) $get_webtracking_response = 400;
+                else if(!$is_webtracking && $webtracking_label_500) $get_webtracking_response = 500;
+
+                (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('api', $is_webtracking, 'pered umovou 500 api webtracking');
+                if($get_webtracking_response && ($get_webtracking_response === 400 || $get_webtracking_response === 404) && !$is_webtracking) $is_webtracking = false;
+                if($get_webtracking_response && $get_webtracking_response === 500 && !$is_webtracking){
+
+                    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('500', $get_webtracking_response, 'umova inside 500 api');
+                    $is_webtracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_exist_label_500();
+                }
+                if($get_webtracking_response > 199 && $get_webtracking_response < 300){
+                    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->remove_label_500();
+                    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->remove_form_500();
+                }
+
+                /* webpush */
                 $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
-                if(!$is_webpush) (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); // webpush
+                $display_wepush_form = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_form_500();
+                $webpush_label_400 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_400();
+                $webpush_label_500 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_500();
+
+                if((!$is_webpush && $display_wepush_form) || (!$is_webpush && $webpush_label_400) ) $get_push_response = 400;
+                else if(!$is_webpush && $webpush_label_500) $get_push_response = 500;
+
+                (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('api', $is_webpush, 'pered umovou 500 api');
+                if($get_push_response && ($get_push_response === 400 || $get_push_response === 404) && !$is_webpush) $is_webpush = false;
+                if($get_push_response && $get_push_response === 500 && !$is_webpush){
+
+                    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('500', $get_push_response, 'umova inside 500 api');
+                    
+                    $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_exist_label_500();
+                }
+                if($get_push_response > 199 && $get_push_response < 300){
+                    (new Yespo\Integrations\Webpush\Yespo_Web_Push())->remove_label_500();
+                    (new Yespo\Integrations\Webpush\Yespo_Web_Push())->remove_form_500();
+                }
+
                 (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->add_tenant_id_to_options(); // tenant
                 (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->remove_contact_log_column(); //update tables
 
-                wp_send_json_success(['auth' => 'success', 'tracker' => $is_tracking, 'webpush' => $is_webpush]);
+                wp_send_json_success(['auth' => 'success', 'tracker' => $is_webtracking, 'webpush' => $is_webpush]);
             } else if($result === 401 || $result === 0){
                 wp_send_json_error(['auth' => 'incorrect', 'code' => $result]);
             } else {
@@ -146,17 +187,43 @@ function yespo_save_settings_via_form_function() {
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
                 update_option('yespo_options', $options);
-                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
-                (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); //webpush
+                $get_webtracking_response = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
+                $get_push_response = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); //webpush
             }
-            $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+            $is_webtracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
             $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
+
+            /* webtraking */
+            (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('500', $get_webtracking_response, 'response via form webtracking');
+
+            if($get_webtracking_response && ($get_webtracking_response === 400 || $get_webtracking_response === 404) && !$is_webtracking) {
+                $is_webtracking = false;
+                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->add_label_400();
+            }
+            if($get_webtracking_response && $get_webtracking_response== 500 && !$is_webtracking){
+                $is_webtracking = 500;
+                (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('500', 'inside 500 auth form', 'if 500 works webtracking');
+                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->add_label_500();
+            }
+
+            /* webpush */
+            (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('500', $get_push_response, 'response via form webpush');
+            if($get_push_response && ($get_push_response === 400 || $get_push_response === 404) && !$is_webpush){
+                $is_webpush = false;
+                (new Yespo\Integrations\Webpush\Yespo_Web_Push())->add_label_400();
+            }
+            if($get_push_response && $get_push_response === 500 && !$is_webpush){
+                $is_webpush = 500;
+                (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('500', 'inside 500 auth form', 'if 500 works');
+                (new Yespo\Integrations\Webpush\Yespo_Web_Push())->add_label_500();
+            }
+
             $response_data = array(
                 'status' => 'success',
                 'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Authorization is successful", 'yespo-cdp') . '</p></div>'),
                 'total' => esc_html__("Completed successfully!", 'yespo-cdp'),
                 'username' => isset($organisationName) ? $organisationName : '',
-                'tracker' => $is_tracking,
+                'tracker' => $is_webtracking, // webtracking
                 'webpush' => $is_webpush //webpush
             );
         } else if($result === 0){
@@ -200,9 +267,19 @@ function yespo_get_yespo_tracking_code_function() {
             if (strpos($result, 'Connection refused') !== false) $result = 0;
             if ($result === 200) {
 
-                (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
+                $get_webtracker_response = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
 
                 $is_tracking = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->is_script_in_options();
+
+                $webtracking500 = false;
+                if($get_webtracker_response === 500 && !$is_tracking){
+                    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->remove_form_500();
+                    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->add_label_500();
+                    $webtracking500 = true;
+                }
+                $webtracking400 = false;
+                if(($get_webtracker_response === 400 || $get_webtracker_response === 404) && !$is_tracking) $webtracking400 = true;
+
                 if ($is_tracking) {
                     $response_data = array(
                         'status' => 'success',
@@ -216,6 +293,8 @@ function yespo_get_yespo_tracking_code_function() {
                         'status' => 'error',
                         'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Problem with installation web tracking script", 'yespo-cdp') . '</p></div>'),
                         'total' => esc_html__("Completed unsuccessfully!", 'yespo-cdp'),
+                        'webtracking400' => $webtracking400,
+                        'webtracking500' => $webtracking500,
                     );
                 }
                 wp_send_json($response_data);
@@ -226,6 +305,108 @@ function yespo_get_yespo_tracking_code_function() {
     }
 }
 add_action('wp_ajax_yespo_get_webtracking_script_action', 'yespo_get_yespo_tracking_code_function');
+
+
+function yespo_get_yespo_webpush_code_function() {
+
+    if ( ! isset( $_GET['yespo_get_webpush_script_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_get_webpush_script_nonce'])), 'yespo_get_webpush_script' ) ) {
+        return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    if (get_option('yespo_options') !== false) {
+        $options = get_option('yespo_options', array());
+        if (isset($options['yespo_api_key'])) $yespo_api_key = sanitize_text_field($options['yespo_api_key']);
+
+        if(isset($yespo_api_key)) {
+            $accountClass = new \Yespo\Integrations\Esputnik\Yespo_Account();
+            $result = $accountClass->send_keys($options['yespo_api_key']);
+            if (strpos($result, 'Connection refused') !== false) $result = 0;
+            if ($result === 200) {
+
+                $get_push_response = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); //webpush
+
+                $is_webpush = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->check_webpush_installation(); // webpush
+
+                $webpush500 = false;
+                if($get_push_response === 500 && !$is_webpush){
+                    (new Yespo\Integrations\Webpush\Yespo_Web_Push())->remove_form_500();
+                    (new Yespo\Integrations\Webpush\Yespo_Web_Push())->add_label_500();
+                    $webpush500 = true;
+                }
+
+                $webpush400 = false;
+                if(($get_push_response === 400 || $get_push_response === 404) && !$is_webpush) $$webpush400 = true;
+
+                if ($is_webpush) {
+                    $response_data = array(
+                        'status' => 'success',
+                        'message' => wp_kses_post('<div class="notice notice-success is-dismissible"><p>' . __("Web script installed successfully", 'yespo-cdp') . '</p></div>'),
+                        'webpush' => $is_webpush
+                    );
+
+
+                } else {
+                    $response_data = array(
+                        'status' => 'error',
+                        'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Problem with installation web tracking script", 'yespo-cdp') . '</p></div>'),
+                        'total' => esc_html__("Completed unsuccessfully!", 'yespo-cdp'),
+                        'webpush400' => $webpush400,
+                        'webpush500' => $webpush500,
+                    );
+                }
+                wp_send_json($response_data);
+                exit;
+
+            }
+        }
+    }
+}
+add_action('wp_ajax_yespo_get_webpush_script_action', 'yespo_get_yespo_webpush_code_function');
+
+/*** Get profile username on Yespo ***/
+function yespo_get_current_status_500_function(){
+
+    if ( ! isset( $_GET['yespo_get_current_status_500_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_get_current_status_500_nonce'])), 'yespo_get_current_status_500' ) ) {
+        return;
+    }
+
+    if (isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_get_current_status_500') {
+
+        $get_webtracking_label_400 =  (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_400();
+        $get_webtracking_label_500 =  (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_500();
+        $get_webpush_label_400 =  (new \Yespo\Integrations\Webpush\Yespo_Web_Push())->get_label_400();
+        $get_webpush_label_500 =  (new \Yespo\Integrations\Webpush\Yespo_Web_Push())->get_label_500();
+        $webtracking_code = 200;
+        $webpush_code = 200;
+        if ($get_webtracking_label_400 !== false) $webtracking_code = 400;
+        else if ($get_webtracking_label_500 !== false) $webtracking_code = 500;
+
+        if ($get_webpush_label_400 !== false) $webpush_code = 400;
+        else if ($get_webpush_label_500 !== false) $webpush_code = 500;
+
+
+        $get_webtracking_500 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_form_500();
+        $get_webpush_500 = (new \Yespo\Integrations\Webpush\Yespo_Web_Push())->get_form_500();
+
+        $response_data = array(
+            'status' => 'success',
+            'webtracking_code' => $webtracking_code,
+            'webpush_code' => $webpush_code,
+            'tracker' => $get_webtracking_500, // webtracking
+            'webpush' => $get_webpush_500 //webpush
+        );
+
+        wp_send_json($response_data);
+        exit;
+
+    }
+    wp_die();
+}
+add_action('wp_ajax_yespo_get_current_status_500', 'yespo_get_current_status_500_function');
 
 /** update user profile on Yespo service **/
 function yespo_update_user_profile_function($user_id, $old_user_data) {
@@ -529,11 +710,14 @@ function yespo_export_data_cron_function(){
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_bulk_export_orders();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->schedule_export_orders();
     (new \Yespo\Integrations\Esputnik\Yespo_Contact())->remove_user_after_erase();
+    //(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_script_code_cron();
+    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_exist_label_500();
+    (new \Yespo\Integrations\Webpush\Yespo_Web_Push())->check_exist_label_500();
 }
 add_action('yespo_export_data_cron', 'yespo_export_data_cron_function');
 
 function yespo_script_cron_event_function(){
-    (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_script_code_cron();
+    //(new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->check_script_code_cron();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->remove_old_json_log_entries();
 }
 add_action('yespo_script_cron_event', 'yespo_script_cron_event_function');
@@ -621,21 +805,41 @@ function yespo_save_webid_to_session() {
     $response = [];
 
     foreach (['webId', 'orgId'] as $key) {
+
+        $userIP = (new \Yespo\Integrations\Webtracking\Yespo_Logger())->get_user_IP();
+
         if (isset($_POST[$key])) {
             $value = trim(sanitize_text_field($_POST[$key]));
 
             if ($value !== '' && $value !== 'null' && $value !== 'undefined') {
                 if (!isset($_SESSION[$key])) {
                     $_SESSION[$key] = $value;
-                    $response[$key] = "$key saved in session";
+                    $response[$key] = [
+                        'message' => "$key saved in session",
+                        'saved'   => true,
+                    ];
+
+                    //if ($key === 'webId') (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('sc', $value . ' user-agent: ' . $_POST['userAgent'] . ' esState: ' . $_POST['esState'], 'successfully saved in session ' .  $userIP);
                 } else {
-                    $response[$key] = "$key already set in session, not overwritten";
+                    //if ($key === 'webId') (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('sc', $value . ' user-agent: ' . $_POST['userAgent'] . ' esState: ' . $_POST['esState'], 'sc is already in session ' .  $userIP);
+                    $response[$key] = [
+                        'message' => "$key already set in session, not overwritten",
+                        'saved'   => true,
+                    ];
                 }
             } else {
-                $response[$key] = "$key ignored due to invalid value";
+                //if ($key === 'webId') (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('sc', $value . ' user-agent: ' . $_POST['userAgent'] . ' esState: ' . $_POST['esState'], 'sc is empty, null or underfined ' .  $userIP);
+                $response[$key] = [
+                    'message' => "$key ignored due to invalid value",
+                    'saved'   => false,
+                ];
             }
         } else {
-            $response[$key] = "$key not transferred";
+            //if ($key === 'webId') (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('sc', $value . ' user-agent: ' . $_POST['userAgent'] . ' esState: ' . $_POST['esState'], 'sc is not transfered ' .  $userIP);
+            $response[$key] = [
+                'message' => "$key not transferred",
+                'saved'   => false,
+            ];
         }
     }
 

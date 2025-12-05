@@ -211,7 +211,7 @@ class YespoTracker
     }
 
     //send wedId to backend
-    checkWebIdOnLoad(webId, orgId) {
+    checkWebIdOnLoad(webId, orgId, esState= '') {
 
         if (!webId || typeof webId !== "string" || webId.trim() === "") {
             console.warn("webId is empty or invalid.");
@@ -221,6 +221,8 @@ class YespoTracker
             console.warn("orgId is empty or invalid.");
         }
 
+        //const userAgent = navigator.userAgent; // needs to be removed
+
         fetch(this.ajaxUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -228,6 +230,8 @@ class YespoTracker
                 action: 'save_webid',
                 webId: webId,
                 orgId: orgId,
+                //userAgent: userAgent, // needs to be removed
+                //esState:esState, // needs to be removed
                 yespo_tenant_webid_nonce_name: this.tenantWebIdNonce
             })
         })
@@ -237,7 +241,24 @@ class YespoTracker
                 }
                 return response.json();
             })
-            .then(data => console.log('Answer of WordPress server:', data))
+            .then(data => {
+                console.log('Answer of WordPress server:', data);
+
+                if (data?.data?.webId?.saved === false) {
+                    //console.warn("webId not saved, retrying in 5 seconds...");
+
+                    setTimeout(() => {
+                        let newWebId = "";
+                        try {
+                            newWebId = this.getWebIdData();
+                        } catch (error) {
+                            console.error("Failed to parse document.cookie:", error);
+                        }
+
+                        this.checkWebIdOnLoad(newWebId, orgId);
+                    }, 5000);
+                }
+            })
             .catch(error => console.error('Error sending webId:', error));
     }
 
@@ -247,27 +268,28 @@ class YespoTracker
             if (window._esConfig) {
                 observer.disconnect();
                 const orgId = window._esConfig?.orgId || "";
+
+                let esState = localStorage.getItem("esState"); //needs to be removed
+
                 let webId = "";
 
                 try {
-
-                    let esState = JSON.parse(localStorage.getItem("esState") || "{}");
-                    let customerId = esState?.customerId?.trim();
-
-                    webId = customerId && customerId.length > 0 ? customerId : (() => {
-                        const match = document.cookie.match(/(?:^|; )sc=([^;]*)/);
-                        return match ? decodeURIComponent(match[1]) : null;
-                    })();
-
+                    webId = this.getWebIdData();
                 } catch (error) {
                     console.error("Failed to parse document.cookie:", error);
                 }
 
+                //this.checkWebIdOnLoad(webId, orgId, esState); // only for debugging
                 this.checkWebIdOnLoad(webId, orgId);
             }
         });
 
         observer.observe(document, observeConfig);
+    }
+
+    getWebIdData(){
+        const match = document.cookie.match(/(?:^|; )sc=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : null;
     }
 
     /*** Observer Interaction functions ***/

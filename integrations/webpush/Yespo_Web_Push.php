@@ -13,11 +13,16 @@ class Yespo_Web_Push
     const POST_WEBPUSH_YESPO_URL = 'https://yespo.io/api/v1/site/webpush/domains';
     const GET_WEBPUSH_YESPO_URL = 'https://yespo.io/api/v1/site/webpush/script?domain=';
     const WEBPUSH_OPTION_NAME = 'yespo_webpush_script';
+    const WEBPUSH_LABEL_400 = 'yespo_webpush_label_400';
+    const WEBPUSH_LABEL_500 = 'yespo_webpush_label_500';
+    const WEBPUSH_FORM_500 = 'yespo_webpush_form_500';
     private $options;
+    private $cur_time;
 
 
     public function __construct(){
         $this->options = get_option('yespo_options');
+        $this->cur_time = current_time('mysql', true);
     }
 
     public function start(){
@@ -28,14 +33,14 @@ class Yespo_Web_Push
         (new Yespo_Logger())->write_to_file('POST', json_encode($this->get_json()), $response_post);
 
 
-        if ($response_post < 200 || $response_post >= 300) return;
+        if ($response_post < 200 || $response_post >= 300) return $response_post;
 
         $response_get = $this->send_get_data();
 
         //loging debug
         (new Yespo_Logger())->write_to_file('GET', json_encode($this->get_full_site_url()), $response_get);
 
-        if (!is_string($response_get) || empty($response_get)) return;
+        if (!is_string($response_get) || empty($response_get)) return $response_get;
 
         $data = json_decode($response_get, true);
 
@@ -44,6 +49,9 @@ class Yespo_Web_Push
 
         $this->add_script_to_options(json_encode($data['script']));
         $this->write_script_to_file($data['serviceWorker']);
+
+        $this->remove_form_500();
+        $this->remove_label_500();
 
     }
 
@@ -156,6 +164,99 @@ class Yespo_Web_Push
     public function is_script_in_options(){
         if (isset($this->options[self::WEBPUSH_OPTION_NAME])) return true;
         return false;
+    }
+
+    /*** 500 error dealing ***/
+    public function check_exist_label_500() {
+        if(!$this->is_script_in_options()) {
+
+            $label_time = $this->get_label_500();
+            $current_timestamp = current_time('timestamp', true);
+
+            if (is_string($label_time) && !$this->get_form_500()) {
+                $label_timestamp = strtotime($label_time);
+
+                if ($label_timestamp !== false && $current_timestamp < ($label_timestamp + 300) && !$this->get_form_500()) {
+
+                    $response = $this->start();
+                    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('web push script', 'inside check_exist_label_500', json_encode($response));
+
+                    if ($response > 199 && $response < 300){
+                        $this->remove_label_400();
+                        $this->remove_form_500();
+                        $this->remove_label_500();
+
+                        return 200;
+                    }
+
+                } else if ($label_timestamp !== false && $current_timestamp > ($label_timestamp + 300) && !$this->get_form_500()) {
+                    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('web push script', 'inside check_exist_label_500', 'other response than 200');
+
+                    $this->remove_label_500();
+                    $this->add_form_500();
+
+                    return false;
+                }
+
+                return 500;
+            }
+            return false;
+        }
+    }
+
+    public function add_label_400() {
+        if(!$this->get_label_400()) {
+            $this->options[self::WEBPUSH_LABEL_400] = true;
+            update_option('yespo_options', $this->options);
+        }
+    }
+    public function add_label_500() {
+        if(!$this->get_label_500()) {
+            $this->options[self::WEBPUSH_LABEL_500] = $this->cur_time;
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function add_form_500() {
+        if(!$this->get_form_500()) {
+            $this->options[self::WEBPUSH_FORM_500] = 1;
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function get_label_400(){
+        if (isset($this->options[self::WEBPUSH_LABEL_400])) return $this->options[self::WEBPUSH_LABEL_400];
+        return false;
+    }
+    public function get_label_500(){
+        if (isset($this->options[self::WEBPUSH_LABEL_500])) return $this->options[self::WEBPUSH_LABEL_500];
+        return false;
+    }
+
+    public function get_form_500(){
+        if (isset($this->options[self::WEBPUSH_FORM_500])) return true;
+        return false;
+    }
+
+    public function remove_label_400(){
+        if (isset($this->options[self::WEBPUSH_LABEL_400])) {
+            unset($this->options[self::WEBPUSH_LABEL_400]);
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function remove_label_500(){
+        if (isset($this->options[self::WEBPUSH_LABEL_500])) {
+            unset($this->options[self::WEBPUSH_LABEL_500]);
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function remove_form_500(){
+        if (isset($this->options[self::WEBPUSH_FORM_500])) {
+            unset($this->options[self::WEBPUSH_FORM_500]);
+            update_option('yespo_options', $this->options);
+        }
     }
 
 }

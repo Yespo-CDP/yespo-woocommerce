@@ -234,6 +234,8 @@ class ActDeact extends Base {
         self::create_databases(self::$wpdb);
         self::add_capabilities();
         self::upgrade_procedure();
+
+        \Yespo\Integrations\Esputnik\Yespo_Act_Deact_Export::activate();
         (new \Yespo\Integrations\Esputnik\Yespo_Export_Users())->update_after_activation();
         (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->update_after_activation();
 
@@ -251,6 +253,7 @@ class ActDeact extends Base {
     private static function single_deactivate() {
         // @TODO: Define deactivation functionality here
         self::remove_capabilities();
+        \Yespo\Integrations\Esputnik\Yespo_Act_Deact_Export::deactivate();
         // Clear the permalinks
         \flush_rewrite_rules();
     }

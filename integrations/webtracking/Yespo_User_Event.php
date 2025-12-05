@@ -30,6 +30,7 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 
     public function handle_user_event($user_id_or_login, $user = null) {
         $user_data = $this->get_user_data($user_id_or_login);
+        if(!$this->get_webId()) return false;
 
         $user_json = $this->generate_user_json("CustomerData", $user_data);
         Yespo_Web_Tracking_Curl_Request::curl_request($user_json);
@@ -49,12 +50,13 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 
     public function after_order_complete($order_id){
 
-        if (!isset($order_id) || !is_numeric($order_id)) {
+        $get_webId = $this->get_webId();
+        if (!isset($order_id) || !is_numeric($order_id) || !$get_webId) {
             return;
         }
 
         $user_data = $this->get_user_from_order($order_id);
-        $user_json = ["GeneralInfo" => $this->generate_user_info( "CustomerData", $user_data, $this->get_webId(), $this->get_tenantId()) ];
+        $user_json = ["GeneralInfo" => $this->generate_user_info( "CustomerData", $user_data, $get_webId, $this->get_tenantId()) ];
 
         Yespo_Web_Tracking_Curl_Request::curl_request($user_json);
         $webcontact = $this->get_webcontact_data($user_data);
@@ -133,7 +135,11 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
             session_start();
         }
 
-        return $_SESSION['webId'] ?? null;
+        $webId = $_SESSION['webId'] ?? null;
+        $userIP = (new Yespo_Logger())->get_user_IP();
+        //(new Yespo_Logger())->write_to_file('sc', $webId, 'used from session ' . $userIP);
+
+        return $webId;
     }
 
     public function get_orgId(){

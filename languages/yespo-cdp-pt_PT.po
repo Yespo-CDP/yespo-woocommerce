@@ -111,3 +111,15 @@ msgstr "A sincronização de dados começou"
 #: integrations/esputnik/Yespo_Localization.php:19
 msgid "Web push is successfully configured. Notifications can be managed from your Yespo account."
 msgstr "As notificações web push foram configuradas com sucesso. Pode geri-las a partir da sua conta Yespo."
+
+#: integrations/esputnik/Yespo_Localization.php:44
+msgid "Try again"
+msgstr "Tentar novamente"
+
+#: integrations/esputnik/Yespo_Localization.php:45
+msgid "Unable to install Site script. Please contact support"
+msgstr "Não foi possível instalar o script do Site. Contacte o suporte"
+
+#: integrations/esputnik/Yespo_Localization.php:46
+msgid "Unable to install Web Push script. Please contact support"
+msgstr "Não foi possível instalar o script do Web Push. Contacte o suporte"

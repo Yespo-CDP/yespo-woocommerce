@@ -89,4 +89,14 @@ class Yespo_Logger
         file_put_contents($log_file, $new_content, LOCK_EX);
     }
 
+    public function get_user_IP() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            return $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+        } else {
+            return $_SERVER['REMOTE_ADDR'];
+        }
+    }
+
 }

@@ -9,7 +9,7 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
 
 
     public function send_order_to_yespo($order_id) {
-        if (!empty($order_id)) {
+        if (!empty($order_id) && (new Yespo_User_Event())->get_webId()) {
             $order = wc_get_order($order_id);
             $hash = (new Yespo_Cart_Event())->get_option();
 

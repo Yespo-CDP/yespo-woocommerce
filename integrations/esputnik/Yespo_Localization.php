@@ -35,6 +35,15 @@ class Yespo_Localization
             'getScriptButtonText' => esc_html__( 'Configure Web Tracking', 'yespo-cdp' ),
             'getScriptSpanText' => esc_html__( 'General script will be added to the website and web tracking events will be configured', 'yespo-cdp' ),
             'getTrackingScriptNonce' => wp_nonce_field('yespo_get_tracking_script', 'yespo_get_tracking_script_nonce', true, false),
+            'getWebpushScriptNonce' => wp_nonce_field('yespo_get_webpush_script', 'yespo_get_webpush_script_nonce', true, false),
+
+            //'getCurrentStatus500Nonce' => wp_nonce_field('yespo_get_current_status_500', 'yespo_get_current_status_500_nonce', true, false),
+            'getCurrentStatus500Nonce' => wp_create_nonce('yespo_get_current_status_500'),
+
+            'getWebtrackingScriptNonce' => wp_nonce_field('yespo_get_webtracking_script', 'yespo_get_webtracking_script_nonce', true, false),
+            'getTryAgainText' => esc_html__( 'Try again', 'yespo-cdp' ),
+            'getTryAgainWebtrackingSpanText' => esc_html__( 'Unable to install Site script. Please contact support', 'yespo-cdp' ),
+            'getTryAgainWebpushSpanText' => esc_html__( 'Unable to install Web Push script. Please contact support', 'yespo-cdp' ),
 
             'yespoGetAccountYespoNameNonce' => wp_create_nonce('yespo_get_account_yespo_name'),
             'yespoCheckApiAuthorizationYespoNonce' => wp_create_nonce('yespo_check_api_authorization_yespo'),

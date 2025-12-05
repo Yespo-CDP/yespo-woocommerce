@@ -14,6 +14,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
 
     // SEND DATA TO YESPO
     public function add_to_cart_event() {
+        if(!(new Yespo_User_Event())->get_webId()) return false;
         $json = $this->generate_json();
         $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
 
@@ -23,6 +24,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     }
 
     public function after_cart_item_quantity_update() {
+        if(!(new Yespo_User_Event())->get_webId()) return false;
         $json = $this->generate_json();
         $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
 
@@ -32,6 +34,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     }
 
     public function cart_item_removed() {
+        if(!(new Yespo_User_Event())->get_webId()) return false;
         $json = $this->generate_json();
         $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
 

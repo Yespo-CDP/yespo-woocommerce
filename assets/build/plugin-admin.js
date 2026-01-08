@@ -26,6 +26,8 @@ class YespoExportData {
         this.getTryAgainText = yespoVars.getTryAgainText;
         this.getTryAgainWebtrackingSpanText = yespoVars.getTryAgainWebtrackingSpanText;
         this.getTryAgainWebpushSpanText = yespoVars.getTryAgainWebpushSpanText;
+        this.getTryAgainSpanLinkText = yespoVars.getTryAgainSpanLinkText;
+        this.yespoLinkSupport = yespoVars.yespoLinkSupport;
         this.getCurrentStatus500Nonce = yespoVars.getCurrentStatus500Nonce;
 
         this.startExportUsersNonce = yespoVars.startExportUsersNonce;
@@ -536,6 +538,15 @@ class YespoExportData {
         fieldGroup1.appendChild(nonceWrapper);
 
         const spanEl = this.createElement("span", { className: 'api-key-text' }, spanText);
+
+        const linkEl = this.createElement("a", {
+            href: this.yespoLinkSupport,
+            target: "_blank"
+        }, this.getTryAgainSpanLinkText);
+
+        spanEl.appendChild(document.createTextNode(" "));
+        spanEl.appendChild(linkEl);
+
         fieldGroup1.appendChild(spanEl);
 
         const fieldGroup2 = this.createFieldGroup();

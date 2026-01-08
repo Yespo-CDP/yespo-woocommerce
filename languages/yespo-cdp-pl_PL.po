@@ -117,9 +117,13 @@ msgid "Try again"
 msgstr "Spróbuj ponownie"
 
 #: integrations/esputnik/Yespo_Localization.php:45
-msgid "Unable to install Site script. Please contact support"
-msgstr "Nie udało się zainstalować skryptu Site. Skontaktuj się z pomocą techniczną"
+msgid "Unable to install Site script."
+msgstr "Nie udało się zainstalować skryptu Site."
 
 #: integrations/esputnik/Yespo_Localization.php:46
-msgid "Unable to install Web Push script. Please contact support"
-msgstr "Nie udało się zainstalować skryptu Web Push. Skontaktuj się z pomocą techniczną"
+msgid "Please contact support"
+msgstr "Skontaktuj się z pomocą techniczną"
+
+#: integrations/esputnik/Yespo_Localization.php:47
+msgid "Unable to install Web Push script."
+msgstr "Nie udało się zainstalować skryptu Web Push."

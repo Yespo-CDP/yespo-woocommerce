@@ -112,7 +112,7 @@ class Yespo_Export_Orders
                 $export_quantity++;
 
                 $orders = $this->get_bulk_export_orders();
-                $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
+                $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update', count($orders));
 
                 if(count($orders) <= 0) {
                     $current_status = 'completed';

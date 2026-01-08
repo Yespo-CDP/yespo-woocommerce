@@ -41,7 +41,19 @@ class Yespo_Web_Tracking_Curl_Request
                 return 'Error: ' . $response->get_error_message();
             }
 
-            return wp_remote_retrieve_response_code($response);
+            $code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+
+            if ($code < 200 || $code > 299) Yespo_Logging_Remote::web_tracking_sync_error($code);
+
+            $decoded_body = json_decode($body, true);
+
+            return wp_json_encode([
+                'request_data' => $tracking_data,
+                'response_body' => $decoded_body ?: $body,
+                'code' => $code,
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
         } catch (Exception $e) {
             return 'Error: ' . $e->getMessage();
         }

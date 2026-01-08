@@ -42,8 +42,10 @@ class Yespo_Localization
 
             'getWebtrackingScriptNonce' => wp_nonce_field('yespo_get_webtracking_script', 'yespo_get_webtracking_script_nonce', true, false),
             'getTryAgainText' => esc_html__( 'Try again', 'yespo-cdp' ),
-            'getTryAgainWebtrackingSpanText' => esc_html__( 'Unable to install Site script. Please contact support', 'yespo-cdp' ),
-            'getTryAgainWebpushSpanText' => esc_html__( 'Unable to install Web Push script. Please contact support', 'yespo-cdp' ),
+            'getTryAgainWebtrackingSpanText' => esc_html__( 'Unable to install Site script.', 'yespo-cdp' ),
+            'getTryAgainWebpushSpanText' => esc_html__( 'Unable to install Web Push script.', 'yespo-cdp' ),
+            'getTryAgainSpanLinkText' => esc_html__( 'Please contact support', 'yespo-cdp' ),
+            'yespoLinkSupport' => 'https://yespo.io/support',
 
             'yespoGetAccountYespoNameNonce' => wp_create_nonce('yespo_get_account_yespo_name'),
             'yespoCheckApiAuthorizationYespoNonce' => wp_create_nonce('yespo_check_api_authorization_yespo'),

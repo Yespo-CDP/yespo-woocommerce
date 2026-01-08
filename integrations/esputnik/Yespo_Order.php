@@ -28,7 +28,7 @@ class Yespo_Order
         $data = Yespo_Order_Mapping::order_woo_to_yes($order);
 
         if($data){
-            $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $data, 'orders');
+            $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $data, 'orders', 1000000);
             if (($response > 199 && $response < 300) || $response == 400) {
                 if ($order && is_a($order, 'WC_Order') && $order->get_id()) {
                     update_post_meta($order->get_id(), self::ORDER_META_KEY, 'true');
@@ -48,7 +48,7 @@ class Yespo_Order
 
     }
 
-    public function create_bulk_orders_on_yespo($orders, $operation = 'update'){
+    public function create_bulk_orders_on_yespo($orders, $operation = 'update', $offset = 0){
 
         global $wpdb;
         if (empty($this->authData)) {
@@ -56,7 +56,7 @@ class Yespo_Order
         }
 
         if (isset($orders['orders']) && $orders['orders'] > 0){
-            $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders, 'orders');
+            $response = Yespo_Curl_Request::curl_request(self::REMOTE_ORDER_YESPO_URL, self::CUSTOM_ORDER_REQUEST, $this->authData, $orders, 'orders', $offset);
 
             (new Yespo_Export_Orders())->add_entry_queue_items();
 

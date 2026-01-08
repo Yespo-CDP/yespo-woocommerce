@@ -32,18 +32,18 @@ function yespo_error_api_key_admin_notice_function() {
         else $yespo_api_key = '';
     }
     if(!empty($yespo_api_key)){
-        $result = (new \Yespo\Integrations\Esputnik\Yespo_Account())->send_keys($yespo_api_key);
+        $result = json_decode( (new \Yespo\Integrations\Esputnik\Yespo_Account())->send_keys($yespo_api_key));
         (new \Yespo\Integrations\Esputnik\Yespo_Account())->add_entry_auth_log($yespo_api_key, $result);
     }
-    if (isset($result) && strpos($result, 'Connection refused') !== false) $result = 0;
-    if(!empty($yespo_api_key) && $result === 401){
+    if (isset($result) && strpos($result->code, 'Connection refused') !== false) $result->code = 0;
+    if(!empty($yespo_api_key) && $result->code === 401){
         ?>
         <div class="notice notice-error is-dismissible">
             <p><?php echo esc_html__("Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost.", 'yespo-cdp'); ?></p>
         </div>
         <?php
     }
-    if(isset($result) && $result === 0){
+    if(isset($result) && $result->code === 0){
         ?>
         <div class="notice notice-error is-dismissible">
             <p><?php echo esc_html__('Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved.', 'yespo-cdp')?></p>
@@ -63,16 +63,24 @@ function yespo_get_account_profile_name_function(){
 
     if (isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_get_account_yespo_name') {
         $organisationName = '';
+        $orgId = '';
         if ( get_option( 'yespo_options' ) !== false ) {
             $options = get_option('yespo_options', array());
             if (isset($options['yespo_username'])) $organisationName = sanitize_text_field($options['yespo_username']);
+            if (isset($options['yespo_orgId'])) $orgId = sanitize_text_field($options['yespo_orgId']);
         }
-        if(!isset($organisationName)){
+        if(!isset($organisationName) || !isset($orgId)){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Account())->get_profile_name();
             if (!empty($response)) {
                 $objResponse = json_decode($response);
-                $organisationName = sanitize_text_field($objResponse->organisationName);
-                $options['yespo_username'] = $organisationName;
+                if(!isset($organisationName)) {
+                    $organisationName = sanitize_text_field($objResponse->response_body->organisationName);
+                    $options['yespo_username'] = $organisationName;
+                }
+                if(!isset($orgId)) {
+                    $orgId = sanitize_text_field($objResponse->response_body->orgId);
+                    $options['yespo_orgId'] = $orgId;
+                }
                 update_option('yespo_options', $options);
             }
         }
@@ -97,10 +105,10 @@ function yespo_check_api_authorization_function(){
             if (isset($options['yespo_api_key'])) $yespo_api_key = sanitize_text_field($options['yespo_api_key']);
         }
         if(isset($yespo_api_key)){
-            $result = (new \Yespo\Integrations\Esputnik\Yespo_Account())->send_keys($yespo_api_key);
+            $result = json_decode((new \Yespo\Integrations\Esputnik\Yespo_Account())->send_keys($options['yespo_api_key']));
             (new \Yespo\Integrations\Esputnik\Yespo_Account())->add_entry_auth_log($yespo_api_key, $result);
-            if (strpos($result, 'Connection refused') !== false) $result = 0;
-            if ($result === 200) {
+            if (isset($result) && strpos($result->code, 'Connection refused') !== false) $result->code = 0;
+            if ($result && $result->code === 200) {
                 (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
 
                 /* webtracking */
@@ -109,10 +117,11 @@ function yespo_check_api_authorization_function(){
                 $webtracking_label_400 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_400();
                 $webtracking_label_500 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_500();
 
+                $get_webtracking_response = 200;
                 if((!$is_webtracking && $display_webtracking_form) || (!$is_webtracking && $webtracking_label_400) ) $get_webtracking_response = 400;
                 else if(!$is_webtracking && $webtracking_label_500) $get_webtracking_response = 500;
 
-                (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('api', $is_webtracking, 'pered umovou 500 api webtracking');
+                //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('api', $is_webtracking, 'pered umovou 500 api webtracking');
                 if($get_webtracking_response && ($get_webtracking_response === 400 || $get_webtracking_response === 404) && !$is_webtracking) $is_webtracking = false;
                 if($get_webtracking_response && $get_webtracking_response === 500 && !$is_webtracking){
 
@@ -130,10 +139,11 @@ function yespo_check_api_authorization_function(){
                 $webpush_label_400 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_400();
                 $webpush_label_500 = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_500();
 
+                $get_push_response = 200;
                 if((!$is_webpush && $display_wepush_form) || (!$is_webpush && $webpush_label_400) ) $get_push_response = 400;
                 else if(!$is_webpush && $webpush_label_500) $get_push_response = 500;
 
-                (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('api', $is_webpush, 'pered umovou 500 api');
+                //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('api', $is_webpush, 'pered umovou 500 api');
                 if($get_push_response && ($get_push_response === 400 || $get_push_response === 404) && !$is_webpush) $is_webpush = false;
                 if($get_push_response && $get_push_response === 500 && !$is_webpush){
 
@@ -177,16 +187,19 @@ function yespo_save_settings_via_form_function() {
         if (isset($_POST['yespo_api_key'])) $options['yespo_api_key'] = sanitize_text_field(wp_unslash($_POST['yespo_api_key']));
         else $options['yespo_api_key'] = '';
         $accountClass = new \Yespo\Integrations\Esputnik\Yespo_Account();
-        $result = $accountClass->send_keys($options['yespo_api_key']);
-        if (strpos($result, 'Connection refused') !== false) $result = 0;
-        if ($result === 200) {
+        $result = json_decode($accountClass->send_keys($options['yespo_api_key']));
+        if (isset($result) && strpos($result->code, 'Connection refused') !== false) $result->code = 0;
+        if ($result->code === 200) {
             update_option('yespo_options', $options);
             $userData = $accountClass->get_profile_name();
             if (!empty($userData)) {
                 $objResponse = json_decode($userData);
                 $organisationName = sanitize_text_field($objResponse->organisationName);
                 $options['yespo_username'] = $organisationName;
+                $orgId = sanitize_text_field($objResponse->orgId);
+                $options['yespo_orgId'] = $orgId;
                 update_option('yespo_options', $options);
+                Yespo\Integrations\Webtracking\Yespo_Logging_Remote::add_api_key_success();
                 $get_webtracking_response = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script(); //comment when button for tracking
                 $get_push_response = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); //webpush
             }
@@ -227,11 +240,13 @@ function yespo_save_settings_via_form_function() {
                 'webpush' => $is_webpush //webpush
             );
         } else if($result === 0){
+            Yespo\Integrations\Webtracking\Yespo_Logging_Remote::add_api_key_error($result);
             $response_data = array(
                 'status' => 'incorrect',
                 'code' => $result
             );
         } else {
+            Yespo\Integrations\Webtracking\Yespo_Logging_Remote::add_api_key_error($result);
             $response_data = array(
                 'status' => 'error',
                 'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Invalid API key", 'yespo-cdp') . '</p></div>'),
@@ -263,9 +278,9 @@ function yespo_get_yespo_tracking_code_function() {
 
         if(isset($yespo_api_key)) {
             $accountClass = new \Yespo\Integrations\Esputnik\Yespo_Account();
-            $result = $accountClass->send_keys($options['yespo_api_key']);
-            if (strpos($result, 'Connection refused') !== false) $result = 0;
-            if ($result === 200) {
+            $result = json_decode($accountClass->send_keys($options['yespo_api_key']));
+            if (isset($result) && strpos($result->code, 'Connection refused') !== false) $result->code = 0;
+            if ($result && $result->code === 200) {
 
                 $get_webtracker_response = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->make_tracking_script();
 
@@ -323,9 +338,9 @@ function yespo_get_yespo_webpush_code_function() {
 
         if(isset($yespo_api_key)) {
             $accountClass = new \Yespo\Integrations\Esputnik\Yespo_Account();
-            $result = $accountClass->send_keys($options['yespo_api_key']);
-            if (strpos($result, 'Connection refused') !== false) $result = 0;
-            if ($result === 200) {
+            $result = json_decode($accountClass->send_keys($options['yespo_api_key']));
+            if (isset($result) && strpos($result->code, 'Connection refused') !== false) $result->code = 0;
+            if ($result && $result->code === 200) {
 
                 $get_push_response = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->start(); //webpush
 
@@ -339,7 +354,7 @@ function yespo_get_yespo_webpush_code_function() {
                 }
 
                 $webpush400 = false;
-                if(($get_push_response === 400 || $get_push_response === 404) && !$is_webpush) $$webpush400 = true;
+                if(($get_push_response === 400 || $get_push_response === 404) && !$is_webpush) $webpush400 = true;
 
                 if ($is_webpush) {
                     $response_data = array(

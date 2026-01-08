@@ -16,9 +16,12 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     public function add_to_cart_event() {
         if(!(new Yespo_User_Event())->get_webId()) return false;
         $json = $this->generate_json();
-        $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
+        $response = json_decode(Yespo_Web_Tracking_Curl_Request::curl_request($json), true);
 
-        (new Yespo_Logger())->write_to_file('StatusCart', $json, $response);
+        (new Yespo_Logger())->write_to_file('StatusCart', $json, $response['response_body']);
+
+        if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_status_cart_event_success($response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_status_cart_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
 
         return true;
     }
@@ -26,9 +29,11 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     public function after_cart_item_quantity_update() {
         if(!(new Yespo_User_Event())->get_webId()) return false;
         $json = $this->generate_json();
-        $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
+        $response = json_decode(Yespo_Web_Tracking_Curl_Request::curl_request($json), true);
 
-        (new Yespo_Logger())->write_to_file('StatusCart', $json, $response);
+        (new Yespo_Logger())->write_to_file('StatusCart', $json, $response['response_body']);
+        if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_status_cart_event_success($response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_status_cart_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
 
         return true;
     }
@@ -36,9 +41,11 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
     public function cart_item_removed() {
         if(!(new Yespo_User_Event())->get_webId()) return false;
         $json = $this->generate_json();
-        $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
+        $response = json_decode(Yespo_Web_Tracking_Curl_Request::curl_request($json), true);
 
-        (new Yespo_Logger())->write_to_file('StatusCart', $json, $response);
+        (new Yespo_Logger())->write_to_file('StatusCart', $json, $response['response_body']);
+        if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_status_cart_event_success($response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_status_cart_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
 
         return true;
     }

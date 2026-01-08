@@ -22,9 +22,15 @@ class Yespo_Account
                 return 'Error: ' . $response->get_error_message();
             }
 
-            $status_code = wp_remote_retrieve_response_code($response);
+            $code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
 
-            return $status_code;
+            $decoded_body = json_decode($body, true);
+
+            return wp_json_encode([
+                'response_body' => $decoded_body ?: $body,
+                'code' => $code,
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         } catch (Exception $e) {
             return 'Error: ' . $e->getMessage();

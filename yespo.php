@@ -6,7 +6,7 @@
  * @copyright 2024 Yespo
  * @license   GPL-2.0-or-later
  *
- * Plugin Name:     Yespo CDP for eCommerce: Marketing Automation, Omnichannel, Email Marketing, Product Recommendations, Web Tracking & Personalization
+ * Plugin Name:     Yespo CDP for WooCommerce: Email Marketing, Automation & Web Tracking
  * Description:     CDP for WooCommerce: boost conversion and retention with omnichannel campaigns (email, SMS, push notifications, widgets) and product recommendations!
  * Version:         1.1.8
  * Author:          Yespo

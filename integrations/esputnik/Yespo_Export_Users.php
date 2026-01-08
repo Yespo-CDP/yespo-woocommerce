@@ -73,7 +73,7 @@ class Yespo_Export_Users
                 $usersForExport = $this->get_bulk_users_object();
 
                 if($usersForExport && count($usersForExport) > 0) {
-                    $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport));
+                    $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport), count($usersForExport));
                     $endTime = microtime(true);
 
                     if ($response == 429 || $response == 500) {
@@ -96,6 +96,7 @@ class Yespo_Export_Users
                 } else if(count($usersForExport) === 0){
                     $current_status = 'completed';
                     $exported = $total;
+                    $this->set_exported_user_id(0);
                 }
 
                 $error = Yespo_Errors::get_error_entry();
@@ -105,6 +106,7 @@ class Yespo_Export_Users
             if(($total <= $exported + $live_exported) || $this->get_users_export_count() < 1){
                 $current_status = 'completed';
                 $exported = $total;
+                $this->set_exported_user_id(0);
             } else $exported += $live_exported;
 
             $this->update_table_data($status->id, $exported, $current_status, $http_code);
@@ -113,6 +115,7 @@ class Yespo_Export_Users
             $status = $this->get_user_export_status();
             if(!empty($status) && $status->status === 'completed' && $status->code === null){
                 $this->update_table_data($status->id, intval($status->total), $status->status);
+                $this->set_exported_user_id(0);
             }
         }
     }

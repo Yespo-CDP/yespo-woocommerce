@@ -82,13 +82,27 @@ class Yespo_Web_Tracking_Script
 
     public function add_script_to_options(){
         if(!$this->is_script_in_options()) {
-            $script = $this->get_tracking_script();
-            if($script === 400 || $script === 404 || $script === 500) return $script;
-            if($script) {
-                $this->options['yespo_tracking_script'] = $script;
-                update_option('yespo_options', $this->options);
-                return true;
+            $script = json_decode($this->get_tracking_script(), true);
+            if($script['code'] === 400 || $script['code'] === 404 || $script['code'] === 500) {
+                Yespo_Logging_Remote::get_site_script_error($script['code'], $script['response_body'], $script['code']);
+                
+                return $script['code'];
             }
+
+            if ($script && !empty($script['response_body'])) {
+                Yespo_Logging_Remote::get_site_script_success($script['response_body'], $script['code']);
+                $this->options['yespo_tracking_script'] = wp_json_encode($script['response_body']);
+
+                // Перевіряємо результат update_option
+                if (update_option('yespo_options', $this->options)) {
+                    Yespo_Logging_Remote::add_site_script_html_success();
+                    return true;
+                } else {
+                    Yespo_Logging_Remote::add_site_script_html_error($script['code']);
+                    return false;
+                }
+            }
+
         }
         return false;
     }
@@ -100,18 +114,22 @@ class Yespo_Web_Tracking_Script
             if (!empty($response)) {
                 $data = json_decode($response, true);
 
-                if (json_last_error() === JSON_ERROR_NONE && is_array($data) && !empty($data['siteId'])) {
-                    $tenantId = $data['siteId'];
+                if (json_last_error() === JSON_ERROR_NONE && is_array($data["response_body"]) && !empty($data["response_body"]['siteId'])) {
+                    $tenantId = $data["response_body"]['siteId'];
 
                     (new Yespo_Logger())->write_to_file('Response post curl', $tenantId, 'got tenantId');
 
                     $this->options['yespo_tenant_id'] = $tenantId;
                     update_option('yespo_options', $this->options);
+
+                    Yespo_Logging_Remote::add_site_domain_success($data["request_data"], $data["response_body"], $data["code"]);
                 } else {
                     $error_msg = json_last_error() !== JSON_ERROR_NONE
                         ? 'JSON decode error: ' . json_last_error_msg()
                         : 'Missing or invalid siteId';
                     (new Yespo_Logger())->write_to_file('Response post curl', $error_msg, 'error');
+
+                    Yespo_Logging_Remote::add_site_domain_error($error_msg, $data["request_data"], $data["response_body"], $data["code"]);
                 }
             } else {
                 (new Yespo_Logger())->write_to_file('Response post curl', 'Empty response from send_domain_to_yespo', 'error');
@@ -181,29 +199,16 @@ class Yespo_Web_Tracking_Script
                     return 'Error: ' . $response->get_error_message();
                 }
 
-                $http_code = wp_remote_retrieve_response_code($response);
+                $code = wp_remote_retrieve_response_code($response);
+                $body = wp_remote_retrieve_body($response);
 
-                if (in_array($http_code, [400, 404, 500])) return $http_code;
+                $decoded_body = json_decode($body, true);
 
-                $response_body = wp_remote_retrieve_body($response);
-
-                if ($custom_request === 'POST') {
-                    if (($http_code === 200) || ($http_code === 201) ) {
-                        return $response_body;
-                    }
-
-                    return false;
-                }
-
-                if ($custom_request === 'GET') {
-                    if ($http_code === 200) {
-                        return wp_json_encode($response_body);
-                    }
-
-                    return false;
-                }
-
-                return $response_body;
+                return wp_json_encode([
+                    'request_data' => $data,
+                    'response_body' => $decoded_body ?: $body,
+                    'code' => $code,
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
             }
 
         } catch (Exception $e) {

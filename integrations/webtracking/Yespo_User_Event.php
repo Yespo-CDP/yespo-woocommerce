@@ -36,9 +36,11 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
         Yespo_Web_Tracking_Curl_Request::curl_request($user_json);
 
         $webcontact = $this->get_webcontact_data($user_data);
-        $response = Yespo_Web_Tracking_Curl_Request::curl_request($webcontact);
+        $response = json_decode(Yespo_Web_Tracking_Curl_Request::curl_request($webcontact), true);
 
-        (new Yespo_Logger())->write_to_file('CustomerData', $user_json, $response);
+        (new Yespo_Logger())->write_to_file('CustomerData', $user_json, $response['response_body']);
+        if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_customer_data_event_success($response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_customer_data_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
 
         $user = get_user_by('login', $user_id_or_login);
         if ($user) {

@@ -27,7 +27,15 @@ class Yespo_Account
 
             $decoded_body = json_decode($body, true);
 
+            $message = '';
+            if (isset($decoded_body['errors']['message'])) {
+                $message = $decoded_body['errors']['message'];
+            } else if ($code < 200 || $code >= 300){
+                $message = $code . ' ERROR';
+            }
+
             return wp_json_encode([
+                'message' => $message,
                 'response_body' => $decoded_body ?: $body,
                 'code' => $code,
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

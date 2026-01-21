@@ -246,7 +246,7 @@ function yespo_save_settings_via_form_function() {
                 'code' => $result
             );
         } else {
-            Yespo\Integrations\Webtracking\Yespo_Logging_Remote::add_api_key_error($result);
+            Yespo\Integrations\Webtracking\Yespo_Logging_Remote::add_api_key_error($result->message);
             $response_data = array(
                 'status' => 'error',
                 'message' => wp_kses_post('<div class="errorAPiKey"><p>' . __("Invalid API key", 'yespo-cdp') . '</p></div>'),

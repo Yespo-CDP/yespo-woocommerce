@@ -84,7 +84,7 @@ class Yespo_Web_Tracking_Script
         if(!$this->is_script_in_options()) {
             $script = json_decode($this->get_tracking_script(), true);
             if($script['code'] === 400 || $script['code'] === 404 || $script['code'] === 500) {
-                Yespo_Logging_Remote::get_site_script_error($script['code'], $script['response_body'], $script['code']);
+                Yespo_Logging_Remote::get_site_script_error($script['message'], $script['response_body'], $script['code']);
                 
                 return $script['code'];
             }
@@ -98,7 +98,7 @@ class Yespo_Web_Tracking_Script
                     Yespo_Logging_Remote::add_site_script_html_success();
                     return true;
                 } else {
-                    Yespo_Logging_Remote::add_site_script_html_error($script['code']);
+                    Yespo_Logging_Remote::add_site_script_html_error($script['message']);
                     return false;
                 }
             }
@@ -204,8 +204,16 @@ class Yespo_Web_Tracking_Script
 
                 $decoded_body = json_decode($body, true);
 
+                $message = '';
+                if (isset($decoded_body['errors']['message'])) {
+                    $message = $decoded_body['errors']['message'];
+                } else if ($code < 200 || $code >= 300){
+                    $message = $code . ' ERROR';
+                }
+
                 return wp_json_encode([
                     'request_data' => $data,
+                    'message' => $message,
                     'response_body' => $decoded_body ?: $body,
                     'code' => $code,
                 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

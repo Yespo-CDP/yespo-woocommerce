@@ -31,6 +31,26 @@ msgstr "Синхронізація даних"
 msgid "Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools"
 msgstr "Синхронізуйте контакти та замовлення для подальшого аналізу та ефективного використання даних за допомогою інструментів автоматизації маркетингу Yespo"
 
+#: functions/functions.php:21
+msgid "Customers"
+msgstr "Клієнти"
+
+#: functions/functions.php:22
+msgid "Orders"
+msgstr "Замовлення"
+
+#: functions/functions.php:23
+msgid "Synchronized"
+msgstr "Синхронізовані"
+
+#: functions/functions.php:24
+msgid "Failed"
+msgstr "Не успішні"
+
+#: functions/functions.php:25
+msgid "Total"
+msgstr "Всього"
+
 #: functions/functions.php:27
 msgid "API Key"
 msgstr "API ключ"
@@ -81,7 +101,7 @@ msgstr "Відновити"
 
 #: functions/functions.php:83
 msgid "Some error have occurred. Try to resume synchronization. If it doesn`t help, contact Support"
-msgstr "Виникла помилка. Спробуйте відновити синхронізацію. Якщо це не допоможе, зв`яжіться зі службою підтримки"
+msgstr "Виникла помилка. Спробуйте відновити синхронізацію. Якщо це не допоможе, зв'яжіться зі службою підтримки"
 
 #: functions/functions.php:361
 msgid "Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost."
@@ -89,11 +109,11 @@ msgstr "Невалідний API ключ. Видаліть плагін і по
 
 #: functions/functions.php:362
 msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
-msgstr "Вихідна активність на сервері заблокована. Будь ласка, зв`яжіться з вашим провайдером для вирішення цієї проблеми. Синхронізація даних буде автоматично відновлена без втрати даних після вирішення проблеми."
+msgstr "Вихідна активність на сервері заблокована. Будь ласка, зв'яжіться з вашим провайдером для вирішення цієї проблеми. Синхронізація даних буде автоматично відновлена без втрати даних після вирішення проблеми. Перезавантажте сторінку, щоб побачити актуальний стан процесу синхронізації."
 
 #: functions/functions.php:86
 msgid "Contact Support"
-msgstr "Зв`язатися зі службою підтримки"
+msgstr "Зв'язатися зі службою підтримки"
 
 #: functions/functions.php:87
 msgid "Data is successfully synchronized"
@@ -108,8 +128,8 @@ msgid "Data synchronization has started"
 msgstr "Синхронізація даних розпочалася"
 
 #: integrations/esputnik/Yespo_Localization.php:19
-msgid "Web push is successfully configured. Notifications can be managed from your Yespo account."
-msgstr "Веб-пуш успішно налаштовано. Керувати сповіщеннями можна в обліковому записі Yespo."
+msgid "Web push is successfully configured. Manage notifications in your Yespo account."
+msgstr "Web push успішно налаштовано. Керуйте сповіщеннями у своєму акаунті Yespo."
 
 #: integrations/esputnik/Yespo_Localization.php:44
 msgid "Try again"
@@ -117,12 +137,12 @@ msgstr "Спробувати ще раз"
 
 #: integrations/esputnik/Yespo_Localization.php:45
 msgid "Unable to install Site script."
-msgstr "Не вдалося встановити Site скрипт."
+msgstr "Неможливо встановити site скрипт."
 
 #: integrations/esputnik/Yespo_Localization.php:46
 msgid "Please contact support"
-msgstr "Зверніться в підтримку"
+msgstr "Зверніться до служби підтримки"
 
 #: integrations/esputnik/Yespo_Localization.php:47
 msgid "Unable to install Web Push script."
-msgstr "Не вдалося встановити скрипт Web Push."
+msgstr "Неможливо встановити web push скрипт."

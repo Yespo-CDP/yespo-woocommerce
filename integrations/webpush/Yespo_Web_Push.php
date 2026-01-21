@@ -34,7 +34,7 @@ class Yespo_Web_Push
         (new Yespo_Logger())->write_to_file('POST', json_encode($this->get_json()), $response_post['code']);
 
         if ($response_post['code'] < 200 || $response_post['code'] >= 300){
-            Yespo_Logging_Remote::add_web_push_domain_error($response_post['code'], $response_post['request_data'], $response_post['response_body'], $response_post['code']);
+            Yespo_Logging_Remote::add_web_push_domain_error($response_post['message'], $response_post['request_data'], $response_post['response_body'], $response_post['code']);
             return $response_post['code'];
         }
         else Yespo_Logging_Remote::add_web_push_domain_success($response_post['request_data'], $response_post['response_body'], $response_post['code']);
@@ -52,19 +52,19 @@ class Yespo_Web_Push
             || !is_string($response_get['response_body']['script'])
             || $response_get['response_body']['script'] === ''
         ) {
-            Yespo_Logging_Remote::get_web_push_script_error($response_get['code'], $response_get['response_body'], $response_get['code']);
+            Yespo_Logging_Remote::get_web_push_script_error($response_get['message'], $response_get['response_body'], $response_get['code']);
             return $response_get['code'];
         }
 
         $data = $response_get['response_body'];
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            Yespo_Logging_Remote::get_web_push_script_error($response_get['code'], $response_get['response_body'], $response_get['code']);
+            Yespo_Logging_Remote::get_web_push_script_error($response_get['message'], $response_get['response_body'], $response_get['code']);
             return false;
         }
         if (!is_array($data) || !isset($data['script']) || !isset($data['serviceWorker'])){
-            Yespo_Logging_Remote::get_web_push_script_error($response_get['code'], $response_get['response_body'], $response_get['code']);
-            Yespo_Logging_Remote::add_web_push_script_html_error($response_get['code']);
+            Yespo_Logging_Remote::get_web_push_script_error($response_get['message'], $response_get['response_body'], $response_get['code']);
+            Yespo_Logging_Remote::add_web_push_script_html_error($response_get['message']);
             return false;
         }
 
@@ -72,7 +72,7 @@ class Yespo_Web_Push
 
         $this->add_script_to_options(json_encode($data['script']));
         if($this->write_script_to_file($data['serviceWorker'])) Yespo_Logging_Remote::add_swjs_site_root_success($data, $response_get['code']);
-        else Yespo_Logging_Remote::add_swjs_site_root_error($response_get['code'], $data, $response_get['code']);
+        else Yespo_Logging_Remote::add_swjs_site_root_error($response_get['message'], $data, $response_get['code']);
 
         $this->remove_form_500();
         $this->remove_label_500();
@@ -186,11 +186,11 @@ class Yespo_Web_Push
                     Yespo_Logging_Remote::add_web_push_script_html_success();
                     return true;
                 } else {
-                    Yespo_Logging_Remote::add_web_push_script_html_error('update_failed');
+                    Yespo_Logging_Remote::add_web_push_script_html_error('Update failed');
                     return false;
                 }
             } else {
-                Yespo_Logging_Remote::add_web_push_script_html_error('empty_script');
+                Yespo_Logging_Remote::add_web_push_script_html_error('Empty script');
                 return false;
             }
         }

@@ -21,7 +21,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
         (new Yespo_Logger())->write_to_file('StatusCart', $json, $response['response_body']);
 
         if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_status_cart_event_success($response['request_data'], $response['response_body'], $response['code']);
-        else Yespo_Logging_Remote::send_status_cart_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_status_cart_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
 
         return true;
     }
@@ -33,7 +33,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
 
         (new Yespo_Logger())->write_to_file('StatusCart', $json, $response['response_body']);
         if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_status_cart_event_success($response['request_data'], $response['response_body'], $response['code']);
-        else Yespo_Logging_Remote::send_status_cart_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_status_cart_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
 
         return true;
     }
@@ -45,7 +45,7 @@ class Yespo_Cart_Event extends Yespo_Web_Tracking_Abstract
 
         (new Yespo_Logger())->write_to_file('StatusCart', $json, $response['response_body']);
         if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_status_cart_event_success($response['request_data'], $response['response_body'], $response['code']);
-        else Yespo_Logging_Remote::send_status_cart_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_status_cart_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
 
         return true;
     }

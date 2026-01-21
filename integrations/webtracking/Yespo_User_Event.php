@@ -40,7 +40,7 @@ class Yespo_User_Event extends Yespo_Web_Tracking_Abstract
 
         (new Yespo_Logger())->write_to_file('CustomerData', $user_json, $response['response_body']);
         if($response['code'] > 199 && $response['code'] < 300) Yespo_Logging_Remote::send_customer_data_event_success($response['request_data'], $response['response_body'], $response['code']);
-        else Yespo_Logging_Remote::send_customer_data_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
+        else Yespo_Logging_Remote::send_customer_data_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
 
         $user = get_user_by('login', $user_id_or_login);
         if ($user) {

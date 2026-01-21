@@ -5,17 +5,25 @@ class YespoExportData {
         this.h4 = yespoVars.h4;
         this.resume = yespoVars.resume;
         this.error = yespoVars.error;
-        this.error401 = yespoVars.error401;
+        //this.error401 = yespoVars.error401;
+        this.error401 = yespoVars.invalidAPIKey;
         this.error555 = yespoVars.error555;
         this.success = yespoVars.success;
         this.trackerAdded = yespoVars.trackerAdded;
         this.webPushAdded = yespoVars.webPushAdded;
-        this.synhStarted = yespoVars.synhStarted;
+        //this.synhStarted = yespoVars.synhStarted;
+        this.synhStarted = yespoVars.dataSynchronization;
         this.pluginUrl = yespoVars.pluginUrl;
         this.pauseButton = yespoVars.pauseButton;
         this.resumeButton = yespoVars.resumeButton;
         this.contactSupportButton = yespoVars.contactSupportButton;
         this.ajaxUrl = yespoVars.ajaxUrl;
+
+        this.customers = yespoVars.customers;
+        this.orders = yespoVars.orders;
+        this.synchronized = yespoVars.synchronized;
+        this.failed = yespoVars.failed;
+        this.total = yespoVars.total;
 
         this.getScriptButtonText = yespoVars.getScriptButtonText;
         this.getScriptSpanText = yespoVars.getScriptSpanText;

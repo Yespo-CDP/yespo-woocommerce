@@ -21,8 +21,8 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
                 Yespo_Logging_Remote::send_customer_data_event_success($response['request_data'], $response['response_body'], $response['code']);
                 Yespo_Logging_Remote::send_purchased_items_event_success($response['request_data'], $response['response_body'], $response['code']);
             } else {
-                Yespo_Logging_Remote::send_customer_data_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
-                Yespo_Logging_Remote::send_purchased_items_event_error($response['code'], $response['request_data'], $response['response_body'], $response['code']);
+                Yespo_Logging_Remote::send_customer_data_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
+                Yespo_Logging_Remote::send_purchased_items_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
             }
 
             return true;

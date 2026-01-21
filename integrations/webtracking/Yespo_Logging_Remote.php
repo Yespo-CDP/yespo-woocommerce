@@ -206,6 +206,7 @@ class Yespo_Logging_Remote
         $message = "DATA_SYNC_FAILED";
         $log_level = "ERROR";
         $data = self::get_data();
+        $errorMessage = 'Error ' . $errorMessage;
 
         //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('400', self::generate_json($message, $log_level, $data, $errorMessage), 'data_sync_error');
 
@@ -228,6 +229,7 @@ class Yespo_Logging_Remote
         $message = "SEND_CONTACTS_BULK_FAILED";
         $log_level = "ERROR";
         $data = self::get_data(null, $response_body, $code, $offset);
+        $errorMessage = 'Error ' . $errorMessage;
 
         //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('400', self::generate_json($message, $log_level, $data, $errorMessage), 'add_contacts_bulk_error');
 
@@ -250,6 +252,7 @@ class Yespo_Logging_Remote
         $message = "SEND_ORDERS_BULK_FAILED";
         $log_level = "ERROR";
         $data = self::get_data(null, $response_body, $code, $offset);
+        $errorMessage = 'Error ' . $errorMessage;
 
         //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('400', self::generate_json($message, $log_level, $data, $errorMessage), 'add_orders_bulk_error');
 
@@ -377,7 +380,7 @@ class Yespo_Logging_Remote
         //return $data;
     }
 
-    private static function generate_json($message, $log_level, $data,$errorMessage = '')
+    private static function generate_json($message, $log_level, $data, $errorMessage = '')
     {
         $orgId = self::get_orgid();
         return [

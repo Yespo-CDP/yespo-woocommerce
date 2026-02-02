@@ -337,7 +337,8 @@ class Yespo_Export_Orders
         $meta_key = esc_sql($this->meta_key);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key));
+        //return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key));
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(p.ID) FROM %i AS p WHERE p.post_type IN ('shop_order','shop_order_placehold') AND p.post_status <> %s AND p.post_parent = %d AND p.ID > 0 AND NOT EXISTS (SELECT 1 FROM {$prefix_postmeta_table} AS m WHERE m.post_id = p.ID AND m.meta_key = %s AND m.meta_value = 'true')", $table_posts, 'wc-checkout-draft', 0, $meta_key));
     }
 
     public function get_bulk_export_orders_count(){
@@ -485,6 +486,7 @@ class Yespo_Export_Orders
         $table_posts = esc_sql($this->table_posts);
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        /*
         return $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND post_modified_gmt BETWEEN %s AND %s",
@@ -496,6 +498,23 @@ class Yespo_Export_Orders
                 gmdate('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
         );
+        */
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT *
+                FROM %i AS p
+                WHERE p.post_type IN ('shop_order','shop_order_placehold')
+                    AND p.post_status <> %s
+                    AND p.post_parent = %d
+                    AND p.post_modified_gmt BETWEEN %s AND %s",
+                        $table_posts,
+                        'wc-checkout-draft',
+                        0,
+                        gmdate('Y-m-d H:i:s', time() - $this->period_selection_since),
+                        gmdate('Y-m-d H:i:s', time() - $this->period_selection_up)
+            )
+        );
+
     }
 
     public function is_email_in_removed_users($email) {

@@ -39,7 +39,7 @@ class Yespo_Contact
     }
 
     //method export bulk
-    public function export_bulk_users($data, $offset = 0){
+    public function export_bulk_users($data, $offset = 1){
         if(!empty($data)){
 
             $response = $this->process_on_yespo($data, 'bulk', null, null, false, $offset);

@@ -70,4 +70,38 @@ class Yespo_Account
         );
 
     }
+
+    /*** set orgId value ***/
+    public function set_orgId() {
+
+        $options = get_option('yespo_options', array());
+
+        if (!isset($options['yespo_orgId']) && isset($options['yespo_api_key'])) {
+            $response = $this->get_profile_name();
+
+            if (!empty($response)) {
+                $objResponse = json_decode($response);
+
+                if (json_last_error() === JSON_ERROR_NONE && is_object($objResponse)) {
+
+                    if (isset($objResponse->orgId)) {
+                        $orgId = sanitize_text_field($objResponse->orgId);
+
+                        if (!empty($orgId)) {
+                            $options['yespo_orgId'] = $orgId;
+
+                            if (update_option('yespo_options', $options)) {
+                                return true;
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        return false;
+    }
+
+
+
 }

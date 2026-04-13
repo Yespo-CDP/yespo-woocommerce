@@ -720,6 +720,7 @@ add_filter( 'cron_schedules', 'yespo_establish_custom_cron_interval_function' );
 /*** START CRON JOB ***/
 function yespo_export_data_cron_function(){
     set_time_limit(60);
+    (new \Yespo\Integrations\Esputnik\Yespo_Account())->set_orgId(); //set orgId value
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_unexported_orders_because_errors();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Users())->start_active_bulk_export_users();
     (new \Yespo\Integrations\Esputnik\Yespo_Export_Orders())->start_bulk_export_orders();

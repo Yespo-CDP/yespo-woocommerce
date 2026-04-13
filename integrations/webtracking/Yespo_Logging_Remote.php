@@ -219,7 +219,7 @@ class Yespo_Logging_Remote
         $log_level = "INFO";
         $data = self::get_data(null, $response_body, $code, $offset);
 
-        //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('200', self::generate_json($message, $log_level, $data), 'add_contacts_bulk_success');
+        (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('200', self::generate_json($message, $log_level, $data), 'add_contacts_bulk_success');
 
         return self::send_curl_request(self::generate_json($message, $log_level, $data));
     }
@@ -231,7 +231,7 @@ class Yespo_Logging_Remote
         $data = self::get_data(null, $response_body, $code, $offset);
         $errorMessage = 'Error ' . $errorMessage;
 
-        //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('400', self::generate_json($message, $log_level, $data, $errorMessage), 'add_contacts_bulk_error');
+        (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('400', self::generate_json($message, $log_level, $data, $errorMessage), 'add_contacts_bulk_error');
 
         return self::send_curl_request(self::generate_json($message, $log_level, $data, $errorMessage));
     }
@@ -242,7 +242,7 @@ class Yespo_Logging_Remote
         $log_level = "INFO";
         $data = self::get_data(null, $response_body, $code, $offset);
 
-        //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('200', self::generate_json($message, $log_level, $data), 'add_orders_bulk_success');
+        (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('200', self::generate_json($message, $log_level, $data), 'add_orders_bulk_success');
 
         return self::send_curl_request(self::generate_json($message, $log_level, $data));
     }
@@ -254,7 +254,7 @@ class Yespo_Logging_Remote
         $data = self::get_data(null, $response_body, $code, $offset);
         $errorMessage = 'Error ' . $errorMessage;
 
-        //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('400', self::generate_json($message, $log_level, $data, $errorMessage), 'add_orders_bulk_error');
+        (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('400', self::generate_json($message, $log_level, $data, $errorMessage), 'add_orders_bulk_error');
 
         return self::send_curl_request(self::generate_json($message, $log_level, $data, $errorMessage));
     }
@@ -345,11 +345,11 @@ class Yespo_Logging_Remote
     /*
      * added in curl_request of Yespo_Curl_Request class */
     public static function export_data_dealing($response_body, $code, $type_response, $offset){
-        if($response_body && $code > 199 && $code < 300 && $type_response === 'users' && $offset > 0 && $offset < 100000) self::add_contacts_bulk_success($response_body, $code, $offset);
-        else if($response_body && $code < 199 || $code > 299 && $type_response === 'users' && $offset > 0 && $offset < 100000) self::add_contacts_bulk_error($code, $response_body, $code, $offset);
-        else if($response_body && $code > 199 && $code < 300 && $type_response === 'orders' && $offset > 0 && $offset < 100000) self::add_orders_bulk_success($response_body, $code, $offset);
-        else if($response_body && $code < 199 || $code > 299 && $type_response === 'orders' && $offset > 0 && $offset < 100000) self::add_orders_bulk_error($code, $response_body, $code, $offset);
-        else if($response_body && $code < 199 || $code > 299 && $offset > 100000) self::data_sync_error($code);
+        if($response_body && $code > 199 && $code < 300 && $type_response === 'users' && $offset > 0) self::add_contacts_bulk_success($response_body, $code, $offset);
+        else if($response_body && $code < 199 || $code > 299 && $type_response === 'users' && $offset > 0) self::add_contacts_bulk_error($code, $response_body, $code, $offset);
+        else if($response_body && $code > 199 && $code < 300 && $type_response === 'orders' && $offset > 0) self::add_orders_bulk_success($response_body, $code, $offset);
+        else if($response_body && $code < 199 || $code > 299 && $type_response === 'orders' && $offset > 0) self::add_orders_bulk_error($code, $response_body, $code, $offset);
+        else if($response_body && $code < 199 || $code > 299) self::data_sync_error($code);
     }
 
     /***

@@ -71,9 +71,10 @@ class Yespo_Export_Users
                 $endTime = microtime(true);
 
                 $usersForExport = $this->get_bulk_users_object();
+                $last_element = end($usersForExport);
 
                 if($usersForExport && count($usersForExport) > 0) {
-                    $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport), count($usersForExport));
+                    $response = $this->esputnikContact->export_bulk_users(Yespo_Contact_Mapping::create_bulk_export_array($usersForExport), $last_element);
                     $endTime = microtime(true);
 
                     if ($response == 429 || $response == 500) {
@@ -83,7 +84,7 @@ class Yespo_Export_Users
                         $this->update_entry_yespo_queue($response, "FINISHED", "FINISHED");
                         $http_code = '0';
                     } else if($response){
-                        $last_element = end($usersForExport);
+                        //$last_element = end($usersForExport);
                         $this->esputnikContact->add_bulk_esputnik_id_to_userprofile($usersForExport, 'true');
                         if($response == 400){
                             Yespo_Errors::error_400($usersForExport, 'users');

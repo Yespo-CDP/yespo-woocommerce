@@ -48,7 +48,7 @@ class Yespo_Order
 
     }
 
-    public function create_bulk_orders_on_yespo($orders, $operation = 'update', $offset = 0){
+    public function create_bulk_orders_on_yespo($orders, $operation = 'update', $offset = 1){
 
         global $wpdb;
         if (empty($this->authData)) {

@@ -37,7 +37,7 @@ class Yespo_Logger
         $log_entry .= "{$time}" . PHP_EOL;
         $log_entry .= "{$property}" . PHP_EOL;
         $log_entry .= "{$data}" . PHP_EOL;
-        $log_entry .= "{$response}" . PHP_EOL;
+        $log_entry .= json_encode($response, JSON_UNESCAPED_UNICODE) . PHP_EOL;
         $log_entry .= self::ENTRY_LINE . PHP_EOL;
 
         file_put_contents($log_file, $log_entry, FILE_APPEND | LOCK_EX);
@@ -87,6 +87,16 @@ class Yespo_Logger
 
         $new_content = implode(PHP_EOL, $new_blocks) . PHP_EOL;
         file_put_contents($log_file, $new_content, LOCK_EX);
+    }
+
+    public function get_user_IP() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            return $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+        } else {
+            return $_SERVER['REMOTE_ADDR'];
+        }
     }
 
 }

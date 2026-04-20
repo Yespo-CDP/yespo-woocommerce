@@ -10,10 +10,15 @@ class Yespo_Web_Tracking_Script
     const SCRIPT_URL = "https://yespo.io/api/v1/site/script";
     const METHOD_POST = "POST";
     const METHOD_GET = "GET";
+    const WEBTRACKING_LABEL_400 = 'yespo_webtracking_label_400';
+    const WEBTRACKING_LABEL_500 = 'yespo_webtracking_label_500';
+    const WEBTRACKING_FORM_500 = 'yespo_webtracking_form_500';
     private $options;
+    private $cur_time;
 
     public function __construct(){
         $this->options = get_option('yespo_options');
+        $this->cur_time = current_time('mysql', true);
     }
 
     public function check_script_code_cron(){
@@ -36,13 +41,20 @@ class Yespo_Web_Tracking_Script
     }
 
     public function make_tracking_script(){
-        if(!$this->get_label_domain_from_options()) {
+        if(!$this->is_script_in_options()){
             $this->add_label_domain_options('true');
 
-            $this->add_script_to_options();
+            $response = $this->add_script_to_options();
             $this->add_tenant_id_to_options();
 
+            if($response === 400 || $response === 404 || $response === 500) return $response;
+            else {
+                $this->remove_form_500();
+                $this->remove_label_500();
+                return true;
+            }
         }
+        return false;
     }
 
     public function send_domain_to_yespo(){
@@ -70,12 +82,29 @@ class Yespo_Web_Tracking_Script
 
     public function add_script_to_options(){
         if(!$this->is_script_in_options()) {
-            $script = $this->get_tracking_script();
-            if($script) {
-                $this->options['yespo_tracking_script'] = $script;
-                update_option('yespo_options', $this->options);
+            $script = json_decode($this->get_tracking_script(), true);
+            if($script['code'] === 400 || $script['code'] === 404 || $script['code'] === 500) {
+                Yespo_Logging_Remote::get_site_script_error($script['message'], $script['response_body'], $script['code']);
+                
+                return $script['code'];
             }
+
+            if ($script && !empty($script['response_body'])) {
+                Yespo_Logging_Remote::get_site_script_success($script['response_body'], $script['code']);
+                $this->options['yespo_tracking_script'] = wp_json_encode($script['response_body']);
+
+                // Перевіряємо результат update_option
+                if (update_option('yespo_options', $this->options)) {
+                    Yespo_Logging_Remote::add_site_script_html_success();
+                    return true;
+                } else {
+                    Yespo_Logging_Remote::add_site_script_html_error($script['message']);
+                    return false;
+                }
+            }
+
         }
+        return false;
     }
 
     public function add_tenant_id_to_options(){
@@ -85,18 +114,22 @@ class Yespo_Web_Tracking_Script
             if (!empty($response)) {
                 $data = json_decode($response, true);
 
-                if (json_last_error() === JSON_ERROR_NONE && is_array($data) && !empty($data['siteId'])) {
-                    $tenantId = $data['siteId'];
+                if (json_last_error() === JSON_ERROR_NONE && is_array($data["response_body"]) && !empty($data["response_body"]['siteId'])) {
+                    $tenantId = $data["response_body"]['siteId'];
 
                     (new Yespo_Logger())->write_to_file('Response post curl', $tenantId, 'got tenantId');
 
                     $this->options['yespo_tenant_id'] = $tenantId;
                     update_option('yespo_options', $this->options);
+
+                    Yespo_Logging_Remote::add_site_domain_success($data["request_data"], $data["response_body"], $data["code"]);
                 } else {
                     $error_msg = json_last_error() !== JSON_ERROR_NONE
                         ? 'JSON decode error: ' . json_last_error_msg()
                         : 'Missing or invalid siteId';
                     (new Yespo_Logger())->write_to_file('Response post curl', $error_msg, 'error');
+
+                    Yespo_Logging_Remote::add_site_domain_error($error_msg, $data["request_data"], $data["response_body"], $data["code"]);
                 }
             } else {
                 (new Yespo_Logger())->write_to_file('Response post curl', 'Empty response from send_domain_to_yespo', 'error');
@@ -138,7 +171,6 @@ class Yespo_Web_Tracking_Script
         $data = false
     ){
         try {
-
             if (!empty($auth_data['yespo_api_key'])) {
 
                 $headers = [
@@ -167,30 +199,124 @@ class Yespo_Web_Tracking_Script
                     return 'Error: ' . $response->get_error_message();
                 }
 
-                $http_code = wp_remote_retrieve_response_code($response);
-                $response_body = wp_remote_retrieve_body($response);
+                $code = wp_remote_retrieve_response_code($response);
+                $body = wp_remote_retrieve_body($response);
 
-                if ($custom_request === 'POST') {
-                    if (($http_code === 200) || ($http_code === 201) || ($http_code === 400 && $response_body === "Domain already exists")) {
-                        return $response_body;
-                    }
+                $decoded_body = json_decode($body, true);
 
-                    return false;
+                $message = '';
+                if (isset($decoded_body['errors']['message'])) {
+                    $message = $decoded_body['errors']['message'];
+                } else if ($code < 200 || $code >= 300){
+                    $message = $code . ' ERROR';
                 }
 
-                if ($custom_request === 'GET') {
-                    if ($http_code === 200) {
-                        return wp_json_encode($response_body);
-                    }
-
-                    return false;
-                }
-
-                return $response_body;
+                return wp_json_encode([
+                    'request_data' => $data,
+                    'message' => $message,
+                    'response_body' => $decoded_body ?: $body,
+                    'code' => $code,
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
             }
 
         } catch (Exception $e) {
             return 'Error: ' . $e->getMessage();
         }
     }
+
+
+    /*** 500 error dealing ***/
+    public function check_exist_label_500() {
+        if(!$this->is_script_in_options()) {
+
+            $label_time = $this->get_label_500();
+            $current_timestamp = current_time('timestamp', true);
+
+            if (is_string($label_time) && !$this->get_form_500()) {
+                $label_timestamp = strtotime($label_time);
+
+                if ($label_timestamp !== false && $current_timestamp < ($label_timestamp + 300) && !$this->get_form_500()) {
+
+                    $response = $this->make_tracking_script();
+                    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('web tracking script', 'inside check_exist_label_500', json_encode($response));
+
+                    if ($response > 199 && $response < 300){
+                        $this->remove_label_400();
+                        $this->remove_form_500();
+                        $this->remove_label_500();
+
+                        return 200;
+                    }
+
+                } else if ($label_timestamp !== false && $current_timestamp > ($label_timestamp + 300) && !$this->get_form_500()) {
+                    (new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('web tracking script', 'inside check_exist_label_500', 'other response than 200');
+
+                    $this->remove_label_500();
+                    $this->add_form_500();
+
+                    return false;
+                }
+
+                return 500;
+            }
+            return false;
+        }
+    }
+
+    public function add_label_400() {
+        if(!$this->get_label_400()) {
+            $this->options[self::WEBTRACKING_LABEL_400] = true;
+            update_option('yespo_options', $this->options);
+        }
+    }
+    public function add_label_500() {
+        if(!$this->get_label_500()) {
+            $this->options[self::WEBTRACKING_LABEL_500] = $this->cur_time;
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function add_form_500() {
+        if(!$this->get_form_500()) {
+            $this->options[self::WEBTRACKING_FORM_500] = 1;
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function get_label_400(){
+        if (isset($this->options[self::WEBTRACKING_LABEL_400])) return $this->options[self::WEBTRACKING_LABEL_400];
+        return false;
+    }
+    public function get_label_500(){
+        if (isset($this->options[self::WEBTRACKING_LABEL_500])) return $this->options[self::WEBTRACKING_LABEL_500];
+        return false;
+    }
+
+    public function get_form_500(){
+        if (isset($this->options[self::WEBTRACKING_FORM_500])) return true;
+        return false;
+    }
+
+    public function remove_label_400(){
+        if (isset($this->options[self::WEBTRACKING_LABEL_400])) {
+            unset($this->options[self::WEBTRACKING_LABEL_400]);
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function remove_label_500(){
+        if (isset($this->options[self::WEBTRACKING_LABEL_500])) {
+            unset($this->options[self::WEBTRACKING_LABEL_500]);
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+    public function remove_form_500(){
+        if (isset($this->options[self::WEBTRACKING_FORM_500])) {
+            unset($this->options[self::WEBTRACKING_FORM_500]);
+            update_option('yespo_options', $this->options);
+        }
+    }
+
+
 }

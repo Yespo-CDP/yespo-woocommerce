@@ -33,10 +33,16 @@
 .yespo-settings-page .userPanel{
     margin: 20px 0;
 }
+.yespo-settings-page .settingsSection {
+    display:flex;
+    flex-direction: column;
+    gap:20px;
+}
 .yespo-settings-page .settingsSection .sectionBody{
-    padding: 12px 20px;
+    padding: 6.75px 8px;
     background-color: #fff;
     overflow: auto;
+    color:#101422;
 }
 .yespo-settings-page h1{
     font-weight: 700;
@@ -47,7 +53,7 @@
     color: #5f5f5f;
 }
 
-.yespo-settings-page .settingsSection .sectionBody .field-group{
+.yespo-settings-page .settingsSection .sectionBodyAuth .field-group{
     margin:15px 0;
 }
 
@@ -67,7 +73,9 @@
     font-weight: 700;
     color:#525252;
 }
-
+.yespo-settings-page .settingsSection .sectionBodyAuth {
+    padding: 20px;
+}
 .yespo-settings-page .settingsSection .sectionBody .formBlock #api_key,
 .yespo-settings-page .settingsSection .sectionBody .formBlock #api_key:focus {
     max-width: 600px;
@@ -83,8 +91,6 @@
 .yespo-settings-page .settingsSection .sectionBody .formBlock input,
 .yespo-settings-page .settingsSection .sectionBody .formBlock #export_users,
 .yespo-settings-page .settingsSection .sectionBody .formBlock #export_orders{
-    width:100%;
-    height: 43px;
     border-radius: 4px;
     border: 1px solid #e3e3e3;
 }
@@ -107,6 +113,7 @@
 .yespo-settings-page .settingsSection .sectionBody .formBlock #sendYespoAuthData{
     max-width: 200px;
     min-width:117px;
+    width: 200px;
     height: 34px;
     font-weight: 400;
     font-size: 16px;
@@ -284,7 +291,45 @@
     color:#000;
     margin-left: 10px;
 }
-
+/* section error try again*/
+.yespo-settings-page .settingsSection .sectionErrorAgain {
+    background: #fdeeec;
+    border-radius: 4px;
+    border-left: 3px solid #ec514d;
+    box-shadow: 0px 2px 4px 0px #0000001F;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+.yespo-settings-page .settingsSection .sectionErrorAgain .formBlock form {
+    display:flex;
+    gap:20px;
+    justify-content:space-between;
+}
+.yespo-settings-page .settingsSection .sectionErrorAgain .formBlock form #nonceWebtrackingField,
+.yespo-settings-page .settingsSection .sectionErrorAgain .formBlock form #nonceWebpushField {
+    display: flex;
+    align-self: center;
+}
+.yespo-settings-page .settingsSection .sectionErrorAgain .formBlock form .field-group {
+    margin:unset;
+    display: flex;
+    align-self: center;
+    gap:8px;
+}
+.yespo-settings-page .settingsSection .sectionErrorAgain .formBlock form .field-group .api-key-text {
+    font-size: 15px;
+    color: #101422;
+    align-self: center;
+}
+.yespo-settings-page .settingsSection .sectionErrorAgain .formBlock form .field-group input {
+    background: #fff;
+    color: #101422;
+    font-size: 15px;
+    min-width: 100px;
+    border: 1px solid #e5e7ec;
+    font-weight:500;
+}
 /* section success */
 .yespo-settings-page .sectionBodySuccess{
     padding: 0 !important;
@@ -293,15 +338,19 @@
 .yespo-settings-page .settingsSection .messageNonceSuccess{
     border-radius: 4px;
     border-left: 3px solid #3abc51;
-    background-color: #e3ffe7;
+    background-color: #e9f8f3;
     box-shadow: 0px 2px 4px 0px #0000001F;
     display: flex;
     justify-content: start;
-    padding:10px 0;
+    padding:12px 0;
     align-items: center;
 }
 .yespo-settings-page .settingsSection .messageNonceSuccess .messageIconSuccess{
-    margin: auto 20px;
+    margin: auto 8px;
+}
+.yespo-settings-page .settingsSection .messageNonceSuccess .messageIconSuccess img {
+    align-self: center;
+    display: flex;
 }
 .yespo-settings-page .settingsSection .messageTextSuccess{
     position: relative;

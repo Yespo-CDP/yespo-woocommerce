@@ -39,10 +39,10 @@ class Yespo_Contact
     }
 
     //method export bulk
-    public function export_bulk_users($data){
+    public function export_bulk_users($data, $offset = 1){
         if(!empty($data)){
 
-            $response = $this->process_on_yespo($data, 'bulk');
+            $response = $this->process_on_yespo($data, 'bulk', null, null, false, $offset);
             if($response === 0) {
                 (new Yespo_Export_Users())->error_export_users('555');
                 return 'blocked';
@@ -84,7 +84,7 @@ class Yespo_Contact
         }
     }
 
-    private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null, $relocate = false) {
+    private function process_on_yespo($data, $operation, $wc_id = null, $yespo_id = null, $relocate = false, $offset = 0) {
         if (empty($this->authData)) {
             return esc_html__( 'Empty user authorization data', 'yespo-cdp' );
         }
@@ -96,16 +96,16 @@ class Yespo_Contact
             else $erase = '&erase=true';
             $url = self::REMOTE_CONTACT_ESPUTNIK_URL . '?externalCustomerId=' . $yespo_id . $erase;
 
-            $response = Yespo_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data);
+            $response = Yespo_Curl_Request::curl_request($url, self::CUSTOM_REQUEST_DELETE, $this->authData, $data, null, 1000000);
             (new \Yespo\Integrations\Esputnik\Yespo_Logging_Data())->update_contact_log($yespo_id, $operation, $response);
         } else if($operation === 'add_meta_key'){
             return Yespo_Curl_Request::curl_request($data, self::CUSTOM_REQUEST_GET, $this->authData);
         } else if($operation === 'bulk'){
-            return Yespo_Curl_Request::curl_request(self::REMOTE_CONTACTS_ESPUTNIK_URL, $request, $this->authData, $data);
+            return Yespo_Curl_Request::curl_request(self::REMOTE_CONTACTS_ESPUTNIK_URL, $request, $this->authData, $data, 'users', $offset);
         } else {
             if ($operation === 'clean') $url = self::REMOTE_CONTACTS_ESPUTNIK_URL;
 
-            $response = Yespo_Curl_Request::curl_request($url, $request, $this->authData, $data);
+            $response = Yespo_Curl_Request::curl_request($url, $request, $this->authData, $data, null, 1000000);
 
             $responseArray = json_decode($response, true);
 

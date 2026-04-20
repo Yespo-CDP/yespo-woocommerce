@@ -54,6 +54,11 @@ class YespoTracker
         if (typeof cart.cartPageKey === 'string' && cart.cartPageKey === 'StatusCartPage') eS('sendEvent', cart.cartPageKey);
     }
 
+    static userData(customerData){
+        //console.log(customerData);
+        eS('sendEvent', 'CustomerData', { 'CustomerData': { 'externalCustomerId': parseInt(customerData.externalCustomerId, 10), 'user_email': String(customerData.user_email), 'user_name': String(customerData.user_name), 'user_phone': String(customerData.user_phone) } });
+    }
+
     cartMapping(cart){
         let status = [];
         if (cart && cart.products && (this.action === 'cart' || this.action === 'cart_batch')) {
@@ -205,13 +210,18 @@ class YespoTracker
             YespoTracker.addProductStorage();
             YespoTracker.getProductStorage();
 
+            YespoTracker.trackAuthIntent();
+            YespoTracker.trackAuthAfterRedirect();
+            YespoTracker.trackLogoutReset();
+            YespoTracker.trackOrderSuccess();
+
         } else {
             console.log('trackingData is not defined');
         }
     }
 
     //send wedId to backend
-    checkWebIdOnLoad(webId, orgId) {
+    checkWebIdOnLoad(webId, orgId, esState= '') {
 
         if (!webId || typeof webId !== "string" || webId.trim() === "") {
             console.warn("webId is empty or invalid.");
@@ -221,6 +231,8 @@ class YespoTracker
             console.warn("orgId is empty or invalid.");
         }
 
+        //const userAgent = navigator.userAgent; // needs to be removed
+
         fetch(this.ajaxUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -228,6 +240,8 @@ class YespoTracker
                 action: 'save_webid',
                 webId: webId,
                 orgId: orgId,
+                //userAgent: userAgent, // needs to be removed
+                //esState:esState, // needs to be removed
                 yespo_tenant_webid_nonce_name: this.tenantWebIdNonce
             })
         })
@@ -237,7 +251,24 @@ class YespoTracker
                 }
                 return response.json();
             })
-            .then(data => console.log('Answer of WordPress server:', data))
+            .then(data => {
+                console.log('Answer of WordPress server:', data);
+
+                if (data?.data?.webId?.saved === false) {
+                    //console.warn("webId not saved, retrying in 5 seconds...");
+
+                    setTimeout(() => {
+                        let newWebId = "";
+                        try {
+                            newWebId = this.getWebIdData();
+                        } catch (error) {
+                            console.error("Failed to parse document.cookie:", error);
+                        }
+
+                        this.checkWebIdOnLoad(newWebId, orgId);
+                    }, 5000);
+                }
+            })
             .catch(error => console.error('Error sending webId:', error));
     }
 
@@ -247,27 +278,28 @@ class YespoTracker
             if (window._esConfig) {
                 observer.disconnect();
                 const orgId = window._esConfig?.orgId || "";
+
+                let esState = localStorage.getItem("esState"); //needs to be removed
+
                 let webId = "";
 
                 try {
-
-                    let esState = JSON.parse(localStorage.getItem("esState") || "{}");
-                    let customerId = esState?.customerId?.trim();
-
-                    webId = customerId && customerId.length > 0 ? customerId : (() => {
-                        const match = document.cookie.match(/(?:^|; )sc=([^;]*)/);
-                        return match ? decodeURIComponent(match[1]) : null;
-                    })();
-
+                    webId = this.getWebIdData();
                 } catch (error) {
                     console.error("Failed to parse document.cookie:", error);
                 }
 
+                //this.checkWebIdOnLoad(webId, orgId, esState); // only for debugging
                 this.checkWebIdOnLoad(webId, orgId);
             }
         });
 
         observer.observe(document, observeConfig);
+    }
+
+    getWebIdData(){
+        const match = document.cookie.match(/(?:^|; )sc=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : null;
     }
 
     /*** Observer Interaction functions ***/
@@ -321,6 +353,91 @@ class YespoTracker
         const elements = document.querySelectorAll(observed);
         elements.forEach(element => observer.observe(element));
     }
+
+    //Authentication, registration method
+    static trackAuthIntent() {
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            if (!(form instanceof HTMLFormElement)) return;
+
+            if (form.classList.contains('login')) {
+                const isCheckout = !!form.closest('.woocommerce-checkout');
+                sessionStorage.setItem(
+                    'yespo_auth_intent',
+                    isCheckout ? 'login_checkout' : 'login'
+                );
+            }
+
+            if (form.classList.contains('register')) {
+                sessionStorage.setItem('yespo_auth_intent', 'register');
+            }
+        });
+    }
+
+    static trackAuthAfterRedirect() {
+        try {
+            const intent = sessionStorage.getItem('yespo_auth_intent');
+            const alreadyTracked = sessionStorage.getItem('yespo_auth_tracked');
+            if (!intent || alreadyTracked) return;
+
+            const isLoggedIn =
+                document.body?.classList?.contains('logged-in') ||
+                !!document.querySelector('a[href*="customer-logout"]') ||
+                !!document.querySelector('.woocommerce-MyAccount-content');
+
+            if (isLoggedIn) {
+                //console.log('AUTH SUCCESS AFTER REDIRECT:', intent);
+
+                if (intent === 'login' || intent === 'login_checkout') {
+                    //console.log(intent === 'login_checkout' ? 'checkout login success' : 'logged');
+                    this.userData(trackingData.customerData);
+                }
+
+                if (intent === 'register') {
+                    //console.log('registered');
+                    this.userData(trackingData.customerData);
+                }
+
+                sessionStorage.setItem('yespo_auth_tracked', 'true');
+                sessionStorage.removeItem('yespo_auth_intent');
+            }
+        } catch (err) {
+            console.warn('Auth tracking error:', err);
+        }
+    }
+
+    static trackLogoutReset() {
+        document.addEventListener('click', function (e) {
+            const target = e.target;
+            if (target?.closest('a[href*="customer-logout"]')) {
+                sessionStorage.removeItem('yespo_auth_tracked');
+                sessionStorage.removeItem('yespo_auth_intent');
+            }
+        });
+    }
+
+    static trackOrderSuccess() {
+        try {
+            const alreadyTracked = sessionStorage.getItem('yespo_order_tracked');
+
+            const isClassic = document.body?.classList?.contains('woocommerce-order-received');
+            const isBlocks = !!document.querySelector('[data-block-name="woocommerce/order-confirmation-status"]');
+
+            if ((isClassic || isBlocks) && !alreadyTracked) {
+                //console.log('TRACKING ORDER SUCCESS');
+                this.userData(trackingData.customerData);
+
+                sessionStorage.setItem('yespo_order_tracked', 'true');
+            }
+
+            if (!isClassic && !isBlocks) {
+                sessionStorage.removeItem('yespo_order_tracked');
+            }
+        } catch (err) {
+            console.warn('Order tracking error:', err);
+        }
+    }
+
 
 }
 

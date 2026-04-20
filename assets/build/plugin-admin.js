@@ -5,21 +5,38 @@ class YespoExportData {
         this.h4 = yespoVars.h4;
         this.resume = yespoVars.resume;
         this.error = yespoVars.error;
-        this.error401 = yespoVars.error401;
+        //this.error401 = yespoVars.error401;
+        this.error401 = yespoVars.invalidAPIKey;
         this.error555 = yespoVars.error555;
         this.success = yespoVars.success;
         this.trackerAdded = yespoVars.trackerAdded;
         this.webPushAdded = yespoVars.webPushAdded;
-        this.synhStarted = yespoVars.synhStarted;
+        //this.synhStarted = yespoVars.synhStarted;
+        this.synhStarted = yespoVars.dataSynchronization;
         this.pluginUrl = yespoVars.pluginUrl;
         this.pauseButton = yespoVars.pauseButton;
         this.resumeButton = yespoVars.resumeButton;
         this.contactSupportButton = yespoVars.contactSupportButton;
         this.ajaxUrl = yespoVars.ajaxUrl;
 
+        this.customers = yespoVars.customers;
+        this.orders = yespoVars.orders;
+        this.synchronized = yespoVars.synchronized;
+        this.failed = yespoVars.failed;
+        this.total = yespoVars.total;
+
         this.getScriptButtonText = yespoVars.getScriptButtonText;
         this.getScriptSpanText = yespoVars.getScriptSpanText;
         this.getTrackingScriptNonce = yespoVars.getTrackingScriptNonce;
+        this.getWebpushScriptNonce = yespoVars.getWebpushScriptNonce;
+
+        this.getWebtrackingScriptNonce = yespoVars.getWebtrackingScriptNonce;
+        this.getTryAgainText = yespoVars.getTryAgainText;
+        this.getTryAgainWebtrackingSpanText = yespoVars.getTryAgainWebtrackingSpanText;
+        this.getTryAgainWebpushSpanText = yespoVars.getTryAgainWebpushSpanText;
+        this.getTryAgainSpanLinkText = yespoVars.getTryAgainSpanLinkText;
+        this.yespoLinkSupport = yespoVars.yespoLinkSupport;
+        this.getCurrentStatus500Nonce = yespoVars.getCurrentStatus500Nonce;
 
         this.startExportUsersNonce = yespoVars.startExportUsersNonce;
         this.startExportOrdersNonce = yespoVars.startExportOrdersNonce;
@@ -72,13 +89,16 @@ class YespoExportData {
         try {
             const response = await this.getNumberDataExport();
 
-            if (response === true && tracker === true) {
+            if (response === true && tracker === true && webpush !== 500) {
                 this.addSuccessMessage(this.trackerAdded);
-            }
-            if (response === true && webpush === true) {
+            } else if (response === true && tracker === false) this.addErrorWebtrackingForm();
+
+            if (response === true && webpush === true && webpush !== 500) {
                 this.addSuccessMessage(this.webPushAdded);
-            }
+            } else if (response === true && webpush === false) this.addErrorWebpushForm();
             //else this.showGetTrackingForm(); //show web tracking form
+            //this.getCurrentStatus500();
+            this.startPollingStatus500();
         } catch (error) {
             console.error('Error in processData:', error);
         }
@@ -104,12 +124,35 @@ class YespoExportData {
      * Get Webtracking Script *
      * **/
     getWebtrackingEventListener() {
+        /*
         if(document.querySelector('#startGettingScript')) {
             let form = document.querySelector('#startGettingScript');
             form.addEventListener('submit', (event) => {
                 event.preventDefault();
                 document.querySelector('#getWebtrackingScript')?.setAttribute('disabled', 'true');
                 this.getWebtrackingCode();
+            });
+        }
+        */
+        if(document.querySelector('#tryGetWebtrackingAgain')) {
+            let form = document.querySelector('#tryGetWebtrackingAgain');
+            if (!form.dataset.listenerAdded) {
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    document.querySelector('#getWebtrackingScript')?.setAttribute('disabled', 'true');
+                    this.getTryAgainWebtrackingCode();
+                });
+                form.dataset.listenerAdded = 'true';
+            }
+
+        }
+
+        if(document.querySelector('#tryGetWebpushAgain')) {
+            let form = document.querySelector('#tryGetWebpushAgain');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                document.querySelector('#getWebpushScript')?.setAttribute('disabled', 'true');
+                this.getTryAgainWebpushCode();
             });
         }
     }
@@ -136,6 +179,102 @@ class YespoExportData {
                 });
             });
         }
+    }
+
+    getTryAgainCode({ nonceSelector, actionName, nonceKey, sectionIdToRemove, submitButtonId, successMessage }) {
+        const nonceValue = document.querySelector(nonceSelector)?.value;
+        if (!nonceValue) return;
+
+        return new Promise((resolve, reject) => {
+            this.getRequest(actionName, nonceKey, nonceValue, (response) => {
+                try {
+                    response = JSON.parse(response);
+                    if (response?.status === 'success' && ((response?.webpush === true && response?.webpush !== 500) || response?.tracker === true)) {
+                        document.querySelector(`#${sectionIdToRemove}`)?.remove();
+                        this.addSuccessMessage(successMessage);
+                    } else if (response?.status === 'error' && (response?.webtracking500 === true || response?.webpush500 === true)) {
+                        this.startPollingStatus500();// start polling 500 error
+                        if(response?.webtracking500) {
+                            document.querySelector('#getWebtrackingScript')?.setAttribute('disabled', 'false');
+                            document.querySelector('#errorWebtackingSection')?.remove();
+                        } else if(response?.webtracking400) {
+                            document.querySelector('#getWebtrackingScript')?.setAttribute('disabled', 'false');
+                        }
+                        if (response?.webpush500) {
+                            document.querySelector('#getWebpushScript')?.setAttribute('disabled', 'false');
+                            document.querySelector('#errorWebpushSection')?.remove();
+                        } else if(response?.webpush400) {
+                            document.querySelector('#getWebpushScript')?.setAttribute('disabled', 'false');
+                        }
+                    } else {
+                        document.querySelector(`#${submitButtonId}`)?.removeAttribute('disabled');
+                    }
+                    resolve();
+                } catch (error) {
+                    console.error('Error parsing response:', error);
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    getTryAgainWebtrackingCode() {
+        return this.getTryAgainCode({
+            nonceSelector: '#yespo_get_tracking_script_nonce',
+            actionName: 'yespo_get_webtracking_script_action',
+            nonceKey: 'yespo_get_tracking_script_nonce',
+            sectionIdToRemove: 'errorWebtackingSection',
+            submitButtonId: 'getWebtrackingScript',
+            successMessage: this.trackerAdded
+        });
+    }
+
+    getTryAgainWebpushCode() {
+        return this.getTryAgainCode({
+            nonceSelector: '#yespo_get_webpush_script_nonce',
+            actionName: 'yespo_get_webpush_script_action',
+            nonceKey: 'yespo_get_webpush_script_nonce',
+            sectionIdToRemove: 'errorWebpushSection',
+            submitButtonId: 'getWebpushScript',
+            successMessage: this.webPushAdded
+        });
+    }
+
+    startPollingStatus500() {
+        const poll = () => {
+            this.getRequest(
+                'yespo_get_current_status_500',
+                'yespo_get_current_status_500_nonce',
+                this.getCurrentStatus500Nonce,
+                (response) => {
+                    try {
+                        response = JSON.parse(response);
+
+                        if (response.status === 'success') {
+                            if (response.tracker) {
+                                const errorWebtrackingSection = document.getElementById('errorWebtackingSection');
+                                if (!errorWebtrackingSection) this.addErrorWebtrackingForm();
+                            } else if(response?.webtracking_code === 200) this.addSuccessMessage(this.trackerAdded);
+
+                            if (response.webpush) {
+                                const errorWebpushSection = document.getElementById('errorWebpushSection');
+                                if (!errorWebpushSection) this.addErrorWebpushForm();
+                            } else if(response?.webpush_code === 200) this.addSuccessMessage(this.webPushAdded);
+
+                            if (response?.webtracking_code === 200 && response?.webpush_code === 200) {
+                                return;
+                            }
+                        }
+
+                        setTimeout(poll, 30000);
+                    } catch (e) {
+                        console.error('Invalid response format:', e);
+                        setTimeout(poll, 30000);
+                    }
+                }
+            );
+        };
+        poll();
     }
 
     /*
@@ -328,6 +467,14 @@ class YespoExportData {
     }
 
     addSuccessMessage(message, exportData = false) {
+        const messageContainer = document.querySelector('.settingsSection');
+        const authContainer = document.querySelector('.sectionBodyAuth');
+
+        // Перевірка наявності повідомлення з таким самим текстом
+        const existingMessages = messageContainer?.querySelectorAll('.messageTextSuccess');
+        const isDuplicate = Array.from(existingMessages || []).some(el => el.textContent === message);
+        if (isDuplicate) return; // Якщо вже існує — не додаємо
+
         const sectionBody = this.createElement('div', { className: 'sectionBody sectionBodySuccess' });
         const formBlock = this.createElement('div', { className: 'formBlock' });
         const fieldGroup = this.createElement('div', { className: 'field-group' });
@@ -344,7 +491,7 @@ class YespoExportData {
 
         messageIconSuccess.appendChild(img);
 
-        const messageTextSuccess = this.createElement('div', { className: 'messageTextSuccess' }, message );
+        const messageTextSuccess = this.createElement('div', { className: 'messageTextSuccess' }, message);
 
         messageNonceSuccess.appendChild(messageIconSuccess);
         messageNonceSuccess.appendChild(messageTextSuccess);
@@ -353,11 +500,7 @@ class YespoExportData {
         formBlock.appendChild(fieldGroup);
         sectionBody.appendChild(formBlock);
 
-        const messageContainer = document.querySelector('.settingsSection');
-        const authContainer = document.querySelector('.sectionBodyAuth');
-
-        if(authContainer && exportData){
-
+        if (authContainer && exportData) {
             const authContainers = document.querySelectorAll('.sectionBodyAuth');
             authContainers.forEach(authContainer => {
                 authContainer.remove();
@@ -365,12 +508,100 @@ class YespoExportData {
 
             if (messageContainer.firstChild) {
                 messageContainer.insertBefore(sectionBody, messageContainer.firstChild);
+            } else {
+                messageContainer.appendChild(sectionBody);
             }
-            else messageContainer.appendChild(sectionBody);
         } else if (messageContainer) {
             messageContainer.appendChild(sectionBody);
         }
     }
+
+    /** Show error message and button **/
+    addErrorForm({ sectionId, formId, nonceId, nonceValue, spanText, submitId, eventListener }) {
+        const sectionBody = this.createElement('div', {
+            id: sectionId,
+            className: 'sectionBody sectionErrorAgain'
+        });
+
+        const formBlock = this.createElement('div', { className: 'formBlock' });
+        const form = this.createForm(formId, 'post', '');
+
+        const nonceScriptField = this.createElement('div', { id: nonceId });
+        nonceScriptField.innerHTML = nonceValue;
+
+        const img = this.createElement('img', {
+            src: this.pluginUrl + 'assets/images/erroricon.svg',
+            width: 24,
+            height: 24,
+            alt: 'errorIcon',
+            title: 'errorIcon'
+        });
+
+        nonceScriptField.appendChild(img);
+
+        const nonceWrapper = this.createElement('div', { className: 'nonce-wrapper' });
+        nonceWrapper.appendChild(nonceScriptField);
+
+        const fieldGroup1 = this.createFieldGroup();
+        fieldGroup1.appendChild(nonceWrapper);
+
+        const spanEl = this.createElement("span", { className: 'api-key-text' }, spanText);
+
+        const linkEl = this.createElement("a", {
+            href: this.yespoLinkSupport,
+            target: "_blank"
+        }, this.getTryAgainSpanLinkText);
+
+        spanEl.appendChild(document.createTextNode(" "));
+        spanEl.appendChild(linkEl);
+
+        fieldGroup1.appendChild(spanEl);
+
+        const fieldGroup2 = this.createFieldGroup();
+        const submitButton = this.createElement('input', {
+            type: 'submit',
+            id: submitId,
+            className: 'button button-primary',
+            value: this.getTryAgainText
+        });
+        fieldGroup2.appendChild(submitButton);
+
+        form.append(fieldGroup1, fieldGroup2);
+        formBlock.appendChild(form);
+        sectionBody.appendChild(formBlock);
+
+        const mainContainer = document.querySelector('.settingsSection');
+        if (mainContainer) {
+            mainContainer.appendChild(sectionBody);
+            eventListener.call(this);
+        }
+    }
+
+
+    addErrorWebtrackingForm() {
+        this.addErrorForm({
+            sectionId: 'errorWebtackingSection',
+            formId: 'tryGetWebtrackingAgain',
+            nonceId: 'nonceWebtrackingField',
+            nonceValue: this.getTrackingScriptNonce,
+            spanText: this.getTryAgainWebtrackingSpanText,
+            submitId: 'getWebtrackingScript',
+            eventListener: this.getWebtrackingEventListener
+        });
+    }
+
+    addErrorWebpushForm() {
+        this.addErrorForm({
+            sectionId: 'errorWebpushSection',
+            formId: 'tryGetWebpushAgain',
+            nonceId: 'nonceWebpushField',
+            nonceValue: this.getWebpushScriptNonce,
+            spanText: this.getTryAgainWebpushSpanText,
+            submitId: 'getWebpushScript',
+            eventListener: this.getWebtrackingEventListener
+        });
+    }
+
 
     /**
      * AUTHORIZATION FORM **/
@@ -490,8 +721,15 @@ class YespoExportData {
                         if(response.status === 'success') {
                             if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                             this.getNumberDataExport();
+
                             if(response.tracker === true) this.addSuccessMessage(this.trackerAdded);
+                            else if(response.tracker === false) this.addErrorWebtrackingForm();
+
                             if(response.webpush === true) this.addSuccessMessage(this.webPushAdded);
+                            else if(response.webpush === false) this.addErrorWebpushForm();
+
+                            this.startPollingStatus500(); // start polling 500 error
+
                             //else this.showGetTrackingForm(); //show web tracking form
                         } else if(response.status && response.status === 'incorrect') {
                             let code = 401;

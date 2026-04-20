@@ -4,6 +4,7 @@
 namespace Yespo\Integrations\Esputnik;
 
 use Exception;
+use Yespo\Integrations\Webtracking\Yespo_Logging_Remote;
 
 class Yespo_Curl_Request
 {
@@ -12,7 +13,8 @@ class Yespo_Curl_Request
         $custom_request,
         $auth_data,
         $user_data = '',
-        $type_response = ''
+        $type_response = '',
+        $offset = 0
     ){
         try {
             $args = [
@@ -36,6 +38,8 @@ class Yespo_Curl_Request
             $response_body = wp_remote_retrieve_body($response);
 
             //$http_code = 0;
+
+            Yespo_Logging_Remote::export_data_dealing($response_body, $http_code, $type_response, $offset);
 
             if (
                 $custom_request === 'DELETE' ||

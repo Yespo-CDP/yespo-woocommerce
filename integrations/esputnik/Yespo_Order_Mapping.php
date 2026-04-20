@@ -4,6 +4,8 @@ namespace Yespo\Integrations\Esputnik;
 
 use DateTime;
 use Exception;
+use WC_Order;
+use WC_Order_Item_Shipping;
 
 class Yespo_Order_Mapping
 {
@@ -31,6 +33,7 @@ class Yespo_Order_Mapping
         if(Yespo_Contact_Validation::name_validation($orderArray['firstName'])) $data['orders'][0]['firstName'] = $orderArray['firstName'];
         if(Yespo_Contact_Validation::lastname_validation($orderArray['lastName'])) $data['orders'][0]['lastName'] = $orderArray['lastName'];
         $data['orders'][0]['deliveryAddress'] = $orderArray['deliveryAddress'];
+        $data['orders'][0]['deliveryMethod'] = $orderArray['deliveryMethod'];
         $data['orders'][0]['phone'] = preg_replace("/[^0-9]/", "", $phoneNumber);
         $data['orders'][0]['shipping'] = $orderArray['shipping'];
         $data['orders'][0]['discount'] = $orderArray['discount'];
@@ -63,6 +66,7 @@ class Yespo_Order_Mapping
         if(Yespo_Contact_Validation::name_validation($orderArray['firstName'])) $data['firstName'] = $orderArray['firstName'];
         if(Yespo_Contact_Validation::lastname_validation($orderArray['lastName'])) $data['lastName'] = $orderArray['lastName'];
         $data['deliveryAddress'] = $orderArray['deliveryAddress'];
+        $data['deliveryMethod'] = $orderArray['deliveryMethod'];
         $data['phone'] = preg_replace("/[^0-9]/", "", $phoneNumber);
         $data['shipping'] = $orderArray['shipping'];
         $data['discount'] = $orderArray['discount'];
@@ -96,6 +100,7 @@ class Yespo_Order_Mapping
             'firstName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_first_name') && !empty($order->get_billing_first_name())) ? sanitize_text_field($order->get_billing_first_name()) : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_first_name') && !empty($order->get_shipping_first_name()) ? sanitize_text_field($order->get_shipping_first_name()) : ''),
             'lastName' => (!empty($order) && !is_bool($order) && method_exists($order, 'get_billing_last_name') && !empty($order->get_billing_last_name())) ? sanitize_text_field($order->get_billing_last_name()) : (!empty($order) && !is_bool($order) && method_exists($order, 'get_shipping_last_name') && !empty($order->get_shipping_last_name()) ? sanitize_text_field($order->get_shipping_last_name()) : ''),
             'deliveryAddress' => self::get_delivery_address($order, 'shipping') ? sanitize_text_field(self::get_delivery_address($order, 'shipping')) : ( self::get_delivery_address($order, 'billing') ? sanitize_text_field(self::get_delivery_address($order, 'billing')) : ''),
+            'deliveryMethod' => self::get_delivery_method($order),
             'phone' => self::get_phone_number($order),
             'shipping' => ($order->shipping_total) ? $order->shipping_total : '',
             'discount' => ($order->discount) ? $order->discount : '',
@@ -255,5 +260,24 @@ class Yespo_Order_Mapping
 
         return null;
     }
+
+    private static function get_delivery_method( $order ) {
+        if ( ! $order instanceof WC_Order ) {
+            return '';
+        }
+
+        $shipping_items = $order->get_items( 'shipping' );
+
+        if ( empty( $shipping_items ) ) {
+            return '';
+        }
+
+        $first_shipping = reset( $shipping_items );
+
+        return ( $first_shipping instanceof WC_Order_Item_Shipping )
+            ? $first_shipping->get_name()
+            : '';
+    }
+
 
 }

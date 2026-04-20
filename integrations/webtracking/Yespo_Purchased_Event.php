@@ -9,14 +9,21 @@ class Yespo_Purchased_Event extends Yespo_Web_Tracking_Abstract
 
 
     public function send_order_to_yespo($order_id) {
-        if (!empty($order_id)) {
+        if (!empty($order_id) && (new Yespo_User_Event())->get_webId()) {
             $order = wc_get_order($order_id);
             $hash = (new Yespo_Cart_Event())->get_option();
 
             $json = $this->generate_json($order, $order_id, $hash);
-            $response = Yespo_Web_Tracking_Curl_Request::curl_request($json);
+            $response = json_decode(Yespo_Web_Tracking_Curl_Request::curl_request($json), true);
 
-            (new Yespo_Logger())->write_to_file('PurchasedItems', $json, $response);
+            (new Yespo_Logger())->write_to_file('PurchasedItems', $json, $response['response_body']);
+            if($response['code'] > 199 && $response['code'] < 300) {
+                Yespo_Logging_Remote::send_customer_data_event_success($response['request_data'], $response['response_body'], $response['code']);
+                Yespo_Logging_Remote::send_purchased_items_event_success($response['request_data'], $response['response_body'], $response['code']);
+            } else {
+                Yespo_Logging_Remote::send_customer_data_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
+                Yespo_Logging_Remote::send_purchased_items_event_error($response['message'], $response['request_data'], $response['response_body'], $response['code']);
+            }
 
             return true;
         }

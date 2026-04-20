@@ -20,12 +20,26 @@ class Yespo_Web_Push_Curl_Request
             $args = self::prepare_request_args($method, $data);
             $response = wp_remote_request($url, $args);
 
-            $status_code = wp_remote_retrieve_response_code($response);
-            if (in_array($status_code, [400, 404, 500])) {
-                return $status_code;
+            $code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+
+            $decoded_body = json_decode($body, true);
+
+            $message = '';
+            if (isset($decoded_body['errors']['message'])) {
+                $message = $decoded_body['errors']['message'];
+            } else if ($code < 200 || $code >= 300){
+                $message = $code . ' ERROR';
             }
 
-            return self::handle_response($method, $response);
+            return wp_json_encode([
+                'request_data' => $data,
+                'message' => $message,
+                'response_body' => $decoded_body ?: $body,
+                'code' => $code,
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+            //return self::handle_response($method, $response);
         } catch (Exception $e) {
             return 'Error: ' . $e->getMessage();
         }

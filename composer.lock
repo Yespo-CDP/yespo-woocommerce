@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/inpsyde/assets.git",
-                "reference": "b328f2f357e147f662779d20d6642329b1db7307"
+                "reference": "795ffaf2a07480344e7d33db8ea40dc073698641"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inpsyde/assets/zipball/b328f2f357e147f662779d20d6642329b1db7307",
-                "reference": "b328f2f357e147f662779d20d6642329b1db7307",
+                "url": "https://api.github.com/repos/inpsyde/assets/zipball/795ffaf2a07480344e7d33db8ea40dc073698641",
+                "reference": "795ffaf2a07480344e7d33db8ea40dc073698641",
                 "shasum": ""
             },
             "require": {
@@ -75,9 +75,9 @@
             "description": "Package to manage assets in WordPress.",
             "support": {
                 "issues": "https://github.com/inpsyde/assets/issues",
-                "source": "https://github.com/inpsyde/assets/tree/2.10.0"
+                "source": "https://github.com/inpsyde/assets/tree/master"
             },
-            "time": "2025-09-03T07:45:07+00:00"
+            "time": "2026-01-08T13:01:59+00:00"
         },
         {
             "name": "inpsyde/wp-context",

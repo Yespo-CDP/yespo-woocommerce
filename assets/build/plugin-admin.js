@@ -5,17 +5,25 @@ class YespoExportData {
         this.h4 = yespoVars.h4;
         this.resume = yespoVars.resume;
         this.error = yespoVars.error;
-        this.error401 = yespoVars.error401;
+        //this.error401 = yespoVars.error401;
+        this.error401 = yespoVars.invalidAPIKey;
         this.error555 = yespoVars.error555;
         this.success = yespoVars.success;
         this.trackerAdded = yespoVars.trackerAdded;
         this.webPushAdded = yespoVars.webPushAdded;
-        this.synhStarted = yespoVars.synhStarted;
+        //this.synhStarted = yespoVars.synhStarted;
+        this.synhStarted = yespoVars.dataSynchronization;
         this.pluginUrl = yespoVars.pluginUrl;
         this.pauseButton = yespoVars.pauseButton;
         this.resumeButton = yespoVars.resumeButton;
         this.contactSupportButton = yespoVars.contactSupportButton;
         this.ajaxUrl = yespoVars.ajaxUrl;
+
+        this.customers = yespoVars.customers;
+        this.orders = yespoVars.orders;
+        this.synchronized = yespoVars.synchronized;
+        this.failed = yespoVars.failed;
+        this.total = yespoVars.total;
 
         this.getScriptButtonText = yespoVars.getScriptButtonText;
         this.getScriptSpanText = yespoVars.getScriptSpanText;
@@ -26,6 +34,8 @@ class YespoExportData {
         this.getTryAgainText = yespoVars.getTryAgainText;
         this.getTryAgainWebtrackingSpanText = yespoVars.getTryAgainWebtrackingSpanText;
         this.getTryAgainWebpushSpanText = yespoVars.getTryAgainWebpushSpanText;
+        this.getTryAgainSpanLinkText = yespoVars.getTryAgainSpanLinkText;
+        this.yespoLinkSupport = yespoVars.yespoLinkSupport;
         this.getCurrentStatus500Nonce = yespoVars.getCurrentStatus500Nonce;
 
         this.startExportUsersNonce = yespoVars.startExportUsersNonce;
@@ -536,6 +546,15 @@ class YespoExportData {
         fieldGroup1.appendChild(nonceWrapper);
 
         const spanEl = this.createElement("span", { className: 'api-key-text' }, spanText);
+
+        const linkEl = this.createElement("a", {
+            href: this.yespoLinkSupport,
+            target: "_blank"
+        }, this.getTryAgainSpanLinkText);
+
+        spanEl.appendChild(document.createTextNode(" "));
+        spanEl.appendChild(linkEl);
+
         fieldGroup1.appendChild(spanEl);
 
         const fieldGroup2 = this.createFieldGroup();

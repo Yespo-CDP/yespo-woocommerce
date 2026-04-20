@@ -3,6 +3,7 @@
 namespace Yespo\Integrations\Webpush;
 
 use Yespo\Integrations\Webtracking\Yespo_Logger;
+use Yespo\Integrations\Webtracking\Yespo_Logging_Remote;
 
 class Yespo_Web_Push
 {
@@ -26,29 +27,52 @@ class Yespo_Web_Push
     }
 
     public function start(){
-
-        $response_post = $this->send_post_data();
-
-        //loging debug
-        (new Yespo_Logger())->write_to_file('POST', json_encode($this->get_json()), $response_post);
-
-
-        if ($response_post < 200 || $response_post >= 300) return $response_post;
-
-        $response_get = $this->send_get_data();
+        //post request
+        $response_post = json_decode($this->send_post_data(), true);
 
         //loging debug
-        (new Yespo_Logger())->write_to_file('GET', json_encode($this->get_full_site_url()), $response_get);
+        (new Yespo_Logger())->write_to_file('POST', json_encode($this->get_json()), $response_post['code']);
 
-        if (!is_string($response_get) || empty($response_get)) return $response_get;
+        if ($response_post['code'] < 200 || $response_post['code'] >= 300){
+            Yespo_Logging_Remote::add_web_push_domain_error($response_post['message'], $response_post['request_data'], $response_post['response_body'], $response_post['code']);
+            return $response_post['code'];
+        }
+        else Yespo_Logging_Remote::add_web_push_domain_success($response_post['request_data'], $response_post['response_body'], $response_post['code']);
 
-        $data = json_decode($response_get, true);
+        //get request
+        $response_get = json_decode($this->send_get_data(), true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) return;
-        if (!is_array($data) || !isset($data['script']) || !isset($data['serviceWorker'])) return;
+        //loging debug
+        (new Yespo_Logger())->write_to_file('GET', json_encode($this->get_full_site_url()), $response_get['response_body']);
+
+        if (
+            !isset($response_get['response_body'])
+            || !is_array($response_get['response_body'])
+            || !isset($response_get['response_body']['script'])
+            || !is_string($response_get['response_body']['script'])
+            || $response_get['response_body']['script'] === ''
+        ) {
+            Yespo_Logging_Remote::get_web_push_script_error($response_get['message'], $response_get['response_body'], $response_get['code']);
+            return $response_get['code'];
+        }
+
+        $data = $response_get['response_body'];
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Yespo_Logging_Remote::get_web_push_script_error($response_get['message'], $response_get['response_body'], $response_get['code']);
+            return false;
+        }
+        if (!is_array($data) || !isset($data['script']) || !isset($data['serviceWorker'])){
+            Yespo_Logging_Remote::get_web_push_script_error($response_get['message'], $response_get['response_body'], $response_get['code']);
+            Yespo_Logging_Remote::add_web_push_script_html_error($response_get['message']);
+            return false;
+        }
+
+        Yespo_Logging_Remote::get_web_push_script_success($response_get['response_body'], $response_get['code']);
 
         $this->add_script_to_options(json_encode($data['script']));
-        $this->write_script_to_file($data['serviceWorker']);
+        if($this->write_script_to_file($data['serviceWorker'])) Yespo_Logging_Remote::add_swjs_site_root_success($data, $response_get['code']);
+        else Yespo_Logging_Remote::add_swjs_site_root_error($response_get['message'], $data, $response_get['code']);
 
         $this->remove_form_500();
         $this->remove_label_500();
@@ -154,9 +178,20 @@ class Yespo_Web_Push
 
     public function add_script_to_options($script){
         if(!$this->is_script_in_options()) {
-            if($script) {
+            if (!empty($script)) {
                 $this->options[self::WEBPUSH_OPTION_NAME] = $script;
-                update_option('yespo_options', $this->options);
+                $updated = update_option('yespo_options', $this->options);
+
+                if ($updated) {
+                    Yespo_Logging_Remote::add_web_push_script_html_success();
+                    return true;
+                } else {
+                    Yespo_Logging_Remote::add_web_push_script_html_error('Update failed');
+                    return false;
+                }
+            } else {
+                Yespo_Logging_Remote::add_web_push_script_html_error('Empty script');
+                return false;
             }
         }
     }

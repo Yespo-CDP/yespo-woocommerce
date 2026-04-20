@@ -112,7 +112,11 @@ class Yespo_Export_Orders
                 $export_quantity++;
 
                 $orders = $this->get_bulk_export_orders();
-                $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update');
+                $last_order = end($orders);
+                if ($last_order !== false) $last_element = $last_order->ID;
+                else $last_element = 1;
+
+                $export_res = (new Yespo_Order())->create_bulk_orders_on_yespo(Yespo_Order_Mapping::create_bulk_order_export_array($orders), 'update', $last_element);
 
                 if(count($orders) <= 0) {
                     $current_status = 'completed';
@@ -127,7 +131,7 @@ class Yespo_Export_Orders
                     $code = '0';
                 } else {
                     $code = '200';
-                    $last_element = end($orders);
+                    //$last_element = end($orders);
                     $endTime = microtime(true);
                     $live_exported += count($orders);
                     if ($export_res) {
@@ -337,7 +341,9 @@ class Yespo_Export_Orders
         $meta_key = esc_sql($this->meta_key);
 
         // phpcs:ignore WordPress.DB
-        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND ID NOT IN ( SELECT post_id FROM {$prefix_postmeta_table} WHERE meta_key = %s AND meta_value = 'true')",$table_posts, 'shop_order%', 'wc-checkout-draft', 0, $meta_key));
+        return $wpdb->get_var($wpdb->prepare("SELECT COUNT(p.ID) FROM %i AS p LEFT JOIN {$prefix_postmeta_table} AS m ON m.post_id = p.ID AND m.meta_key = %s AND m.meta_value = 'true' WHERE p.post_type IN ('shop_order','shop_order_placehold') AND p.post_status <> %s AND p.post_parent = %d AND p.ID > 0 AND m.post_id IS NULL", $table_posts, $meta_key, 'wc-checkout-draft', 0));
+        //return $wpdb->get_var($wpdb->prepare("SELECT COUNT(p.ID) FROM %i AS p LEFT JOIN {$prefix_postmeta_table} AS m ON m.post_id = p.ID AND m.meta_key = %s AND m.meta_value = 'true' WHERE p.post_type IN ('shop_order','shop_order_placehold') AND p.post_status <> %s AND p.post_parent = %d AND p.ID > 0 )", $table_posts, $meta_key, 'wc-checkout-draft', 0));
+        //return $wpdb->get_var($wpdb->prepare("SELECT COUNT(p.ID) FROM %i AS p WHERE p.post_type IN ('shop_order','shop_order_placehold') AND p.post_status <> %s AND p.post_parent = %d AND p.ID > 0 AND NOT EXISTS (SELECT 1 FROM {$prefix_postmeta_table} AS m WHERE m.post_id = p.ID AND m.meta_key = %s AND m.meta_value = 'true')", $table_posts, 'wc-checkout-draft', 0, $meta_key));
     }
 
     public function get_bulk_export_orders_count(){
@@ -485,6 +491,7 @@ class Yespo_Export_Orders
         $table_posts = esc_sql($this->table_posts);
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        /*
         return $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM %i WHERE post_type LIKE %s AND post_status != %s AND post_parent = %d AND post_modified_gmt BETWEEN %s AND %s",
@@ -496,6 +503,23 @@ class Yespo_Export_Orders
                 gmdate('Y-m-d H:i:s', time() - $this->period_selection_up)
             )
         );
+        */
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT *
+                FROM %i AS p
+                WHERE p.post_type IN ('shop_order','shop_order_placehold')
+                    AND p.post_status <> %s
+                    AND p.post_parent = %d
+                    AND p.post_modified_gmt BETWEEN %s AND %s",
+                        $table_posts,
+                        'wc-checkout-draft',
+                        0,
+                        gmdate('Y-m-d H:i:s', time() - $this->period_selection_since),
+                        gmdate('Y-m-d H:i:s', time() - $this->period_selection_up)
+            )
+        );
+
     }
 
     public function is_email_in_removed_users($email) {

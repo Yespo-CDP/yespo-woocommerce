@@ -31,6 +31,26 @@ msgstr "Sincronização de dados"
 msgid "Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools"
 msgstr "Sincronize contatos e pedidos para análise subsequente e utilização eficiente dos dados usando as ferramentas de automação de marketing Yespo"
 
+#: functions/functions.php:21
+msgid "Customers"
+msgstr "Clientes"
+
+#: functions/functions.php:22
+msgid "Orders"
+msgstr "Pedidos"
+
+#: functions/functions.php:23
+msgid "Synchronized"
+msgstr "Sincronizados"
+
+#: functions/functions.php:24
+msgid "Failed"
+msgstr "Falhados"
+
+#: functions/functions.php:25
+msgid "Total"
+msgstr "Total"
+
 #: backend/views/settings.php:27
 msgid "API Key"
 msgstr "Chave API"
@@ -89,7 +109,7 @@ msgstr "Chave de API inválida. Por favor, exclua o plugin e comece a configura�
 
 #: backend/views/settings.php:362
 msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
-msgstr "A atividade de saída no servidor está bloqueada. Entre em contato com seu provedor para resolver este problema. A sincronização de dados será automaticamente retomada sem perda de dados assim que o problema for resolvido."
+msgstr "A atividade de saída no servidor está bloqueada. Entre em contato com seu provedor para resolver este problema. A sincronização de dados será automaticamente retomada sem perda de dados assim que o problema for resolvido. Recarregue a página para ver o estado atualizado do processo de sincronização."
 
 
 #: backend/views/settings.php:86
@@ -109,17 +129,21 @@ msgid "Data synchronization has started"
 msgstr "A sincronização de dados começou"
 
 #: integrations/esputnik/Yespo_Localization.php:19
-msgid "Web push is successfully configured. Notifications can be managed from your Yespo account."
-msgstr "As notificações web push foram configuradas com sucesso. Pode geri-las a partir da sua conta Yespo."
+msgid "Web push is successfully configured. Manage notifications in your Yespo account."
+msgstr "O Web push foi configurada com sucesso. Gerencie as notificações na sua conta Yespo."
 
 #: integrations/esputnik/Yespo_Localization.php:44
 msgid "Try again"
 msgstr "Tentar novamente"
 
 #: integrations/esputnik/Yespo_Localization.php:45
-msgid "Unable to install Site script. Please contact support"
-msgstr "Não foi possível instalar o script do Site. Contacte o suporte"
+msgid "Unable to install Site script."
+msgstr "Não foi possível instalar o site script. Por favor."
 
 #: integrations/esputnik/Yespo_Localization.php:46
-msgid "Unable to install Web Push script. Please contact support"
-msgstr "Não foi possível instalar o script do Web Push. Contacte o suporte"
+msgid "Please contact support"
+msgstr "Сontacte o suporte"
+
+#: integrations/esputnik/Yespo_Localization.php:47
+msgid "Unable to install Web Push script."
+msgstr "Não foi possível instalar o script de web push. Por favor."

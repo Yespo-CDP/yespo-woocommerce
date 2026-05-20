@@ -352,6 +352,30 @@ class Yespo_Logging_Remote
         else if($response_body && $code < 199 || $code > 299) self::data_sync_error($code);
     }
 
+    //added in enable_app_inbox() of Yespo_Web_Tracking_Script_Configuration class
+    public static function set_app_inbox_enable()
+    {
+        $message = "APP_INBOX_ENABLED";
+        $log_level = "INFO";
+        $data = self::get_data();
+
+        //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('200', self::generate_json($message, $log_level, $data), 'set app inbox enable');
+
+        return self::send_curl_request(self::generate_json($message, $log_level, $data));
+    }
+
+    //added in disable_app_inbox() of Yespo_Web_Tracking_Script_Configuration class
+    public static function set_app_inbox_disable()
+    {
+        $message = "APP_INBOX_DISABLED";
+        $log_level = "INFO";
+        $data = self::get_data();
+
+        //(new \Yespo\Integrations\Webtracking\Yespo_Logger())->write_to_file('200', self::generate_json($message, $log_level, $data), 'set app inbox disable');
+
+        return self::send_curl_request(self::generate_json($message, $log_level, $data));
+    }
+
     /***
      * Private methods
      ***/

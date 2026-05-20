@@ -941,3 +941,37 @@ function yespo_cdp_plugin_updated($upgrader_object, $options) {
     }
 }
 add_action('upgrader_process_complete', 'yespo_cdp_plugin_updated', 10, 2);
+
+/*** Change configuration status ***/
+function yespo_change_configuration_status() {
+
+    if (
+        ! isset($_POST['yespo_set_configuring_webtracking_script_name']) ||
+        ! wp_verify_nonce(
+            sanitize_text_field(
+                wp_unslash($_POST['yespo_set_configuring_webtracking_script_name'])
+            ),
+            'yespo_set_configuring_webtracking_script_action'
+        )
+    ) {
+
+        wp_send_json_error([
+            'message' => 'Invalid nonce'
+        ]);
+    }
+
+    $script_configuration = new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script_Configuration();
+
+    if($script_configuration->toggle_app_inbox()) {
+        wp_send_json_success([
+            'message' => true,
+            'status' => $script_configuration->get_app_inbox_status()
+        ]);
+    } else {
+        wp_send_json_error([
+            'message' => false
+        ]);
+    }
+}
+add_action('wp_ajax_change_configuration_status', 'yespo_change_configuration_status');
+add_action('wp_ajax_nopriv_change_configuration_status', 'yespo_change_configuration_status');

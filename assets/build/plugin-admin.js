@@ -30,6 +30,14 @@ class YespoExportData {
         this.getTrackingScriptNonce = yespoVars.getTrackingScriptNonce;
         this.getWebpushScriptNonce = yespoVars.getWebpushScriptNonce;
 
+        this.setConfiguringWebtrackingTitle = yespoVars.setConfiguringWebtrackingTitle;
+        this.setConfiguringTrackingScriptNonce = yespoVars.setConfiguringTrackingScriptNonce;
+        this.setConfiguringWebtrackingSpanText = yespoVars.setConfiguringWebtrackingSpanText;
+        this.setConfiguringWebtrackingButtonTextEnable = yespoVars.setConfiguringWebtrackingButtonTextEnable;
+        this.setConfiguringWebtrackingButtonTextDisable = yespoVars.setConfiguringWebtrackingButtonTextDisable;
+        this.getWebtrackingStatus = yespoVars.getWebtrackingStatus;
+        this.setConfiguringWebtrackingScript = '#setConfiguringWebtrackingScript';
+
         this.getWebtrackingScriptNonce = yespoVars.getWebtrackingScriptNonce;
         this.getTryAgainText = yespoVars.getTryAgainText;
         this.getTryAgainWebtrackingSpanText = yespoVars.getTryAgainWebtrackingSpanText;
@@ -91,6 +99,7 @@ class YespoExportData {
 
             if (response === true && tracker === true && webpush !== 500) {
                 this.addSuccessMessage(this.trackerAdded);
+                this.addConfiguringWebtrackingForm();
             } else if (response === true && tracker === false) this.addErrorWebtrackingForm();
 
             if (response === true && webpush === true && webpush !== 500) {
@@ -124,16 +133,34 @@ class YespoExportData {
      * Get Webtracking Script *
      * **/
     getWebtrackingEventListener() {
-        /*
-        if(document.querySelector('#startGettingScript')) {
-            let form = document.querySelector('#startGettingScript');
-            form.addEventListener('submit', (event) => {
-                event.preventDefault();
-                document.querySelector('#getWebtrackingScript')?.setAttribute('disabled', 'true');
-                this.getWebtrackingCode();
-            });
+
+        if(document.querySelector('#configuringWebtracking')) {
+            let form = document.querySelector('#configuringWebtracking');
+            if (!form.dataset.listenerAdded) {
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    document
+                        .querySelector(this.setConfiguringWebtrackingScript)
+                        ?.setAttribute('disabled', 'true');
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(
+                        this.setConfiguringTrackingScriptNonce,
+                        'text/html'
+                    );
+                    const nonce = doc.querySelector('input')?.value;
+
+                    this.changeConfigurationStatus(
+                        'change_configuration_status',
+                        'webtracking',
+                        'yespo_set_configuring_webtracking_script_name',
+                        nonce
+                    );
+                });
+                form.dataset.listenerAdded = 'true';
+            }
         }
-        */
+
         if(document.querySelector('#tryGetWebtrackingAgain')) {
             let form = document.querySelector('#tryGetWebtrackingAgain');
             if (!form.dataset.listenerAdded) {
@@ -167,6 +194,7 @@ class YespoExportData {
                         if (response?.status === 'success' && response?.tracker === true) {
                             document.querySelector('.sectionBodyGetScript')?.remove();
                             this.addSuccessMessage(this.trackerAdded);
+                            this.addConfiguringWebtrackingForm();
                         } else {
                             document.querySelector('.sectionBodyGetScript .formBlock')?.insertAdjacentHTML('beforeend', response.message);
                             document.querySelector('#getWebtrackingScript')?.removeAttribute('disabled');
@@ -254,7 +282,10 @@ class YespoExportData {
                             if (response.tracker) {
                                 const errorWebtrackingSection = document.getElementById('errorWebtackingSection');
                                 if (!errorWebtrackingSection) this.addErrorWebtrackingForm();
-                            } else if(response?.webtracking_code === 200) this.addSuccessMessage(this.trackerAdded);
+                            } else if(response?.webtracking_code === 200) {
+                                this.addSuccessMessage(this.trackerAdded);
+                                this.addConfiguringWebtrackingForm();
+                            }
 
                             if (response.webpush) {
                                 const errorWebpushSection = document.getElementById('errorWebpushSection');
@@ -500,19 +531,18 @@ class YespoExportData {
         formBlock.appendChild(fieldGroup);
         sectionBody.appendChild(formBlock);
 
-        if (authContainer && exportData) {
-            const authContainers = document.querySelectorAll('.sectionBodyAuth');
-            authContainers.forEach(authContainer => {
-                authContainer.remove();
-            });
+        if (messageContainer) {
 
-            if (messageContainer.firstChild) {
-                messageContainer.insertBefore(sectionBody, messageContainer.firstChild);
+            const configForm = document.getElementById('configuringWebtackingSection');
+
+            if (configForm) {
+                messageContainer.insertBefore(sectionBody, configForm);
+            } else if (authContainer && exportData) {
+                document.querySelectorAll('.sectionBodyAuth').forEach(el => el.remove());
+                messageContainer.prepend(sectionBody);
             } else {
                 messageContainer.appendChild(sectionBody);
             }
-        } else if (messageContainer) {
-            messageContainer.appendChild(sectionBody);
         }
     }
 
@@ -572,8 +602,68 @@ class YespoExportData {
 
         const mainContainer = document.querySelector('.settingsSection');
         if (mainContainer) {
-            mainContainer.appendChild(sectionBody);
+            const configForm = document.getElementById('configuringWebtackingSection');
+
+            if (configForm) {
+                mainContainer.insertBefore(sectionBody, configForm);
+            } else {
+                mainContainer.appendChild(sectionBody);
+            }
+
             eventListener.call(this);
+        }
+    }
+
+    addConfiguringForm({ sectionId, formId, nonceId, nonceValue, spanText, submitId, eventListener }) {
+        const sectionBody = this.createElement('div', {
+            id: sectionId,
+            className: 'sectionBody sectionConfiguring'
+        });
+
+        const formBlock = this.createElement('div', { className: 'formBlock' });
+        const form = this.createForm(formId, 'post', '');
+
+        const nonceScriptField = this.createElement('div', { id: nonceId });
+        nonceScriptField.innerHTML = nonceValue;
+
+        const nonceWrapper = this.createElement('div', { className: 'nonce-wrapper' });
+        nonceWrapper.appendChild(nonceScriptField);
+
+        const fieldGroup2 = this.createFieldGroup('form-wrapper');
+        fieldGroup2.appendChild(nonceWrapper);
+
+        const h4 = this.createHeading(4, this.setConfiguringWebtrackingTitle);
+        fieldGroup2.appendChild(h4);
+
+        const spanEl = this.createElement("span", { className: 'configuration-span' }, this.setConfiguringWebtrackingSpanText);
+        fieldGroup2.appendChild(spanEl);
+
+        const fieldGroup3 = this.createFieldGroup('button-block');
+
+        let buttonText = this.setConfiguringWebtrackingButtonTextEnable;
+        if(this.getWebtrackingStatus){
+            buttonText = this.setConfiguringWebtrackingButtonTextDisable;
+        }
+        const submitButton = this.createElement('input', {
+            type: 'submit',
+            id: submitId,
+            className: 'button button-primary',
+            value: buttonText
+        });
+        fieldGroup3.appendChild(submitButton);
+
+        //form.append(fieldGroup1, fieldGroup2, fieldGroup3);
+        form.append(fieldGroup2, fieldGroup3);
+        formBlock.appendChild(form);
+        sectionBody.appendChild(formBlock);
+
+        const mainContainer = document.querySelector('.settingsSection');
+        if (mainContainer) {
+            mainContainer.appendChild(sectionBody);
+
+            if (typeof eventListener === 'function') {
+                eventListener.call(this);
+            }
         }
     }
 
@@ -602,6 +692,36 @@ class YespoExportData {
         });
     }
 
+    addConfiguringWebtrackingForm() {
+        if (document.getElementById('configuringWebtackingSection')) {
+            return;
+        }
+        this.addConfiguringForm({
+            sectionId: 'configuringWebtackingSection',
+            formId: 'configuringWebtracking',
+            nonceId: 'nonceConfiguringWebtrackingField',
+            nonceValue: this.setConfiguringTrackingScriptNonce,
+            spanText: this.setConfiguringWebtrackingSpanText,
+            submitId: 'setConfiguringWebtrackingScript',
+            eventListener: this.getWebtrackingEventListener
+        });
+    }
+
+    // update button text
+    updateConfigButtonState(status, id) {
+        const submitButton = document.querySelector(id);
+
+        if (!submitButton) {
+            return;
+        }
+
+        submitButton.removeAttribute('disabled');
+
+        const textEnable = this.setConfiguringWebtrackingButtonTextEnable ?? 'Enable';
+        const textDisable = this.setConfiguringWebtrackingButtonTextDisable ?? 'Disable';
+
+        submitButton.value = Boolean(status) ? textDisable : textEnable;
+    }
 
     /**
      * AUTHORIZATION FORM **/
@@ -722,8 +842,10 @@ class YespoExportData {
                             if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
                             this.getNumberDataExport();
 
-                            if(response.tracker === true) this.addSuccessMessage(this.trackerAdded);
-                            else if(response.tracker === false) this.addErrorWebtrackingForm();
+                            if(response.tracker === true) {
+                                this.addSuccessMessage(this.trackerAdded);
+                                this.addConfiguringWebtrackingForm();
+                            } else if(response.tracker === false) this.addErrorWebtrackingForm();
 
                             if(response.webpush === true) this.addSuccessMessage(this.webPushAdded);
                             else if(response.webpush === false) this.addErrorWebpushForm();
@@ -954,6 +1076,40 @@ class YespoExportData {
             })
             .catch(error => {
                 console.error('Send error:', error);
+            });
+    }
+
+    changeConfigurationStatus(action, service, nonceName, nonceAction) {
+        const formData = new FormData();
+        formData.append('service', service);
+        formData.append('action', action);
+        formData.append(nonceName, nonceAction);
+
+        fetch(this.ajaxUrl, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    if (service === 'webtracking') {
+                        const status = result.data.status;
+
+                        this.updateConfigButtonState(status, this.setConfiguringWebtrackingScript);
+                    }
+                } else {
+                    console.error('Business logic error:', result.data.message || 'Unknown error');
+                    document.querySelector(this.setConfiguringWebtrackingScript)?.removeAttribute('disabled');
+                }
+            })
+            .catch(error => {
+                console.error('Send error:', error);
+                document.querySelector(this.setConfiguringWebtrackingScript)?.removeAttribute('disabled');
             });
     }
 

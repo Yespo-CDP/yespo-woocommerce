@@ -357,3 +357,42 @@
     max-width: 90%;
     font-size: 15px;
 }
+/*configurating webtracking*/
+.yespo-settings-page .sectionConfiguring {
+    border-radius: 2px;
+}
+.yespo-settings-page #configuringWebtracking {
+    display: flex;
+    align-items: flex-start;
+    align-self: stretch;
+}
+.yespo-settings-page #configuringWebtracking .form-wrapper {
+    flex:5;
+}
+.yespo-settings-page #configuringWebtracking .button-block {
+    flex:1;
+    display: flex;
+    justify-content: flex-end;
+}
+.yespo-settings-page #configuringWebtracking h4 {
+    font-size:16px;
+    color:#101402;
+    line-height: 0px;
+    margin-top:15px;
+}
+.yespo-settings-page #configuringWebtracking .configuration-span {
+    font-size: 13px;
+    color:#5E6B91;
+    line-height: 16px;
+}
+.yespo-settings-page .button-block #setConfiguringWebtrackingScript {
+    all:unset;
+    background-color: #fff;
+    border:1px solid #E5E7EC;
+    border-radius: 2px;
+    color: #101422;
+    cursor:pointer;
+    padding: 7px 16px;
+    font-weight: 500;
+    font-size:16px;
+}

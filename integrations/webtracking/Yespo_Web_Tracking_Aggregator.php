@@ -56,6 +56,9 @@ class Yespo_Web_Tracking_Aggregator
 
         $tracking_data['ajaxUrl'] = esc_url( admin_url( 'admin-ajax.php' ) );
         $tracking_data['getCartContentNonce'] = wp_create_nonce('yespo_get_cart_content_nonce');
+        $tracking_data['getAppInboxAuthToken'] = ''; //(new Yespo_Web_Tracking_Script_Configuration())->get_auth_token();
+        $tracking_data['getAuthCallbackNonce'] = wp_create_nonce('yespo_get_app_inbox_auth_token_action');
+
 
         if (!is_null($category)) {
             $tracking_data['category'] = array(

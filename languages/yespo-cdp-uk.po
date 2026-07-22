@@ -146,3 +146,15 @@ msgstr "Зверніться до служби підтримки"
 #: integrations/esputnik/Yespo_Localization.php:47
 msgid "Unable to install Web Push script."
 msgstr "Неможливо встановити web push скрипт."
+
+#: integrations/esputnik/Yespo_Localization.php:61
+msgid "App Inbox is a communication channel that allows you to deliver rich, personalized content to users directly on your mobile app or website."
+msgstr "App Inbox — це канал комунікації, який дозволяє доставляти користувачам персоналізований та насичений контент безпосередньо у вашому мобільному застосунку або на вебсайті."
+
+#: integrations/esputnik/Yespo_Localization.php:62
+msgid "Enable"
+msgstr "Увімкнути"
+
+#: integrations/esputnik/Yespo_Localization.php:63
+msgid "Disable"
+msgstr "Вимкнути"

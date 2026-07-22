@@ -21,141 +21,141 @@ msgstr ""
 
 #: backend/views/settings.php:7
 msgid "My account"
-msgstr "Моят акаунт"
+msgstr "Mein Konto"
 
 #: backend/views/settings.php:13
 msgid "Data synchronization"
-msgstr "Синхронизация на данни"
+msgstr "Datensynchronisierung"
 
 #: backend/views/settings.php:14
 msgid "Synchronize contacts and orders for subsequent analysis and efficient data utilization using Yespo marketing automation tools"
-msgstr "Синхронизирайте контакти и поръчки за последващ анализ и ефективно използване на данните с помощта на автоматизираните маркетингови инструменти на Yespo"
+msgstr "Synchronisieren Sie Kontakte und Bestellungen für weitere Analysen und eine effektive Datennutzung mit den Marketing-Automatisierungstools von Yespo"
 
 #: functions/functions.php:21
 msgid "Customers"
-msgstr "Клиенти"
+msgstr "Kunden"
 
 #: functions/functions.php:22
 msgid "Orders"
-msgstr "Поръчки"
+msgstr "Bestellungen"
 
 #: functions/functions.php:23
 msgid "Synchronized"
-msgstr "Синхронизирани"
+msgstr "Synchronisiert"
 
 #: functions/functions.php:24
 msgid "Failed"
-msgstr "Неуспешни"
+msgstr "Fehlgeschlagen"
 
 #: functions/functions.php:25
 msgid "Total"
-msgstr "Общо"
+msgstr "Gesamt"
 
 #: backend/views/settings.php:27
 msgid "API Key"
-msgstr "API ключ"
+msgstr "API-Schlüssel"
 
 #: backend/views/settings.php:33
 msgid "The API key to connect the account can be received by the"
-msgstr "API ключът за свързване на акаунт може да бъде получен чрез"
+msgstr "Den API-Schlüssel zum Verbinden Ihres Kontos können Sie über den folgenden"
 
 #: backend/views/settings.php:33
 msgid "link"
-msgstr "връзката"
+msgstr "link erhalten"
 
 #: backend/views/settings.php:39
 msgid "Synchronize"
-msgstr "Синхронизиране"
+msgstr "Synchronisieren"
 
 #: backend/views/settings.php:51
 msgid "Invalid API key"
-msgstr "Невалиден API ключ"
+msgstr "Ungültiger API-Schlüssel"
 
 #: backend/views/settings.php:56
 msgid "The first data export will take some time; it will happen in the background, and it is not necessary to stay on the page"
-msgstr "Първият експорт на данни ще отнеме известно време; ще се извърши на заден план и не е необходимо да оставате на страницата"
+msgstr "Der erste Datenexport wird einige Zeit dauern; er läuft im Hintergrund und Sie müssen nicht auf der Seite bleiben"
 
 #: backend/views/settings.php:61
 msgid "Synchronization progress"
-msgstr "Прогрес на синхронизацията"
+msgstr "Fortschritt der Synchronisierung"
 
 #: backend/views/settings.php:64
 msgid "Pause"
-msgstr "Пауза"
+msgstr "Pause"
 
 #: backend/views/settings.php:65
 msgid "Pause synchronization. Are you sure you want to pause synchronization?"
-msgstr "Пауза на синхронизацията. Сигурни ли сте, че искате да паузирате синхронизацията?"
+msgstr "Synchronisierung anhalten. Möchten Sie die Synchronisierung wirklich anhalten?"
 
 #: backend/views/settings.php:66
 msgid "Cancel"
-msgstr "Отказ"
+msgstr "Stornieren"
 
 #: backend/views/settings.php:73
 msgid "The synchronization process has been paused; you can resume it from the moment of pausing without losing the previous progress"
-msgstr "Процесът на синхронизация е паузиран; можете да го възобновите от момента на паузата без да загубите предишния прогрес"
+msgstr "Der Synchronisierungsprozess wurde angehalten; Sie können ihn ab dem Zeitpunkt der Anhaltung fortsetzen, ohne den vorherigen Fortschritt zu verlieren"
 
 #: backend/views/settings.php:78
 msgid "Resume"
-msgstr "Възобновяване"
+msgstr "Fortsetzen"
 
 #: backend/views/settings.php:83
 msgid "Some error have occurred. Try to resume synchronization. If it doesn’t help, contact Support"
-msgstr "Възникна грешка. Опитайте да възобновите синхронизацията. Ако това не помогне се свържете със съпорта"
+msgstr "Die ausgehende Serveraktivität ist blockiert. Bitte wenden Sie sich an Ihren Hosting-Anbieter. Die Synchronisierung wird automatisch ohne Datenverlust fortgesetzt"
 
 #: backend/views/settings.php:361
 msgid "Invalid API key. Please delete the plugin and start the configuration from scratch using a valid API key. No data will be lost."
-msgstr "Невалиден API ключ. Моля, изтрийте плъгина и започнете конфигурацията отначало, използвайки валиден API ключ. Данните няма да бъдат загубени."
+msgstr "Ungültiger API-Schlüssel. Entfernen Sie das Plugin und starten Sie die Konfiguration erneut mit einem gültigen API-Schlüssel. Die Daten gehen nicht verloren."
 
 #: backend/views/settings.php:362
 msgid "Outgoing activity on the server is blocked. Please contact your provider to resolve this issue. Data synchronization will automatically be resumed without any data loss once the issue is resolved."
-msgstr "Изходящата активност на сървъра е блокирана. Моля, свържете се с вашия доставчик, за да разрешите този проблем. Синхронизацията на данни ще бъде автоматично възобновена без загуба на данни, след като проблемът бъде решен. Презаредете страницата, за да видите актуализирания статус на процеса на синхронизация."
+msgstr "Die ausgehende Serveraktivität ist blockiert. Bitte wenden Sie sich an Ihren Hosting-Anbieter. Die Synchronisierung wird automatisch ohne Datenverlust fortgesetzt."
 
 
 #: backend/views/settings.php:86
 msgid "Contact Support"
-msgstr "Свържете се със съпорта"
+msgstr "Support kontaktieren"
 
 #: backend/views/settings.php:87
 msgid "Data is successfully synchronized"
-msgstr "Данните са успешно синхронизирани"
+msgstr "Daten erfolgreich synchronisiert"
 
 #: integrations/esputnik/Yespo_Localization.php:87
 msgid "Web tracking is successfully configured"
-msgstr "Уеб проследяването е успешно конфигурирано"
+msgstr "Web-Tracking wurde erfolgreich eingerichtet"
 
 #: backend/views/settings.php:89
 msgid "Data synchronization has started"
-msgstr "Синхронизация на данни е започнала"
+msgstr "Die Datensynchronisierung wurde gestartet"
 
 #: integrations/esputnik/Yespo_Localization.php:19
 msgid "Web push is successfully configured. Manage notifications in your Yespo account."
-msgstr "Web push е успешно конфигуриран. Управлявайте известията в своя Yespo акаунт."
+msgstr "Web Push wurde erfolgreich eingerichtet. Verwalten Sie Benachrichtigungen in Ihrem Yespo-Konto."
 
 #: integrations/esputnik/Yespo_Localization.php:44
 msgid "Try again"
-msgstr "Опитайте отново"
+msgstr "Erneut versuchen"
 
 #: integrations/esputnik/Yespo_Localization.php:45
 msgid "Unable to install Site script."
-msgstr "Неуспешно инсталиране на site скрипта."
+msgstr "Site-Skript konnte nicht installiert werden."
 
 #: integrations/esputnik/Yespo_Localization.php:46
 msgid "Please contact support"
-msgstr "Моля, свържете се с поддръжката"
+msgstr "Bitte wenden Sie sich an den Support"
 
 #: integrations/esputnik/Yespo_Localization.php:47
 msgid "Unable to install Web Push script."
-msgstr "Неуспешно инсталиране на web push скрипта."
+msgstr "Web-Push-Skript konnte nicht installiert werden. Bitte wenden Sie sich an den Support."
 
 #: integrations/esputnik/Yespo_Localization.php:61
 msgid "App Inbox is a communication channel that allows you to deliver rich, personalized content to users directly on your mobile app or website."
-msgstr "App Inbox е комуникационен канал, който ви позволява да доставяте богато и персонализирано съдържание на потребителите директно във вашето мобилно приложение или уебсайт."
+msgstr "App Inbox ist ein Kommunikationskanal, der es Ihnen ermöglicht, Nutzern direkt über Ihre mobile App oder Website hochwertige, personalisierte Inhalte bereitzustellen."
 
 #: integrations/esputnik/Yespo_Localization.php:62
 msgid "Enable"
-msgstr "Активиране"
+msgstr "Aktivieren"
 
 #: integrations/esputnik/Yespo_Localization.php:63
 msgid "Disable"
-msgstr "Деактивиране"
+msgstr "Deaktivieren"

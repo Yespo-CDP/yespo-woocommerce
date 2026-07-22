@@ -3,8 +3,13 @@ class YespoTracker
     constructor(action = null) {
         this.ajaxUrl = trackingData.ajaxUrl;
         this.getCartContentNonce = trackingData.getCartContentNonce;
+        this.getAppInboxAuthToken = trackingData.getAppInboxAuthToken;
+        this.getAuthCallbackNonce = trackingData.getAuthCallbackNonce;
         this.action = action;
         this.storageProductAdded = 'productAdded';
+
+
+
         if (trackingData.category) this.category = trackingData.category;
         if (trackingData.product) this.product = trackingData.product;
         if (trackingData.cart) this.cart = trackingData.cart;
@@ -119,27 +124,35 @@ class YespoTracker
         });
     }
 
-    static interceptFetch(){
+    static interceptFetch() {
         const originalFetch = window.fetch;
         let hasTriggered = false;
-
         window.fetch = function () {
-            if (arguments[0].includes('/wc/store/v1/batch') && !hasTriggered) {
+            const request = arguments[0];
+            let requestUrl = '';
+            if (typeof request === 'string') {
+                requestUrl = request;
+            } else if (request instanceof URL) {
+                requestUrl = request.href;
+            } else if (request instanceof Request) {
+                requestUrl = request.url;
+            }
+            if (requestUrl.includes('/wc/store/v1/batch') && !hasTriggered) {
                 hasTriggered = true;
-
                 return originalFetch.apply(this, arguments)
-                    .then(response => {
+                    .then(function (response) {
                         new YespoTracker('cart_batch');
-
-                        setTimeout(() => {
+                        setTimeout(function () {
                             hasTriggered = false;
                         }, 3000);
-
                         return response;
+                    })
+                    .catch(function (error) {
+                        hasTriggered = false;
+                        throw error;
                     });
-            } else {
-                return originalFetch.apply(this, arguments);
             }
+            return originalFetch.apply(this, arguments);
         };
     }
 
@@ -220,6 +233,43 @@ class YespoTracker
         }
     }
 
+    //used in webTracking Script code
+    getAuthCallback() {
+        return new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest();
+            let action = 'yespo_get_app_inbox_auth_token_action';
+            xhr.open('POST', this.ajaxUrl, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+
+                        try {
+                            let response = JSON.parse(xhr.responseText);
+
+                            if (response && response.success && response.token) {
+                                console.log(`auth token: ${response.token}`);
+                                resolve(response.token);
+                            } else {
+                                console.log(`no token`);
+                                reject('');
+                            }
+                        } catch (e) {
+                            reject('');
+                        }
+                    } else {
+                        reject('');
+                    }
+                }
+            };
+
+            xhr.send(
+                'action=' + action +
+                '&yespo_get_app_inbox_auth_token_nonce=' + encodeURIComponent(this.getAuthCallbackNonce)
+            );
+        });
+    }
     //send wedId to backend
     checkWebIdOnLoad(webId, orgId, esState= '') {
 

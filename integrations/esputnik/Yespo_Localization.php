@@ -58,7 +58,7 @@ class Yespo_Localization
 
             'setConfiguringWebtrackingTitle' => esc_html__( 'App Inbox', 'yespo-cdp' ),
             'setConfiguringTrackingScriptNonce' => wp_nonce_field('yespo_set_configuring_webtracking_script_action', 'yespo_set_configuring_webtracking_script_name', true, false),
-            'setConfiguringWebtrackingSpanText' => esc_html__( 'App Inbox is a communication channel that allows you to deliver rich, personalized content to users directly on your mobile app or website', 'yespo-cdp' ),
+            'setConfiguringWebtrackingSpanText' => esc_html__( 'App Inbox is a communication channel that allows you to deliver rich, personalized content to users directly on your mobile app or website.', 'yespo-cdp' ),
             'setConfiguringWebtrackingButtonTextEnable' => esc_html__( 'Enable', 'yespo-cdp' ),
             'setConfiguringWebtrackingButtonTextDisable' => esc_html__( 'Disable', 'yespo-cdp' ),
             'getWebtrackingStatus' => (new \Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script_Configuration())->get_app_inbox_status(),

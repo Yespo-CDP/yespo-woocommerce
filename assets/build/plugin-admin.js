@@ -537,11 +537,13 @@ class YespoExportData {
 
             if (configForm) {
                 messageContainer.insertBefore(sectionBody, configForm);
-            } else if (authContainer && exportData) {
-                document.querySelectorAll('.sectionBodyAuth').forEach(el => el.remove());
-                messageContainer.prepend(sectionBody);
             } else {
                 messageContainer.appendChild(sectionBody);
+            }
+
+            if (authContainer && exportData) {
+                document.querySelectorAll('.sectionBodyAuth').forEach(el => el.remove());
+                messageContainer.prepend(sectionBody);
             }
         }
     }

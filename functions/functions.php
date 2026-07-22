@@ -975,3 +975,23 @@ function yespo_change_configuration_status() {
 }
 add_action('wp_ajax_change_configuration_status', 'yespo_change_configuration_status');
 add_action('wp_ajax_nopriv_change_configuration_status', 'yespo_change_configuration_status');
+
+
+function yespo_get_app_inbox_auth_token_function() {
+    if (
+        ! isset($_POST['yespo_get_app_inbox_auth_token_nonce']) ||
+        ! wp_verify_nonce(
+            sanitize_text_field(wp_unslash($_POST['yespo_get_app_inbox_auth_token_nonce'])),
+            'yespo_get_app_inbox_auth_token_action'
+        )
+    ) {
+        wp_send_json(['success' => false, 'token' => '', 'error' => 'Invalid nonce']);
+    }
+
+    $token = (new \Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script_Configuration())->get_auth_token();
+
+    wp_send_json(['success' => true, 'token' => $token]);
+}
+add_action('wp_ajax_yespo_get_app_inbox_auth_token_action', 'yespo_get_app_inbox_auth_token_function');
+add_action('wp_ajax_nopriv_yespo_get_app_inbox_auth_token_action', 'yespo_get_app_inbox_auth_token_function');
+

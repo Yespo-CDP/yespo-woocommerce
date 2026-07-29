@@ -11,6 +11,10 @@ The plugin implements:
 * Web tracking configuration for collecting user activity on the site (product page views, add to cart, etc.)
 * Logging of errors, events, and export status
 
+## Supported Languages
+
+The plugin is available in Ukrainian, Polish, Bulgarian, Romanian, Portuguese, Italian, German, French, and Spanish. Translation files are stored in the root-level `languages` directory.
+
 Below is detailed information about the technical solutions used in the development of the Yespo for WooCommerce plugin
 
 # Plugin installation
@@ -106,6 +110,21 @@ This function passes the key to the method send\_keys() of the class Yespo\_Acco
 Immediately after authorization on the backend, a POST request is executed by the send\_domain\_to\_yespo() method to [https://yespo.io/api/v1/site/domains](https://yespo.io/api/v1/site/domains). If the response is 200 OK, a GET request is sent using the make\_tracking\_script() method of the Yespo\_Web\_Tracking\_Script class to [https://yespo.io/api/v1/site/script](https://yespo.io/api/v1/site/script).
 
 After successfully retrieving the script code, it is stored in the yespo\_tracking\_script property within the yespo\_options. On the frontend, the addSuccessMessage() method displays a notification confirming the successful installation of the tracking script.
+
+### App Inbox configuration
+
+The plugin settings include an App Inbox control that enables or disables the channel without manual script editing:
+
+* `YespoExportData.addConfiguringWebtrackingForm()` renders the control.
+* `YespoExportData.updateConfigButtonState()` updates the **Enable** / **Disable** button state.
+* `YespoExportData.changeConfigurationStatus()` sends the selected state to the backend.
+* `Yespo_Web_Tracking_Script_Configuration.toggle_app_inbox()` switches the current state.
+* `enable_app_inbox()` adds the App Inbox configuration to the tracking script, while `disable_app_inbox()` removes it.
+* `get_app_inbox_status()` returns the current state.
+
+`Yespo_Logging_Remote.set_app_inbox_enable()` and `set_app_inbox_disable()` log the `APP_INBOX_ENABLED` or `APP_INBOX_DISABLED` status in Yespo.
+
+For authentication, `YespoTracker.getAuthCallback()` requests the `authToken` from the backend. `Yespo_Web_Tracking_Script_Configuration.get_auth_token()` returns the token, and `send_curl_request()` retrieves it from Yespo. The plugin therefore handles both script configuration and App Inbox token retrieval automatically.
 
 ## Retrieving account name
 

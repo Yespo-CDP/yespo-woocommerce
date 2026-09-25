@@ -61,6 +61,11 @@ function yespo_get_account_profile_name_function(){
         return;
     }
 
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
+    }
+
     if (isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_get_account_yespo_name') {
         $organisationName = '';
         $orgId = '';
@@ -97,6 +102,11 @@ function yespo_check_api_authorization_function(){
 
     if ( ! isset( $_GET['yespo_check_api_authorization_yespo_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_check_api_authorization_yespo_nonce'])), 'yespo_check_api_authorization_yespo' ) ) {
         return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
     }
 
     if(isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_check_api_authorization_yespo' ) {
@@ -389,6 +399,11 @@ function yespo_get_current_status_500_function(){
         return;
     }
 
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
+    }
+
     if (isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_get_current_status_500') {
 
         $get_webtracking_label_400 =  (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_label_400();
@@ -476,6 +491,10 @@ add_action('profile_update', 'yespo_update_user_profile_function', 10, 2);
  */
 /*** Get total users number ***/
 function yespo_get_all_users_total_function() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
+    }
     $users = (new Yespo\Integrations\Esputnik\Yespo_Export_Users)->get_users_total_count();
     if($users > 0) wp_send_json(intval($users));
     else wp_send_json( 0 );
@@ -488,6 +507,11 @@ function yespo_get_all_users_total_export_function() {
 
     if ( ! isset( $_GET['yespo_get_users_total_export_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_get_users_total_export_nonce'])), 'yespo_get_users_total_export' ) ) {
         return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
     }
 
     $user = new Yespo\Integrations\Esputnik\Yespo_Export_Users();
@@ -513,8 +537,15 @@ function yespo_export_user_data_to_esputnik_function(){
     if ( ! isset( $_POST['yespo_start_export_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_POST['yespo_start_export_nonce'])), 'yespo_export_user_data_to_esputnik' ) ) {
         return;
     }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
+    }
+
     if(isset($_POST['action']) && sanitize_text_field(wp_unslash($_POST['action'])) === 'yespo_export_user_data_to_esputnik' ) {
-        if(isset($_POST['service'])){
+        $service = sanitize_key( wp_unslash( $_POST['service'] ?? '' ) );
+        if( $service !== '' ){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Users)->add_users_export_task();
             wp_send_json($response);
         }
@@ -527,6 +558,11 @@ add_action('wp_ajax_yespo_export_user_data_to_esputnik', 'yespo_export_user_data
 function yespo_get_process_export_users_function(){
     if ( ! isset( $_GET['yespo_get_process_export_users_data_to_esputnik_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_get_process_export_users_data_to_esputnik_nonce'])), 'yespo_get_process_export_users_data_to_esputnik' ) ) {
         return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
     }
 
     if(isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_get_process_export_users_data_to_esputnik' ) {
@@ -580,6 +616,10 @@ add_action( 'wp_privacy_personal_data_erased', 'yespo_clean_user_data_after_data
  */
 /*** Get total orders number ***/
 function yespo_get_all_orders_total_function() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
+    }
     $orders = (new Yespo\Integrations\Esputnik\Yespo_Export_Orders)->get_total_orders();
     if($orders > 0) wp_send_json($orders);
     else wp_send_json(0);
@@ -591,6 +631,11 @@ add_action('wp_ajax_get_orders_total', 'yespo_get_all_orders_total_function');
 function yespo_get_all_orders_total_export_function() {
     if ( ! isset( $_GET['yespo_get_orders_total_export_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_get_orders_total_export_nonce'])), 'yespo_get_orders_total_export' ) ) {
         return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
     }
 
     $order = new Yespo\Integrations\Esputnik\Yespo_Export_Orders();
@@ -616,8 +661,14 @@ function yespo_export_order_data_function(){
         return;
     }
 
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
+    }
+
     if(isset($_POST['action']) && sanitize_text_field(wp_unslash($_POST['action'])) === 'yespo_export_order_data_to_esputnik' ) {
-        if(isset($_POST['service'])){
+        $service = sanitize_key( wp_unslash( $_POST['service'] ?? '' ) );
+        if( $service !== '' ){
             $response = (new Yespo\Integrations\Esputnik\Yespo_Export_Orders)->add_orders_export_task();
             wp_send_json($response);
         }
@@ -630,6 +681,11 @@ add_action('wp_ajax_yespo_export_order_data_to_esputnik', 'yespo_export_order_da
 function yespo_get_process_export_orders_data_function(){
     if ( ! isset( $_GET['yespo_get_process_export_orders_data_to_esputnik_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_get_process_export_orders_data_to_esputnik_nonce'])), 'yespo_get_process_export_orders_data_to_esputnik' ) ) {
         return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
     }
 
     if(isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_get_process_export_orders_data_to_esputnik' ) {
@@ -668,6 +724,11 @@ function yespo_stop_export_function(){
         return;
     }
 
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
+    }
+
     if(isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_stop_export_data_to_yespo' ) {
         $exported = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_exported_number();
         $total = Yespo\Integrations\Esputnik\Yespo_Export_Service::get_export_total();
@@ -689,6 +750,11 @@ function yespo_resume_export_function(){
 
     if ( ! isset( $_GET['yespo_resume_export_data_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ($_GET['yespo_resume_export_data_nonce'])), 'yespo_resume_export_data' ) ) {
         return;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'Forbidden', 403 );
+        wp_die();
     }
 
     if(isset($_GET['action']) && sanitize_text_field(wp_unslash($_GET['action'])) === 'yespo_resume_export_data' ) {
@@ -762,9 +828,13 @@ add_action( 'admin_enqueue_scripts', 'yespo_enqueue_scripts_localization' );
 //add tracking code and send tracking data to yespo
 function yespo_add_tracking_codes() {
     $script = (new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script())->get_script_from_options();
-    if($script) {
-        echo $script;
-        do_action('yespo_after_scripts');
+    if ( $script ) {
+        $script_content = (string) $script;
+        $inner = preg_replace( '/<script[^>]*>(.*?)<\/script>/is', '$1', $script_content );
+        wp_register_script( 'yespo-tracking', '', [], YESPO_VERSION, [ 'in_footer' => true ] );
+        wp_enqueue_script( 'yespo-tracking' );
+        wp_add_inline_script( 'yespo-tracking', $inner );
+        do_action( 'yespo_after_scripts' );
     }
 }
 add_action('wp_footer', 'yespo_add_tracking_codes');
@@ -825,7 +895,7 @@ function yespo_save_webid_to_session() {
         $userIP = (new \Yespo\Integrations\Webtracking\Yespo_Logger())->get_user_IP();
 
         if (isset($_POST[$key])) {
-            $value = trim(sanitize_text_field($_POST[$key]));
+            $value = trim(sanitize_text_field(wp_unslash($_POST[$key])));
 
             if ($value !== '' && $value !== 'null' && $value !== 'undefined') {
                 if (!isset($_SESSION[$key])) {
@@ -920,11 +990,15 @@ add_action('woocommerce_thankyou', 'yespo_send_purchased_data_function', 10, 1);
  **/
 function yespo_add_webpush_codes() {
     $script = (new Yespo\Integrations\Webpush\Yespo_Web_Push())->get_script_from_options();
-    if($script) {
-        echo $script;
+    if ( $script ) {
+        $script_content = (string) $script;
+        $inner = preg_replace( '/<script[^>]*>(.*?)<\/script>/is', '$1', $script_content );
+        wp_register_script( 'yespo-webpush', '', [], YESPO_VERSION, false );
+        wp_enqueue_script( 'yespo-webpush' );
+        wp_add_inline_script( 'yespo-webpush', $inner );
     }
 }
-add_action('wp_head', 'yespo_add_webpush_codes');
+add_action( 'wp_enqueue_scripts', 'yespo_add_webpush_codes' );
 
 
 
@@ -954,10 +1028,13 @@ function yespo_change_configuration_status() {
             'yespo_set_configuring_webtracking_script_action'
         )
     ) {
-
         wp_send_json_error([
             'message' => 'Invalid nonce'
         ]);
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( [ 'message' => 'Forbidden' ], 403 );
     }
 
     $script_configuration = new Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script_Configuration();
@@ -974,7 +1051,6 @@ function yespo_change_configuration_status() {
     }
 }
 add_action('wp_ajax_change_configuration_status', 'yespo_change_configuration_status');
-add_action('wp_ajax_nopriv_change_configuration_status', 'yespo_change_configuration_status');
 
 
 function yespo_get_app_inbox_auth_token_function() {
@@ -986,6 +1062,10 @@ function yespo_get_app_inbox_auth_token_function() {
         )
     ) {
         wp_send_json(['success' => false, 'token' => '', 'error' => 'Invalid nonce']);
+    }
+
+    if ( ! is_user_logged_in() ) {
+        wp_send_json(['success' => false, 'token' => '']);
     }
 
     $token = (new \Yespo\Integrations\Webtracking\Yespo_Web_Tracking_Script_Configuration())->get_auth_token();

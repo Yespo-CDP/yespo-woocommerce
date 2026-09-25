@@ -77,8 +77,11 @@ class Example extends Base {
 			'wp/v2',
 			'calc',
 			array(
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => array( $this, 'sum' ),
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'sum' ),
+				'permission_callback' => function() {
+					return \current_user_can( 'manage_options' );
+				},
 				'args'     => array(
 					'first'  => array(
 						'default'           => 0,
@@ -96,7 +99,9 @@ class Example extends Base {
 			'demo/example',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => '__return_true',
+				'permission_callback' => function() {
+					return \current_user_can( 'manage_options' );
+				},
 				'callback'            => array( $this, 'demo_example' ),
 				'args'                => array(
 					'nonce' => array(

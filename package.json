@@ -50,8 +50,8 @@
         "typescript": "^5.0.4"
     },
     "engines": {
-        "node": ">=14.0.0",
-        "npm": ">=6.9.0"
+        "node": ">=20.0.0",
+        "npm": ">=10.0.0"
     },
     "browserslist": [
         "extends @wordpress/browserslist-config"

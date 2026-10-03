@@ -25,7 +25,13 @@ class Yespo_Logger
 
         $log_dir = trailingslashit($upload_dir['basedir']) . self::YESPO_LOG_DIR . DIRECTORY_SEPARATOR;
 
-        if (!file_exists($log_dir)) wp_mkdir_p($log_dir);
+        if (!file_exists($log_dir)) {
+            wp_mkdir_p($log_dir);
+            $htaccess = $log_dir . '.htaccess';
+            if ( ! file_exists( $htaccess ) ) {
+                file_put_contents( $htaccess, "Deny from all\n" );
+            }
+        }
         if (!is_writable($log_dir)) return;
 
         $log_file = $log_dir . self::YESPO_FILE_NAME . '.' . $this->month . $this->year . '.txt';
@@ -90,13 +96,9 @@ class Yespo_Logger
     }
 
     public function get_user_IP() {
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            return $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-        } else {
-            return $_SERVER['REMOTE_ADDR'];
-        }
+        return isset( $_SERVER['REMOTE_ADDR'] )
+            ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
+            : '';
     }
 
 }

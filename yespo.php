@@ -8,7 +8,7 @@
  *
  * Plugin Name:     Yespo CDP for WooCommerce: Email Marketing, Automation & Web Tracking
  * Description:     CDP for WooCommerce: boost conversion and retention with omnichannel campaigns (email, SMS, push notifications, widgets) and product recommendations!
- * Version:         1.2.1
+ * Version:         1.2.2
  * Author:          Yespo
  * Author URI:      https://yespo.io/
  * License:         GPLv2 or later
@@ -24,7 +24,7 @@ if ( !defined( 'ABSPATH' ) ) {
     die( 'We\'re sorry, but you can not directly access this file.' );
 }
 
-define( 'YESPO_VERSION', '1.2.1' );
+define( 'YESPO_VERSION', '1.2.2' );
 define( 'YESPO_TEXTDOMAIN', 'yespo-cdp' );
 define( 'YESPO_MAIN_PLUGIN_FOLDER', 'yespo-cdp' );
 define( 'YESPO_NAME', 'Yespo' );
@@ -33,9 +33,6 @@ define( 'YESPO_PLUGIN_ABSOLUTE', __FILE__ );
 define( 'YESPO_MIN_PHP_VERSION', '7.4' );
 define( 'YESPO_WP_VERSION', '6.5.5' );
 define( 'YESPO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-
-define( 'YESPO_CLIENT_ID', 'd048ab4ffd96be4ee0c17510d8a42486' );
-define( 'YESPO_CALLBACK', '9bf62295abbb565a5f4e248f30e00b741d3dd713d7cea79c737f14a5ed775486' );
 
 
 add_action(

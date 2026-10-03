@@ -85,7 +85,7 @@ class YespoExportData {
     getAccountYespoName(){
         this.getRequest('yespo_get_account_yespo_name', 'yespo_get_account_yespo_name_nonce', this.yespoGetAccountYespoNameNonce, (response) => {
             response = JSON.parse(response);
-            if(document.querySelector('.panelUser') && response.username !== undefined) document.querySelector('.panelUser').innerHTML=response.username;
+            if(document.querySelector('.panelUser') && response.username !== undefined) document.querySelector('.panelUser').textContent=response.username;
         });
     }
 
@@ -841,7 +841,7 @@ class YespoExportData {
                     var response = JSON.parse(xhr.responseText);
                     try {
                         if(response.status === 'success') {
-                            if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').innerHTML = response.username;
+                            if (document.querySelector('.panelUser') && response.username !== '' && response.username !== undefined) document.querySelector('.panelUser').textContent = response.username;
                             this.getNumberDataExport();
 
                             if(response.tracker === true) {

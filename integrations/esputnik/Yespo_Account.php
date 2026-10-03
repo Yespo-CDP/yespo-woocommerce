@@ -53,7 +53,8 @@ class Yespo_Account
         global $wpdb;
 
         $table_yespo_auth = esc_sql($wpdb->prefix . 'yespo_auth_log');
-        $api_key = sanitize_text_field($api_key);
+        $raw_key = sanitize_text_field($api_key);
+        $api_key = str_repeat( '*', max( 0, strlen( $raw_key ) - 4 ) ) . substr( $raw_key, -4 );
         $response = sanitize_text_field($response);
         $time = gmdate('Y-m-d H:i:s');
 

@@ -146,26 +146,29 @@ function yespo_uninstall() { // phpcs:ignore
 yespo_uninstall_multisite();
 
 
-function delete_directory_recursive() {
-    $dir = ABSPATH . 'wp-content/uploads/yespo-cdp/';
-    if (!file_exists($dir)) {
+function delete_directory_recursive( $dir = '' ) {
+    if ( empty( $dir ) ) {
+        $dir = ABSPATH . 'wp-content/uploads/yespo-cdp/';
+    }
+
+    if ( ! file_exists( $dir ) ) {
         return;
     }
 
-    if (!is_dir($dir)) {
+    if ( ! is_dir( $dir ) ) {
         return;
     }
 
-    $items = array_diff(scandir($dir), ['.', '..']);
+    $items = array_diff( scandir( $dir ), [ '.', '..' ] );
 
-    foreach ($items as $item) {
+    foreach ( $items as $item ) {
         $path = $dir . DIRECTORY_SEPARATOR . $item;
-        if (is_dir($path)) {
-            delete_directory_recursive($path);
+        if ( is_dir( $path ) ) {
+            delete_directory_recursive( $path );
         } else {
-            unlink($path);
+            unlink( $path );
         }
     }
 
-    rmdir($dir);
+    rmdir( $dir );
 }

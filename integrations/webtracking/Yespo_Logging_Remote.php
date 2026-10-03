@@ -132,7 +132,7 @@ class Yespo_Logging_Remote
     //added in start() of Yespo_Web_Push class
     public static function get_web_push_script_success($responseBody, $statusCode)
     {
-        $message = "GET_WEB_PUSH_DOMAIN_SUCCESS";
+        $message = "GET_WEB_PUSH_SCRIPT_SUCCESS";
         $log_level = "INFO";
         $data = self::get_data(null, $responseBody, $statusCode);
 
@@ -144,7 +144,7 @@ class Yespo_Logging_Remote
     //added in start() of Yespo_Web_Push class
     public static function get_web_push_script_error($errorMessage, $responseBody, $statusCode)
     {
-        $message = "GET_WEB_PUSH_DOMAIN_FAILED";
+        $message = "GET_WEB_PUSH_SCRIPT_FAILED";
         $log_level = "ERROR";
         $data = self::get_data(null, $responseBody, $statusCode);
 
@@ -409,7 +409,7 @@ class Yespo_Logging_Remote
         $orgId = self::get_orgid();
         return [
             'orgId'   => intval($orgId),
-            'typeCMS'  => 'Wordpress',
+            'typeCMS'  => 'Wooсommerce',
             'errorMessage' => $errorMessage,
             'data'    => $data,
             'message' => $message,
